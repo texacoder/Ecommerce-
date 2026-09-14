@@ -23,6 +23,7 @@ type Address = {
 };
 
 type Quote = {
+  items: { quantity: number }[];
   subtotal: number;
   discount: number;
   shipping: number;
@@ -106,6 +107,8 @@ export default function CheckoutPage() {
       .then((d) => setQuote(d.quote ?? null))
       .finally(() => setQuoteLoading(false));
   }, [user, items, couponCode]);
+
+  const quoteItemCount = quote?.items.reduce((sum, i) => sum + i.quantity, 0) ?? 0;
 
   function addressIsValid() {
     if (addressId) return true;
@@ -317,7 +320,7 @@ export default function CheckoutPage() {
           {quoteLoading && <p className="text-sm text-[var(--text-faint)]">Calculating...</p>}
           {quote && (
             <div className="text-sm flex flex-col gap-2">
-              <Row label={`Price (${items.length} item${items.length > 1 ? "s" : ""})`} value={quote.subtotal} />
+              <Row label={`Price (${quoteItemCount} item${quoteItemCount > 1 ? "s" : ""})`} value={quote.subtotal} />
               {quote.discount > 0 && <Row label="Discount" value={-quote.discount} highlight />}
               <Row label="Delivery" value={quote.shipping} free={quote.shipping === 0} />
               {quote.tax > 0 && <Row label="Tax" value={quote.tax} />}
