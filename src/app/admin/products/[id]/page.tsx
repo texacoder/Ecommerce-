@@ -6,7 +6,7 @@ import { formatDateTime } from "@/lib/format";
 
 const inputClass = "border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent w-full";
 
-type Category = { id: string; name: string };
+type Category = { id: string; name: string; parent?: { name: string } | null };
 type ImageRow = { id: string; url: string; position: number };
 type VariantRow = { id: string; name: string; sku: string; priceOverride: number | null; stock: number; attributes: string | null };
 type Product = {
@@ -237,15 +237,15 @@ export default function EditProductPage() {
               <option value="">None</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name}
+                  {c.parent ? `${c.parent.name} — ${c.name}` : c.name}
                 </option>
               ))}
             </select>
           </Field>
-          <Field label="Price (USD)">
+          <Field label="Price (₹)">
             <input type="number" step="0.01" className={inputClass} value={(product.price / 100).toString()} onChange={(e) => setProduct({ ...product, price: Math.round(Number(e.target.value) * 100) })} />
           </Field>
-          <Field label="Original price (USD)">
+          <Field label="Original price (₹)">
             <input type="number" step="0.01" className={inputClass} value={product.originalPrice ? (product.originalPrice / 100).toString() : ""} onChange={(e) => setProduct({ ...product, originalPrice: e.target.value ? Math.round(Number(e.target.value) * 100) : null })} />
           </Field>
           <Field label="Discount % (display only)">

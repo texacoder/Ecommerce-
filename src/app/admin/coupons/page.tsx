@@ -20,6 +20,9 @@ type Coupon = {
   category: { name: string } | null;
 };
 
+type Category = { id: string; name: string; parent?: { name: string } | null };
+type Product = { id: string; name: string };
+
 const empty = {
   code: "",
   type: "PERCENT" as "PERCENT" | "FIXED",
@@ -28,10 +31,14 @@ const empty = {
   expiresAt: "",
   usageLimit: "",
   perCustomerLimit: "",
+  productId: "",
+  categoryId: "",
 };
 
 export default function AdminCouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [form, setForm] = useState(empty);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -44,6 +51,12 @@ export default function AdminCouponsPage() {
 
   useEffect(() => {
     load();
+    fetch("/api/admin/categories")
+      .then((r) => r.json())
+      .then((d) => setCategories(d.categories ?? []));
+    fetch("/api/admin/products?pageSize=100")
+      .then((r) => r.json())
+      .then((d) => setProducts((d.products ?? []).map((p: { id: string; name: string }) => ({ id: p.id, name: p.name }))));
   }, []);
 
   async function createCoupon(e: React.FormEvent) {
@@ -60,6 +73,8 @@ export default function AdminCouponsPage() {
         expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
         usageLimit: form.usageLimit ? Number(form.usageLimit) : null,
         perCustomerLimit: form.perCustomerLimit ? Number(form.perCustomerLimit) : null,
+        productId: form.productId || null,
+        categoryId: form.categoryId || null,
       }),
     });
     const data = await res.json();
@@ -103,11 +118,37 @@ export default function AdminCouponsPage() {
             <option value="PERCENT">Percentage off</option>
             <option value="FIXED">Fixed amount off</option>
           </select>
-          <input required type="number" step={form.type === "PERCENT" ? "1" : "0.01"} placeholder={form.type === "PERCENT" ? "Value (%)" : "Value (USD)"} value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} className={inputClass} />
-          <input type="number" step="0.01" placeholder="Minimum order value (USD)" value={form.minOrderValue} onChange={(e) => setForm({ ...form, minOrderValue: e.target.value })} className={inputClass} />
+          <input required type="number" step={form.type === "PERCENT" ? "1" : "0.01"} placeholder={form.type === "PERCENT" ? "Value (%)" : "Value (₹)"} value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} className={inputClass} />
+          <input type="number" step="0.01" placeholder="Minimum order value (₹)" value={form.minOrderValue} onChange={(e) => setForm({ ...form, minOrderValue: e.target.value })} className={inputClass} />
           <input type="date" placeholder="Expiry date" value={form.expiresAt} onChange={(e) => setForm({ ...form, expiresAt: e.target.value })} className={inputClass} />
           <input type="number" placeholder="Total usage limit" value={form.usageLimit} onChange={(e) => setForm({ ...form, usageLimit: e.target.value })} className={inputClass} />
           <input type="number" placeholder="Per-customer limit" value={form.perCustomerLimit} onChange={(e) => setForm({ ...form, perCustomerLimit: e.target.value })} className={inputClass} />
+
+          <select
+            value={form.productId}
+            onChange={(e) => setForm({ ...form, productId: e.target.value, categoryId: e.target.value ? "" : form.categoryId })}
+            className={inputClass}
+          >
+            <option value="">Apply to: all products</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>
+                Only: {p.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={form.categoryId}
+            onChange={(e) => setForm({ ...form, categoryId: e.target.value, productId: e.target.value ? "" : form.productId })}
+            className={inputClass}
+          >
+            <option value="">Apply to: all categories</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                Only category: {c.parent ? `${c.parent.name} — ${c.name}` : c.name}
+              </option>
+            ))}
+          </select>
+
           {error && <p className="col-span-3 text-sm text-[var(--danger)]">{error}</p>}
           <button className="col-span-3 rounded-md btn-primary py-2 text-sm font-medium">Create coupon</button>
         </form>

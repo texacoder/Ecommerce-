@@ -19,10 +19,15 @@ type Promotion = {
   category: { name: string } | null;
 };
 
-const empty = { type: "BANNER", title: "", subtitle: "", linkUrl: "", position: "0" };
+type Category = { id: string; name: string; parent?: { name: string } | null };
+type Product = { id: string; name: string };
+
+const empty = { type: "BANNER", title: "", subtitle: "", linkUrl: "", position: "0", productId: "", categoryId: "" };
 
 export default function AdminPromotionsPage() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [form, setForm] = useState(empty);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -36,6 +41,12 @@ export default function AdminPromotionsPage() {
 
   useEffect(() => {
     load();
+    fetch("/api/admin/categories")
+      .then((r) => r.json())
+      .then((d) => setCategories(d.categories ?? []));
+    fetch("/api/admin/products?pageSize=100")
+      .then((r) => r.json())
+      .then((d) => setProducts((d.products ?? []).map((p: { id: string; name: string }) => ({ id: p.id, name: p.name }))));
   }, []);
 
   async function uploadImage(file: File) {
@@ -59,6 +70,8 @@ export default function AdminPromotionsPage() {
         linkUrl: form.linkUrl || null,
         imageUrl,
         position: Number(form.position) || 0,
+        productId: form.productId || null,
+        categoryId: form.categoryId || null,
       }),
     });
     const data = await res.json();
@@ -111,6 +124,34 @@ export default function AdminPromotionsPage() {
           <input required placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={`${inputClass} col-span-2`} />
           <input placeholder="Subtitle" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} className={`${inputClass} col-span-2`} />
           <input placeholder="Link URL (e.g. /products/some-slug)" value={form.linkUrl} onChange={(e) => setForm({ ...form, linkUrl: e.target.value })} className={`${inputClass} col-span-2`} />
+          <select
+            value={form.productId}
+            onChange={(e) => setForm({ ...form, productId: e.target.value, categoryId: e.target.value ? "" : form.categoryId })}
+            className={inputClass}
+          >
+            <option value="">No linked product</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>
+                Product: {p.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={form.categoryId}
+            onChange={(e) => setForm({ ...form, categoryId: e.target.value, productId: e.target.value ? "" : form.productId })}
+            className={inputClass}
+          >
+            <option value="">No linked category</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                Category: {c.parent ? `${c.parent.name} — ${c.name}` : c.name}
+              </option>
+            ))}
+          </select>
+          <p className="col-span-2 text-xs text-[var(--text-faint)] -mt-1">
+            A linked category powers a Featured Section&apos;s product grid (including its subcategories); a linked
+            product is used for Deal tiles and single-product spotlights.
+          </p>
           <label className="col-span-2 text-sm">
             Image:{" "}
             <input
@@ -139,6 +180,11 @@ export default function AdminPromotionsPage() {
                 {p.title} <span className="text-xs text-[var(--text-faint)]">({p.type})</span>
               </p>
               {p.subtitle && <p className="text-sm text-[var(--text-muted)]">{p.subtitle}</p>}
+              {(p.product || p.category) && (
+                <p className="text-xs text-[var(--text-faint)] mt-0.5">
+                  Linked to: {p.product ? `product "${p.product.name}"` : `category "${p.category?.name}"`}
+                </p>
+              )}
             </div>
             <div className="flex gap-3 items-center">
               <button onClick={() => toggleActive(p.id, p.active)} className={`text-sm ${p.active ? "text-[var(--success)]" : "text-[var(--text-faint)]"}`}>
