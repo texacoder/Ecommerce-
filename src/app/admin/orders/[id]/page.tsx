@@ -33,6 +33,7 @@ export default function AdminOrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [tracking, setTracking] = useState({ carrier: "", number: "" });
   const [message, setMessage] = useState<{ text: string; kind: "error" | "info" } | null>(null);
+  const [cancelReasonInput, setCancelReasonInput] = useState("");
 
   async function load() {
     const res = await fetch(`/api/admin/orders/${id}`);
@@ -75,19 +76,21 @@ export default function AdminOrderDetailPage() {
     // A single confirm() rather than chaining prompt()+confirm() — two
     // native dialogs back to back is flaky on mobile browsers (dismissing
     // either one silently aborts with no feedback, which looks like the
-    // button did nothing).
+    // button did nothing). The cancellation reason is a plain on-page
+    // input instead, so it's still capturable without that risk.
     if (!confirm("Cancel this order? Stock will be returned to inventory.")) return;
     setMessage(null);
     const res = await fetch(`/api/admin/orders/${id}/cancel`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
+      body: JSON.stringify({ reason: cancelReasonInput.trim() || undefined }),
     });
     const data = await res.json();
     if (!res.ok) {
       setMessage({ text: data.error, kind: "error" });
     } else {
       setMessage({ text: "Order cancelled and stock returned to inventory.", kind: "info" });
+      setCancelReasonInput("");
     }
     load();
   }
@@ -142,7 +145,15 @@ export default function AdminOrderDetailPage() {
             </button>
           ))}
         </div>
-        <div className="flex gap-3 text-sm">
+        {canCancel && (
+          <input
+            placeholder="Reason for cancellation (optional)"
+            value={cancelReasonInput}
+            onChange={(e) => setCancelReasonInput(e.target.value)}
+            className="border border-[var(--border-subtle)] rounded px-3 py-1.5 text-sm bg-transparent w-full mb-2"
+          />
+        )}
+        <div className="flex flex-wrap gap-3 text-sm">
           {canCancel && (
             <button onClick={cancelOrder} className="text-[var(--danger)] underline">
               Cancel order
