@@ -16,6 +16,9 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     if (!order || order.userId !== user.id) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
+    if (order.status === "CANCELLED") {
+      return NextResponse.json({ error: "This order was cancelled and can no longer be paid for" }, { status: 400 });
+    }
     if (order.paymentStatus !== "PENDING" && order.paymentStatus !== "FAILED") {
       return NextResponse.json({ error: "This order does not have a payment to retry" }, { status: 400 });
     }

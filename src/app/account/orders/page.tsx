@@ -36,12 +36,8 @@ export default async function OrdersPage() {
             </div>
             <div className="text-right">
               <p className="font-medium">{formatMoney(o.total)}</p>
-              <p
-                className={`text-sm ${
-                  o.paymentStatus === "FAILED" || o.paymentStatus === "PENDING" ? "text-[var(--warning)] font-medium" : "text-[var(--text-muted)]"
-                }`}
-              >
-                {o.paymentStatus === "PENDING" ? "Payment pending" : o.paymentStatus === "FAILED" ? "Payment failed" : statusLabel(o.status)}
+              <p className={`text-sm ${orderListLabelClass(o.status, o.paymentStatus)}`}>
+                {orderListLabel(o.status, o.paymentStatus)}
               </p>
             </div>
           </Link>
@@ -49,4 +45,21 @@ export default async function OrdersPage() {
       </div>
     </div>
   );
+}
+
+// The order's own status always wins once it's reached a terminal state
+// (cancelled/refunded) — "Payment pending" is otherwise-correct but
+// misleading to keep showing on an order that's already cancelled, since
+// no payment is coming for it anymore.
+function orderListLabel(status: string, paymentStatus: string): string {
+  if (status === "CANCELLED" || status === "REFUNDED") return statusLabel(status);
+  if (paymentStatus === "PENDING") return "Payment pending";
+  if (paymentStatus === "FAILED") return "Payment failed";
+  return statusLabel(status);
+}
+
+function orderListLabelClass(status: string, paymentStatus: string): string {
+  if (status === "CANCELLED" || status === "REFUNDED") return "text-[var(--text-muted)]";
+  if (paymentStatus === "PENDING" || paymentStatus === "FAILED") return "text-[var(--warning)] font-medium";
+  return "text-[var(--text-muted)]";
 }

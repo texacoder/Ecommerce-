@@ -28,7 +28,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   };
 
   const isPaid = order.paymentStatus === "PAID" || order.paymentStatus === "PARTIALLY_REFUNDED" || order.paymentStatus === "REFUNDED";
-  const isFailedOrPending = order.paymentStatus === "PENDING" || order.paymentStatus === "FAILED";
+  const isCancelledOrDone = order.status === "CANCELLED" || order.status === "REFUNDED";
+  const isFailedOrPending = (order.paymentStatus === "PENDING" || order.paymentStatus === "FAILED") && !isCancelledOrDone;
 
   return (
     <div className="container-page py-10 max-w-3xl">

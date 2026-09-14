@@ -37,6 +37,9 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     if (!order || order.userId !== user.id) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
+    if (order.status === "CANCELLED") {
+      return NextResponse.json({ error: "This order is already cancelled" }, { status: 400 });
+    }
     if (order.paymentStatus !== "PENDING" && order.paymentStatus !== "FAILED") {
       return NextResponse.json({ error: "Only unpaid orders can be cancelled this way" }, { status: 400 });
     }
