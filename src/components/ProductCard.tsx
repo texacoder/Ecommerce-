@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatMoney } from "@/lib/format";
 import AddToCartButton from "@/components/AddToCartButton";
+import StarRating from "@/components/StarRating";
 
 export type ProductCardData = {
   id: string;
@@ -14,48 +15,51 @@ export type ProductCardData = {
   isBestSeller: boolean;
   image: string | null;
   hasVariants: boolean;
+  rating?: number | null;
+  reviewCount?: number;
 };
 
 export default function ProductCard({ product }: { product: ProductCardData }) {
   return (
-    <div className="group border border-black/10 dark:border-white/10 rounded-lg overflow-hidden flex flex-col">
-      <Link href={`/products/${product.slug}`} className="block bg-black/5 dark:bg-white/5 aspect-square overflow-hidden">
+    <div className="group card-surface hover:shadow-md transition-shadow overflow-hidden flex flex-col">
+      <Link href={`/products/${product.slug}`} className="relative block bg-[var(--surface-muted)] aspect-square overflow-hidden">
         {product.image && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition" />
+          <img src={product.image} alt={product.name} className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform" />
+        )}
+        {product.stock === 0 && (
+          <span className="absolute top-2 left-2 text-[11px] font-semibold bg-[var(--text)] text-white px-2 py-0.5 rounded">
+            Out of stock
+          </span>
         )}
       </Link>
       <div className="p-3 flex flex-col gap-1.5 flex-1">
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 min-h-[18px]">
           {product.isNewArrival && (
-            <span className="text-[10px] uppercase font-semibold bg-emerald-600 text-white px-1.5 py-0.5 rounded">New</span>
+            <span className="text-[10px] uppercase font-semibold bg-[var(--brand-accent)] text-white px-1.5 py-0.5 rounded">New</span>
           )}
           {product.isBestSeller && (
-            <span className="text-[10px] uppercase font-semibold bg-amber-600 text-white px-1.5 py-0.5 rounded">Best seller</span>
+            <span className="text-[10px] uppercase font-semibold bg-[var(--warning)] text-white px-1.5 py-0.5 rounded">Best seller</span>
           )}
           {product.discountPercent ? (
-            <span className="text-[10px] uppercase font-semibold bg-rose-600 text-white px-1.5 py-0.5 rounded">
-              -{product.discountPercent}%
+            <span className="text-[10px] uppercase font-semibold bg-[var(--brand-buy)] text-white px-1.5 py-0.5 rounded">
+              {product.discountPercent}% off
             </span>
           ) : null}
         </div>
-        <Link href={`/products/${product.slug}`} className="font-medium text-sm hover:underline line-clamp-2">
+        <Link href={`/products/${product.slug}`} className="font-medium text-sm hover:text-[var(--brand-accent)] line-clamp-2 leading-snug">
           {product.name}
         </Link>
+        <StarRating rating={product.rating ?? null} count={product.reviewCount} />
         <div className="flex items-baseline gap-2 mt-auto">
-          <span className="font-semibold">{formatMoney(product.price)}</span>
+          <span className="font-semibold text-[15px]">{formatMoney(product.price)}</span>
           {product.originalPrice && product.originalPrice > product.price && (
-            <span className="text-xs text-black/40 dark:text-white/40 line-through">
-              {formatMoney(product.originalPrice)}
-            </span>
+            <span className="text-xs text-[var(--text-faint)] line-through">{formatMoney(product.originalPrice)}</span>
           )}
         </div>
         <div className="mt-1">
           {product.hasVariants ? (
-            <Link
-              href={`/products/${product.slug}`}
-              className="w-full inline-block text-center rounded-md border border-black/20 dark:border-white/20 py-2 text-sm font-medium hover:bg-black/5 dark:hover:bg-white/10"
-            >
+            <Link href={`/products/${product.slug}`} className="btn-outline w-full inline-block text-center py-2 text-sm">
               View options
             </Link>
           ) : (

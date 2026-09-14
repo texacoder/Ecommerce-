@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { errorResponse } from "@/lib/api";
+import { restockOrderItems } from "@/lib/orders";
 
 const schema = z.object({ reason: z.string().max(500).optional() });
 
@@ -22,24 +23,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const updated = await prisma.$transaction(async (tx) => {
-      // Return stock to inventory.
-      for (const item of order.items) {
-        if (item.variantId) {
-          await tx.productVariant.update({
-            where: { id: item.variantId },
-            data: { stock: { increment: item.quantity } },
-          }).catch(() => null);
-        } else if (item.productId) {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: { stock: { increment: item.quantity } },
-          }).catch(() => null);
-        }
+      if (order.stockReserved) {
+        await restockOrderItems(tx, order.items);
       }
 
       return tx.order.update({
         where: { id },
-        data: { status: "CANCELLED", cancelReason: body.reason ?? null },
+        data: { status: "CANCELLED", stockReserved: false, cancelReason: body.reason ?? null },
         include: { items: true, user: { select: { id: true, name: true, email: true } } },
       });
     });

@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     const where: Prisma.UserWhereInput = { role: "CUSTOMER" };
     if (q) {
-      where.OR = [{ name: { contains: q } }, { email: { contains: q } }];
+      where.OR = [{ name: { contains: q, mode: "insensitive" } }, { email: { contains: q, mode: "insensitive" } }];
     }
 
     const [customers, total] = await Promise.all([

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { errorResponse } from "@/lib/api";
-import { getStripeClient } from "@/lib/stripe";
+import { getRazorpayClient } from "@/lib/razorpay";
 
 const schema = z.object({ amount: z.number().int().min(1).optional() });
 
@@ -25,16 +25,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Invalid refund amount" }, { status: 400 });
     }
 
-    const stripe = getStripeClient();
-    if (stripe && order.paymentIntentId) {
+    const paidPayment = await prisma.payment.findFirst({
+      where: { orderId: order.id, status: "PAID" },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const razorpay = getRazorpayClient();
+    if (razorpay && paidPayment?.providerPaymentId) {
       try {
-        await stripe.refunds.create({ payment_intent: order.paymentIntentId, amount });
-      } catch (stripeErr) {
-        const message = stripeErr instanceof Error ? stripeErr.message : "Stripe refund failed";
+        await razorpay.payments.refund(paidPayment.providerPaymentId, { amount });
+      } catch (gatewayErr) {
+        const message = gatewayErr instanceof Error ? gatewayErr.message : "Razorpay refund failed";
         return NextResponse.json({ error: message }, { status: 502 });
       }
     }
-    // When no payment provider is configured, the refund is still recorded
+    // When no payment gateway is configured, the refund is still recorded
     // so the order's financials and status stay consistent.
 
     const newRefundedAmount = order.refundedAmount + amount;

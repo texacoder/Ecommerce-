@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
+import { useToast } from "@/lib/toast-context";
 
 type Props = {
   productId: string;
@@ -12,6 +12,7 @@ type Props = {
   variantId?: string | null;
   maxQuantity: number;
   disabled?: boolean;
+  quantity?: number;
 };
 
 export default function AddToCartButton({
@@ -23,13 +24,14 @@ export default function AddToCartButton({
   variantId = null,
   maxQuantity,
   disabled,
+  quantity = 1,
 }: Props) {
   const { addItem } = useCart();
-  const [added, setAdded] = useState(false);
+  const { notify } = useToast();
 
   if (disabled || maxQuantity <= 0) {
     return (
-      <button disabled className="w-full rounded-md bg-black/10 dark:bg-white/10 text-black/40 dark:text-white/40 py-2 text-sm font-medium cursor-not-allowed">
+      <button disabled className="w-full rounded-md bg-[var(--surface-muted)] text-[var(--text-faint)] py-2 text-sm font-medium cursor-not-allowed border border-[var(--border-subtle)]">
         Out of stock
       </button>
     );
@@ -38,13 +40,12 @@ export default function AddToCartButton({
   return (
     <button
       onClick={() => {
-        addItem({ productId, variantId, name, slug, image, unitPrice }, 1);
-        setAdded(true);
-        setTimeout(() => setAdded(false), 1200);
+        addItem({ productId, variantId, name, slug, image, unitPrice }, quantity);
+        notify(`Added "${name}" to cart`, "success");
       }}
-      className="w-full rounded-md bg-black text-white dark:bg-white dark:text-black py-2 text-sm font-medium hover:opacity-90 transition"
+      className="btn-primary w-full py-2 text-sm"
     >
-      {added ? "Added ✓" : "Add to cart"}
+      Add to Cart
     </button>
   );
 }

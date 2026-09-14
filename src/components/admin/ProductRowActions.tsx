@@ -32,7 +32,7 @@ export default function ProductRowActions({ productId, status }: { productId: st
       <button disabled={busy} onClick={toggleStatus} className="underline">
         {status === "PUBLISHED" ? "Unpublish" : "Publish"}
       </button>
-      <button disabled={busy} onClick={deleteProduct} className="underline text-rose-600">
+      <button disabled={busy} onClick={deleteProduct} className="underline text-[var(--danger)]">
         Delete
       </button>
     </div>

@@ -17,7 +17,7 @@ type Address = {
   isDefault: boolean;
 };
 
-const empty = { fullName: "", line1: "", line2: "", city: "", state: "", postalCode: "", country: "USA", phone: "", isDefault: false };
+const empty = { fullName: "", line1: "", line2: "", city: "", state: "", postalCode: "", country: "India", phone: "", isDefault: false };
 
 export default function AddressesPage() {
   const { user, loading } = useAuth();
@@ -72,38 +72,38 @@ export default function AddressesPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={addAddress} className="border border-black/10 dark:border-white/10 rounded-lg p-4 mb-6 grid grid-cols-2 gap-3">
-          <input required placeholder="Full name" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} className="col-span-2 border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
-          <input required placeholder="Address line 1" value={form.line1} onChange={(e) => setForm({ ...form, line1: e.target.value })} className="col-span-2 border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
-          <input placeholder="Address line 2" value={form.line2} onChange={(e) => setForm({ ...form, line2: e.target.value })} className="col-span-2 border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
-          <input required placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
-          <input required placeholder="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} className="border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
-          <input required placeholder="Postal code" value={form.postalCode} onChange={(e) => setForm({ ...form, postalCode: e.target.value })} className="border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
-          <input required placeholder="Country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
-          <input required placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="col-span-2 border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
+        <form onSubmit={addAddress} className="border border-[var(--border-subtle)] rounded-lg p-4 mb-6 grid grid-cols-2 gap-3">
+          <input required placeholder="Full name" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} className="col-span-2 border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent" />
+          <input required placeholder="Address line 1" value={form.line1} onChange={(e) => setForm({ ...form, line1: e.target.value })} className="col-span-2 border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent" />
+          <input placeholder="Address line 2" value={form.line2} onChange={(e) => setForm({ ...form, line2: e.target.value })} className="col-span-2 border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent" />
+          <input required placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent" />
+          <input required placeholder="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} className="border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent" />
+          <input required placeholder="PIN code" value={form.postalCode} onChange={(e) => setForm({ ...form, postalCode: e.target.value })} className="border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent" />
+          <input required placeholder="Country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent" />
+          <input required placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="col-span-2 border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent" />
           <label className="col-span-2 flex items-center gap-2 text-sm">
             <input type="checkbox" checked={form.isDefault} onChange={(e) => setForm({ ...form, isDefault: e.target.checked })} />
             Set as default
           </label>
-          {error && <p className="col-span-2 text-sm text-rose-600">{error}</p>}
-          <button className="col-span-2 rounded-md bg-black text-white dark:bg-white dark:text-black py-2 text-sm font-medium">Save address</button>
+          {error && <p className="col-span-2 text-sm text-[var(--danger)]">{error}</p>}
+          <button className="col-span-2 rounded-md btn-primary py-2 text-sm font-medium">Save address</button>
         </form>
       )}
 
       <div className="flex flex-col gap-3">
         {addresses.map((a) => (
-          <div key={a.id} className="border border-black/10 dark:border-white/10 rounded-lg p-4 flex justify-between items-start">
+          <div key={a.id} className="border border-[var(--border-subtle)] rounded-lg p-4 flex justify-between items-start">
             <div className="text-sm">
-              {a.isDefault && <span className="text-xs font-semibold text-emerald-600 block mb-1">Default</span>}
+              {a.isDefault && <span className="text-xs font-semibold text-[var(--success)] block mb-1">Default</span>}
               {a.fullName}, {a.line1}
               {a.line2 ? `, ${a.line2}` : ""}, {a.city}, {a.state} {a.postalCode}, {a.country} — {a.phone}
             </div>
-            <button onClick={() => deleteAddress(a.id)} className="text-sm text-rose-600 hover:underline shrink-0 ml-4">
+            <button onClick={() => deleteAddress(a.id)} className="text-sm text-[var(--danger)] hover:underline shrink-0 ml-4">
               Delete
             </button>
           </div>
         ))}
-        {addresses.length === 0 && !showForm && <p className="text-black/60 dark:text-white/60 text-sm">No saved addresses yet.</p>}
+        {addresses.length === 0 && !showForm && <p className="text-[var(--text-muted)] text-sm">No saved addresses yet.</p>}
       </div>
     </div>
   );

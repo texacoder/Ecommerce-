@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
       where: {
         deletedAt: null,
         ...(q
-          ? { OR: [{ name: { contains: q } }, { sku: { contains: q } }] }
+          ? { OR: [{ name: { contains: q, mode: "insensitive" } }, { sku: { contains: q, mode: "insensitive" } }] }
           : {}),
       },
       include: { variants: true, category: true },

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getAnalyticsData } from "@/lib/analytics";
-import { formatMoney, formatDate } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
+import { RevenueChart, OrderStatusChart } from "@/components/admin/AdminCharts";
 
 export default async function AdminDashboardPage() {
   const data = await getAnalyticsData();
@@ -20,53 +21,45 @@ export default async function AdminDashboardPage() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="border border-black/10 dark:border-white/10 rounded-lg p-4">
+        <div className="card-surface p-4">
           <h2 className="font-semibold mb-3">Revenue, last 30 days</h2>
-          {data.revenueOverTime.length === 0 ? (
-            <p className="text-sm text-black/50 dark:text-white/50">No revenue yet.</p>
-          ) : (
-            <div className="flex items-end gap-1 h-32">
-              {data.revenueOverTime.map((d) => {
-                const max = Math.max(...data.revenueOverTime.map((r) => r.revenue), 1);
-                return (
-                  <div key={d.date} className="flex-1 flex flex-col items-center gap-1" title={`${formatDate(d.date)}: ${formatMoney(d.revenue)}`}>
-                    <div className="w-full bg-black dark:bg-white rounded-t" style={{ height: `${(d.revenue / max) * 100}%`, minHeight: 2 }} />
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <RevenueChart data={data.revenueOverTime} />
         </div>
 
-        <div className="border border-black/10 dark:border-white/10 rounded-lg p-4">
+        <div className="card-surface p-4">
+          <h2 className="font-semibold mb-3">Orders by status</h2>
+          <OrderStatusChart data={data.orderStatusDistribution} />
+        </div>
+
+        <div className="card-surface p-4">
           <h2 className="font-semibold mb-3">Best-selling products</h2>
           {data.bestSellers.length === 0 ? (
-            <p className="text-sm text-black/50 dark:text-white/50">No sales yet.</p>
+            <p className="text-sm text-[var(--text-muted)]">No sales yet.</p>
           ) : (
             <ul className="text-sm flex flex-col gap-2">
               {data.bestSellers.map((p) => (
                 <li key={p.productId} className="flex justify-between">
                   <span>{p.name}</span>
-                  <span className="text-black/50 dark:text-white/50">{p.quantity} sold</span>
+                  <span className="text-[var(--text-muted)]">{p.quantity} sold</span>
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        <div className="border border-black/10 dark:border-white/10 rounded-lg p-4 md:col-span-2">
+        <div className="card-surface p-4">
           <div className="flex justify-between items-center mb-3">
             <h2 className="font-semibold">Low stock products</h2>
-            <Link href="/admin/inventory" className="text-sm underline">
+            <Link href="/admin/inventory" className="text-sm text-[var(--brand-accent)] hover:underline">
               Manage inventory
             </Link>
           </div>
           {data.lowStockProducts.length === 0 ? (
-            <p className="text-sm text-black/50 dark:text-white/50">Nothing running low.</p>
+            <p className="text-sm text-[var(--text-muted)]">Nothing running low.</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-black/50 dark:text-white/50">
+                <tr className="text-left text-[var(--text-muted)]">
                   <th className="py-1">Product</th>
                   <th className="py-1">SKU</th>
                   <th className="py-1 text-right">Stock</th>
@@ -74,10 +67,10 @@ export default async function AdminDashboardPage() {
               </thead>
               <tbody>
                 {data.lowStockProducts.map((p) => (
-                  <tr key={p.id} className="border-t border-black/5 dark:border-white/10">
+                  <tr key={p.id} className="border-t border-[var(--border-subtle)]">
                     <td className="py-1.5">{p.name}</td>
                     <td className="py-1.5">{p.sku}</td>
-                    <td className={`py-1.5 text-right ${p.stock === 0 ? "text-rose-600 font-medium" : "text-amber-600"}`}>{p.stock}</td>
+                    <td className={`py-1.5 text-right ${p.stock === 0 ? "text-[var(--danger)] font-medium" : "text-[var(--warning)]"}`}>{p.stock}</td>
                   </tr>
                 ))}
               </tbody>
@@ -91,8 +84,8 @@ export default async function AdminDashboardPage() {
 
 function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`border rounded-lg p-4 ${highlight ? "border-amber-500/50 bg-amber-500/5" : "border-black/10 dark:border-white/10"}`}>
-      <p className="text-xs text-black/50 dark:text-white/50">{label}</p>
+    <div className={`card-surface p-4 ${highlight ? "border-[var(--warning)]" : ""}`}>
+      <p className="text-xs text-[var(--text-muted)]">{label}</p>
       <p className="text-xl font-semibold mt-1">{value}</p>
     </div>
   );

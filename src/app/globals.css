@@ -1,26 +1,155 @@
 @import "tailwindcss";
 
+/* NEXORA is intentionally a single light, commerce-first theme — this
+   scopes the `dark:` variant to an explicit `.dark` class we never apply,
+   so it never kicks in based on the visitor's OS color-scheme preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* NEXORA brand palette — a deep-navy header/footer paired with a teal
+     primary accent and a distinct coral "buy now" accent. Intentionally
+     different from any existing marketplace's exact colors. */
+  --brand-navy: #101a2c;
+  --brand-navy-light: #1f3350;
+  --brand-navy-dark: #0a1220;
+
+  --brand-accent: #0e7c6b;
+  --brand-accent-dark: #0b5f53;
+  --brand-accent-light: #e6f4f1;
+
+  --brand-buy: #d64526;
+  --brand-buy-dark: #b33a1f;
+
+  --surface: #ffffff;
+  --surface-muted: #f4f6f8;
+  --border-subtle: #e3e6eb;
+
+  --text: #14181f;
+  --text-muted: #5b6472;
+  --text-faint: #8a919c;
+
+  --success: #12805c;
+  --warning: #b5730b;
+  --danger: #c0392b;
+
+  --background: var(--surface-muted);
+  --foreground: var(--text);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-navy-light: var(--brand-navy-light);
+  --color-brand-navy-dark: var(--brand-navy-dark);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-dark: var(--brand-accent-dark);
+  --color-brand-accent-light: var(--brand-accent-light);
+  --color-brand-buy: var(--brand-buy);
+  --color-brand-buy-dark: var(--brand-buy-dark);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border-subtle: var(--border-subtle);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* NEXORA is a light, commerce-first UI by design — no dark-mode variant. */
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+.container-page {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-page {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+.card-surface {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+}
+
+.btn-primary {
+  background: var(--brand-accent);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  transition: background-color 0.15s ease;
+}
+.btn-primary:hover {
+  background: var(--brand-accent-dark);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-buy {
+  background: var(--brand-buy);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  transition: background-color 0.15s ease;
+}
+.btn-buy:hover {
+  background: var(--brand-buy-dark);
+}
+.btn-buy:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border-subtle);
+  font-weight: 500;
+  border-radius: 0.375rem;
+  transition: background-color 0.15s ease;
+}
+.btn-outline:hover {
+  background: var(--surface-muted);
+}
+
+.input-field {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text);
+  width: 100%;
+}
+.input-field:focus {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 1px;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.skeleton {
+  background: var(--border-subtle);
+  border-radius: 0.375rem;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const inputClass = "border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent";
+const inputClass = "border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent";
 
 type Category = {
   id: string;
@@ -114,15 +114,15 @@ export default function AdminCategoriesPage() {
             ))}
           </select>
         </div>
-        <button className="rounded-md bg-black text-white dark:bg-white dark:text-black px-4 py-2 text-sm font-medium">Create</button>
+        <button className="rounded-md btn-primary px-4 py-2 text-sm font-medium">Create</button>
       </form>
 
-      {message && <p className="text-sm text-rose-600 mb-4">{message}</p>}
+      {message && <p className="text-sm text-[var(--danger)] mb-4">{message}</p>}
 
-      <div className="border border-black/10 dark:border-white/10 rounded-lg overflow-x-auto">
+      <div className="border border-[var(--border-subtle)] rounded-lg overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left bg-black/5 dark:bg-white/5">
+            <tr className="text-left bg-[var(--surface-muted)]">
               <th className="p-3">Image</th>
               <th className="p-3">Name</th>
               <th className="p-3">Parent</th>
@@ -133,14 +133,14 @@ export default function AdminCategoriesPage() {
           </thead>
           <tbody>
             {categories.map((c) => (
-              <tr key={c.id} className="border-t border-black/5 dark:border-white/10">
+              <tr key={c.id} className="border-t border-[var(--border-subtle)]">
                 <td className="p-3">
                   <label className="cursor-pointer">
                     {c.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={c.imageUrl} alt="" className="w-10 h-10 rounded object-cover" />
                     ) : (
-                      <span className="w-10 h-10 rounded bg-black/10 dark:bg-white/10 inline-block" />
+                      <span className="w-10 h-10 rounded bg-[var(--surface-muted)] inline-block" />
                     )}
                     <input
                       type="file"
@@ -162,15 +162,15 @@ export default function AdminCategoriesPage() {
                     className="bg-transparent border-b border-transparent hover:border-black/20 dark:hover:border-white/20 focus:border-black/40"
                   />
                 </td>
-                <td className="p-3 text-black/50 dark:text-white/50">{c.parent?.name ?? "—"}</td>
+                <td className="p-3 text-[var(--text-muted)]">{c.parent?.name ?? "—"}</td>
                 <td className="p-3">{c._count.products}</td>
                 <td className="p-3">
-                  <button onClick={() => toggleVisible(c.id, c.visible)} className={c.visible ? "text-emerald-600" : "text-black/40 dark:text-white/40"}>
+                  <button onClick={() => toggleVisible(c.id, c.visible)} className={c.visible ? "text-[var(--success)]" : "text-[var(--text-faint)]"}>
                     {c.visible ? "Visible" : "Hidden"}
                   </button>
                 </td>
                 <td className="p-3">
-                  <button onClick={() => remove(c.id)} className="text-rose-600 underline text-xs">
+                  <button onClick={() => remove(c.id)} className="text-[var(--danger)] underline text-xs">
                     Delete
                   </button>
                 </td>

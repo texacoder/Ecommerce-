@@ -46,12 +46,12 @@ export default function AdminOrdersPage() {
           value={q}
           onKeyDown={(e) => e.key === "Enter" && load()}
           onChange={(e) => setQ(e.target.value)}
-          className="border border-black/15 dark:border-white/20 rounded px-3 py-1.5 text-sm bg-transparent w-72"
+          className="border border-[var(--border-subtle)] rounded px-3 py-1.5 text-sm bg-transparent w-72"
         />
         <button onClick={load} className="text-sm underline">
           Search
         </button>
-        <select value={status} onChange={(e) => setStatus(e.target.value)} className="border border-black/15 dark:border-white/20 rounded px-2 py-1.5 text-sm bg-transparent ml-auto">
+        <select value={status} onChange={(e) => setStatus(e.target.value)} className="border border-[var(--border-subtle)] rounded px-2 py-1.5 text-sm bg-transparent ml-auto">
           <option value="">All statuses</option>
           {STATUSES.map((s) => (
             <option key={s} value={s}>
@@ -61,10 +61,10 @@ export default function AdminOrdersPage() {
         </select>
       </div>
 
-      <div className="border border-black/10 dark:border-white/10 rounded-lg overflow-x-auto">
+      <div className="border border-[var(--border-subtle)] rounded-lg overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left bg-black/5 dark:bg-white/5">
+            <tr className="text-left bg-[var(--surface-muted)]">
               <th className="p-3">Order</th>
               <th className="p-3">Customer</th>
               <th className="p-3">Items</th>
@@ -76,7 +76,7 @@ export default function AdminOrdersPage() {
           </thead>
           <tbody>
             {orders.map((o) => (
-              <tr key={o.id} className="border-t border-black/5 dark:border-white/10">
+              <tr key={o.id} className="border-t border-[var(--border-subtle)]">
                 <td className="p-3">
                   <Link href={`/admin/orders/${o.id}`} className="hover:underline font-medium">
                     #{o.orderNumber}
@@ -84,18 +84,18 @@ export default function AdminOrdersPage() {
                 </td>
                 <td className="p-3">
                   {o.user.name}
-                  <div className="text-xs text-black/50 dark:text-white/50">{o.user.email}</div>
+                  <div className="text-xs text-[var(--text-muted)]">{o.user.email}</div>
                 </td>
                 <td className="p-3">{o.items.length}</td>
                 <td className="p-3">{formatMoney(o.total)}</td>
                 <td className="p-3">{statusLabel(o.status)}</td>
                 <td className="p-3">{statusLabel(o.paymentStatus)}</td>
-                <td className="p-3 text-black/50 dark:text-white/50">{formatDate(o.createdAt)}</td>
+                <td className="p-3 text-[var(--text-muted)]">{formatDate(o.createdAt)}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        {orders.length === 0 && <p className="p-6 text-center text-black/50 dark:text-white/50">No orders found.</p>}
+        {orders.length === 0 && <p className="p-6 text-center text-[var(--text-muted)]">No orders found.</p>}
       </div>
     </div>
   );

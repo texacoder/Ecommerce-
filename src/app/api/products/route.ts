@@ -26,9 +26,9 @@ export async function GET(req: NextRequest) {
     if (newArrival === "true") where.isNewArrival = true;
     if (q) {
       where.OR = [
-        { name: { contains: q } },
-        { brand: { contains: q } },
-        { description: { contains: q } },
+        { name: { contains: q, mode: "insensitive" } },
+        { brand: { contains: q, mode: "insensitive" } },
+        { description: { contains: q, mode: "insensitive" } },
       ];
     }
 

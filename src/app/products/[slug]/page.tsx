@@ -4,6 +4,9 @@ import { prisma } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
 import ProductPurchasePanel from "@/components/ProductPurchasePanel";
 import ReviewsSection from "@/components/ReviewsSection";
+import ProductGallery from "@/components/ProductGallery";
+import StarRating from "@/components/StarRating";
+import ProductCard, { type ProductCardData } from "@/components/ProductCard";
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -27,9 +30,37 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     : null;
   const specs: Record<string, string> = product.specifications ? JSON.parse(product.specifications) : {};
 
+  const related = product.categoryId
+    ? await prisma.product.findMany({
+        where: {
+          categoryId: product.categoryId,
+          id: { not: product.id },
+          deletedAt: null,
+          status: "PUBLISHED",
+          visible: true,
+        },
+        include: { images: { orderBy: { position: "asc" }, take: 1 }, _count: { select: { variants: true } } },
+        take: 4,
+      })
+    : [];
+
+  const relatedCards: ProductCardData[] = related.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    price: p.price,
+    originalPrice: p.originalPrice,
+    discountPercent: p.discountPercent,
+    stock: p.stock,
+    isNewArrival: p.isNewArrival,
+    isBestSeller: p.isBestSeller,
+    image: p.images[0]?.url ?? null,
+    hasVariants: p._count.variants > 0,
+  }));
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="text-sm text-black/50 dark:text-white/50 mb-4 flex gap-1">
+    <div className="container-page py-8">
+      <div className="text-sm text-[var(--text-muted)] mb-4 flex gap-1">
         <Link href="/products" className="hover:underline">
           Products
         </Link>
@@ -43,47 +74,35 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         )}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="flex flex-col gap-3">
-          <div className="aspect-square rounded-lg overflow-hidden bg-black/5 dark:bg-white/5">
-            {product.images[0] && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={product.images[0].url} alt={product.name} className="w-full h-full object-cover" />
-            )}
-          </div>
-          {product.images.length > 1 && (
-            <div className="flex gap-2">
-              {product.images.slice(1).map((img) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={img.id} src={img.url} alt={product.name} className="w-16 h-16 rounded object-cover bg-black/5 dark:bg-white/5" />
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="grid md:grid-cols-2 gap-10">
+        <ProductGallery images={product.images} name={product.name} />
 
         <div>
           <div className="flex gap-1.5 mb-2">
-            {product.isNewArrival && <Badge label="New" color="bg-emerald-600" />}
-            {product.isBestSeller && <Badge label="Best seller" color="bg-amber-600" />}
-            {product.discountPercent ? <Badge label={`-${product.discountPercent}%`} color="bg-rose-600" /> : null}
+            {product.isNewArrival && <Badge label="New" color="bg-[var(--brand-accent)]" />}
+            {product.isBestSeller && <Badge label="Best seller" color="bg-[var(--warning)]" />}
+            {product.discountPercent ? <Badge label={`${product.discountPercent}% off`} color="bg-[var(--brand-buy)]" /> : null}
           </div>
-          <h1 className="text-2xl font-semibold">{product.name}</h1>
-          {product.brand && <p className="text-black/50 dark:text-white/50 text-sm mt-1">{product.brand}</p>}
-          {avgRating !== null && (
-            <p className="text-sm mt-1">
-              {"★".repeat(Math.round(avgRating))}
-              {"☆".repeat(5 - Math.round(avgRating))} ({product.reviews.length})
-            </p>
-          )}
+          <h1 className="text-2xl font-semibold leading-snug">{product.name}</h1>
+          {product.brand && <p className="text-[var(--text-muted)] text-sm mt-1">by {product.brand}</p>}
+          <div className="mt-2">
+            <StarRating rating={avgRating} count={product.reviews.length} size="md" />
+          </div>
 
           <div className="flex items-baseline gap-3 mt-4">
-            <span className="text-2xl font-bold">{formatMoney(product.price)}</span>
+            <span className="text-3xl font-bold">{formatMoney(product.price)}</span>
             {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-black/40 dark:text-white/40 line-through">{formatMoney(product.originalPrice)}</span>
+              <>
+                <span className="text-[var(--text-faint)] line-through">{formatMoney(product.originalPrice)}</span>
+                <span className="text-[var(--success)] text-sm font-medium">
+                  Save {formatMoney(product.originalPrice - product.price)}
+                </span>
+              </>
             )}
           </div>
+          <p className="text-xs text-[var(--text-faint)] mt-1">Inclusive of all taxes</p>
 
-          {product.description && <p className="mt-4 text-sm leading-relaxed">{product.description}</p>}
+          {product.description && <p className="mt-4 text-sm leading-relaxed text-[var(--text-muted)]">{product.description}</p>}
 
           <div className="mt-6">
             <ProductPurchasePanel
@@ -108,9 +127,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               <h2 className="font-semibold mb-2">Specifications</h2>
               <table className="text-sm w-full">
                 <tbody>
+                  <tr className="border-b border-[var(--border-subtle)]">
+                    <td className="py-1.5 pr-4 text-[var(--text-muted)] w-1/3">SKU</td>
+                    <td className="py-1.5">{product.sku}</td>
+                  </tr>
                   {Object.entries(specs).map(([k, v]) => (
-                    <tr key={k} className="border-b border-black/5 dark:border-white/10">
-                      <td className="py-1.5 pr-4 text-black/50 dark:text-white/50 w-1/3">{k}</td>
+                    <tr key={k} className="border-b border-[var(--border-subtle)]">
+                      <td className="py-1.5 pr-4 text-[var(--text-muted)] w-1/3">{k}</td>
                       <td className="py-1.5">{v}</td>
                     </tr>
                   ))}
@@ -121,7 +144,18 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <div className="mt-12">
+      {relatedCards.length > 0 && (
+        <div className="mt-14">
+          <h2 className="text-lg font-semibold mb-4">Related Products</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {relatedCards.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-14">
         <ReviewsSection
           productId={product.id}
           initialReviews={product.reviews.map((r) => ({

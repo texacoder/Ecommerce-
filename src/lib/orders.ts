@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+
 export const ORDER_STATUS_FLOW = [
   "PENDING",
   "CONFIRMED",
@@ -31,5 +33,28 @@ export function assertValidTransition(current: OrderStatus, next: OrderStatus) {
   }
   if (nextIdx < currentIdx) {
     throw new Error(`Cannot move order status backwards from ${current} to ${next}`);
+  }
+}
+
+/**
+ * Returns reserved stock to the catalog. Stock is decremented at order
+ * creation time (to prevent overselling while payment is in flight), so
+ * cancelling for any reason — admin cancellation, abandoned checkout, a
+ * failed/expired payment — must release it back via this same path.
+ */
+export async function restockOrderItems(
+  tx: Prisma.TransactionClient,
+  items: { productId: string | null; variantId: string | null; quantity: number }[]
+) {
+  for (const item of items) {
+    if (item.variantId) {
+      await tx.productVariant
+        .update({ where: { id: item.variantId }, data: { stock: { increment: item.quantity } } })
+        .catch(() => null);
+    } else if (item.productId) {
+      await tx.product
+        .update({ where: { id: item.productId }, data: { stock: { increment: item.quantity } } })
+        .catch(() => null);
+    }
   }
 }

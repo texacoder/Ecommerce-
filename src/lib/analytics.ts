@@ -1,21 +1,31 @@
 import { prisma } from "@/lib/db";
 import { LOW_STOCK_THRESHOLD } from "@/app/api/admin/inventory/route";
 
+const PAID_STATUSES: ("PAID" | "PARTIALLY_REFUNDED" | "REFUNDED")[] = ["PAID", "PARTIALLY_REFUNDED", "REFUNDED"];
+
 export async function getAnalyticsData() {
-  const revenueOrders = await prisma.order.findMany({
-    where: { status: { not: "CANCELLED" } },
-    select: { total: true, createdAt: true },
+  // "Revenue" is real money actually collected (net of refunds) — orders
+  // that are merely placed but still awaiting/failed payment don't count,
+  // otherwise the dashboard would overstate what the business actually made.
+  const paidOrders = await prisma.order.findMany({
+    where: { paymentStatus: { in: PAID_STATUSES } },
+    select: { total: true, refundedAmount: true, createdAt: true },
   });
-  const totalRevenue = revenueOrders.reduce((s, o) => s + o.total, 0);
-  const orderCount = revenueOrders.length;
-  const averageOrderValue = orderCount ? Math.round(totalRevenue / orderCount) : 0;
+  const totalRevenue = paidOrders.reduce((s, o) => s + (o.total - o.refundedAmount), 0);
+
+  const allOrders = await prisma.order.findMany({
+    where: { status: { not: "CANCELLED" } },
+    select: { id: true },
+  });
+  const orderCount = allOrders.length;
+  const averageOrderValue = paidOrders.length ? Math.round(totalRevenue / paidOrders.length) : 0;
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const byDay = new Map<string, number>();
-  for (const o of revenueOrders) {
+  for (const o of paidOrders) {
     if (o.createdAt < thirtyDaysAgo) continue;
     const key = o.createdAt.toISOString().slice(0, 10);
-    byDay.set(key, (byDay.get(key) ?? 0) + o.total);
+    byDay.set(key, (byDay.get(key) ?? 0) + (o.total - o.refundedAmount));
   }
   const revenueOverTime = Array.from(byDay.entries())
     .sort(([a], [b]) => (a < b ? -1 : 1))
@@ -52,6 +62,9 @@ export async function getAnalyticsData() {
 
   const pendingOrders = await prisma.order.count({ where: { status: "PENDING" } });
 
+  const statusCounts = await prisma.order.groupBy({ by: ["status"], _count: { _all: true } });
+  const orderStatusDistribution = statusCounts.map((s) => ({ status: s.status, count: s._count._all }));
+
   return {
     totalRevenue,
     orderCount,
@@ -62,5 +75,6 @@ export async function getAnalyticsData() {
     bestSellers,
     lowStockProducts,
     pendingOrders,
+    orderStatusDistribution,
   };
 }

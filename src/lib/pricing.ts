@@ -1,9 +1,13 @@
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 
-export const TAX_RATE = 0.08;
-export const FREE_SHIPPING_THRESHOLD = 5000; // cents ($50)
-export const FLAT_SHIPPING = 599; // cents ($5.99)
+// Amounts everywhere are in paise (smallest INR unit), matching Razorpay.
+// Listed product prices are treated as tax-inclusive (the common convention
+// for Indian retail), so TAX_RATE is 0 by default — change it here if your
+// catalog needs an explicit tax line.
+export const TAX_RATE = 0;
+export const FREE_SHIPPING_THRESHOLD = 49900; // ₹499
+export const FLAT_SHIPPING = 4900; // ₹49
 
 export type QuoteItemInput = { productId: string; variantId?: string | null; quantity: number };
 

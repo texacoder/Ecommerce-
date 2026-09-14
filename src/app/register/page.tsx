@@ -37,23 +37,26 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="text-xl font-semibold mb-6">Create an account</h1>
-      <form onSubmit={onSubmit} className="flex flex-col gap-3">
-        <input required placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} className="border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
-        <input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
-        <input required type="password" minLength={8} placeholder="Password (min 8 characters)" value={password} onChange={(e) => setPassword(e.target.value)} className="border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
-        {error && <p className="text-sm text-rose-600">{error}</p>}
-        <button disabled={submitting} className="rounded-md bg-black text-white dark:bg-white dark:text-black py-2.5 font-medium disabled:opacity-50">
-          {submitting ? "Creating account..." : "Create account"}
-        </button>
-      </form>
-      <p className="text-sm mt-4 text-black/60 dark:text-white/60">
-        Already have an account?{" "}
-        <Link href="/login" className="underline">
-          Log in
-        </Link>
-      </p>
+    <div className="container-page py-16 flex justify-center">
+      <div className="card-surface p-8 w-full max-w-sm">
+        <h1 className="text-xl font-semibold mb-1">Create your account</h1>
+        <p className="text-sm text-[var(--text-muted)] mb-6">Join NEXORA to start shopping</p>
+        <form onSubmit={onSubmit} className="flex flex-col gap-3">
+          <input required placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} className="input-field" />
+          <input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />
+          <input required type="password" minLength={8} placeholder="Password (min 8 characters)" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" />
+          {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
+          <button disabled={submitting} className="btn-primary py-2.5 font-medium disabled:opacity-50">
+            {submitting ? "Creating account..." : "Create account"}
+          </button>
+        </form>
+        <p className="text-sm mt-5 text-[var(--text-muted)]">
+          Already have an account?{" "}
+          <Link href="/login" className="text-[var(--brand-accent)] hover:underline font-medium">
+            Sign in
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

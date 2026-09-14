@@ -46,7 +46,7 @@ export default function AdminOrderDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  if (!order) return <p className="text-sm text-black/50">Loading...</p>;
+  if (!order) return <p className="text-sm text-[var(--text-muted)]">Loading...</p>;
 
   const address = JSON.parse(order.addressSnapshot);
 
@@ -98,16 +98,16 @@ export default function AdminOrderDetailPage() {
   return (
     <div className="max-w-3xl">
       <h1 className="text-xl font-semibold mb-1">Order #{order.orderNumber}</h1>
-      <p className="text-xs text-black/40 dark:text-white/40 mb-6">Placed {formatDateTime(order.createdAt)}</p>
-      {message && <p className="text-sm text-rose-600 mb-4">{message}</p>}
+      <p className="text-xs text-[var(--text-faint)] mb-6">Placed {formatDateTime(order.createdAt)}</p>
+      {message && <p className="text-sm text-[var(--danger)] mb-4">{message}</p>}
 
       <div className="grid sm:grid-cols-2 gap-4 mb-6">
-        <div className="border border-black/10 dark:border-white/10 rounded-lg p-4">
+        <div className="border border-[var(--border-subtle)] rounded-lg p-4">
           <h2 className="font-medium mb-2">Customer</h2>
           <p className="text-sm">{order.user.name}</p>
-          <p className="text-sm text-black/50 dark:text-white/50">{order.user.email}</p>
+          <p className="text-sm text-[var(--text-muted)]">{order.user.email}</p>
         </div>
-        <div className="border border-black/10 dark:border-white/10 rounded-lg p-4">
+        <div className="border border-[var(--border-subtle)] rounded-lg p-4">
           <h2 className="font-medium mb-2">Delivery address</h2>
           <p className="text-sm">
             {address.fullName}, {address.line1}
@@ -116,7 +116,7 @@ export default function AdminOrderDetailPage() {
         </div>
       </div>
 
-      <div className="border border-black/10 dark:border-white/10 rounded-lg p-4 mb-6">
+      <div className="border border-[var(--border-subtle)] rounded-lg p-4 mb-6">
         <h2 className="font-medium mb-3">Status</h2>
         <div className="flex flex-wrap gap-2 mb-3">
           {FORWARD_STATUSES.map((s) => (
@@ -124,7 +124,7 @@ export default function AdminOrderDetailPage() {
               key={s}
               onClick={() => updateStatus(s)}
               disabled={order.status === s || order.status === "CANCELLED" || order.status === "REFUNDED"}
-              className={`text-xs rounded-full px-3 py-1 border ${order.status === s ? "bg-black text-white dark:bg-white dark:text-black border-transparent" : "border-black/20 dark:border-white/20"} disabled:opacity-40`}
+              className={`text-xs rounded-full px-3 py-1 border ${order.status === s ? "btn-primary border-transparent" : "border-[var(--border-subtle)]"} disabled:opacity-40`}
             >
               {statusLabel(s)}
             </button>
@@ -132,45 +132,45 @@ export default function AdminOrderDetailPage() {
         </div>
         <div className="flex gap-3 text-sm">
           {canCancel && (
-            <button onClick={cancelOrder} className="text-rose-600 underline">
+            <button onClick={cancelOrder} className="text-[var(--danger)] underline">
               Cancel order
             </button>
           )}
           {canRefund && (
-            <button onClick={refund} className="text-amber-600 underline">
+            <button onClick={refund} className="text-[var(--warning)] underline">
               Refund payment
             </button>
           )}
         </div>
-        {order.cancelReason && <p className="text-sm text-black/50 dark:text-white/50 mt-2">Cancel reason: {order.cancelReason}</p>}
+        {order.cancelReason && <p className="text-sm text-[var(--text-muted)] mt-2">Cancel reason: {order.cancelReason}</p>}
         <p className="text-sm mt-2">
           Payment: {statusLabel(order.paymentStatus)}
           {order.refundedAmount > 0 && ` (refunded ${formatMoney(order.refundedAmount)})`}
         </p>
       </div>
 
-      <div className="border border-black/10 dark:border-white/10 rounded-lg p-4 mb-6">
+      <div className="border border-[var(--border-subtle)] rounded-lg p-4 mb-6">
         <h2 className="font-medium mb-3">Tracking</h2>
         <div className="flex gap-2">
-          <input placeholder="Carrier" value={tracking.carrier} onChange={(e) => setTracking({ ...tracking, carrier: e.target.value })} className="border border-black/15 dark:border-white/20 rounded px-3 py-1.5 text-sm bg-transparent" />
-          <input placeholder="Tracking number" value={tracking.number} onChange={(e) => setTracking({ ...tracking, number: e.target.value })} className="border border-black/15 dark:border-white/20 rounded px-3 py-1.5 text-sm bg-transparent" />
+          <input placeholder="Carrier" value={tracking.carrier} onChange={(e) => setTracking({ ...tracking, carrier: e.target.value })} className="border border-[var(--border-subtle)] rounded px-3 py-1.5 text-sm bg-transparent" />
+          <input placeholder="Tracking number" value={tracking.number} onChange={(e) => setTracking({ ...tracking, number: e.target.value })} className="border border-[var(--border-subtle)] rounded px-3 py-1.5 text-sm bg-transparent" />
           <button onClick={saveTracking} className="text-sm underline">
             Save
           </button>
         </div>
       </div>
 
-      <div className="border border-black/10 dark:border-white/10 rounded-lg p-4">
+      <div className="border border-[var(--border-subtle)] rounded-lg p-4">
         <h2 className="font-medium mb-3">Items</h2>
         {order.items.map((item) => (
-          <div key={item.id} className="flex justify-between text-sm py-1.5 border-b border-black/5 dark:border-white/10 last:border-0">
+          <div key={item.id} className="flex justify-between text-sm py-1.5 border-b border-[var(--border-subtle)] last:border-0">
             <span>
               {item.nameSnapshot} ({item.skuSnapshot}) × {item.quantity}
             </span>
             <span>{formatMoney(item.priceSnapshot * item.quantity)}</span>
           </div>
         ))}
-        <div className="flex flex-col gap-1 text-sm mt-3 pt-3 border-t border-black/10 dark:border-white/10">
+        <div className="flex flex-col gap-1 text-sm mt-3 pt-3 border-t border-[var(--border-subtle)]">
           <Row label="Subtotal" value={order.subtotal} />
           {order.discount > 0 && <Row label={`Discount${order.couponCode ? ` (${order.couponCode})` : ""}`} value={-order.discount} />}
           <Row label="Shipping" value={order.shipping} />

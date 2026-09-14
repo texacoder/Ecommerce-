@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatDate, formatMoney } from "@/lib/format";
 
-const inputClass = "border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent w-full";
+const inputClass = "border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent w-full";
 
 type Coupon = {
   id: string;
@@ -91,13 +91,13 @@ export default function AdminCouponsPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold">Coupons</h1>
-        <button onClick={() => setShowForm((v) => !v)} className="rounded-md bg-black text-white dark:bg-white dark:text-black px-4 py-2 text-sm font-medium">
+        <button onClick={() => setShowForm((v) => !v)} className="rounded-md btn-primary px-4 py-2 text-sm font-medium">
           {showForm ? "Cancel" : "+ New coupon"}
         </button>
       </div>
 
       {showForm && (
-        <form onSubmit={createCoupon} className="border border-black/10 dark:border-white/10 rounded-lg p-4 mb-6 grid grid-cols-3 gap-3">
+        <form onSubmit={createCoupon} className="border border-[var(--border-subtle)] rounded-lg p-4 mb-6 grid grid-cols-3 gap-3">
           <input required placeholder="CODE" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} className={inputClass} />
           <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as "PERCENT" | "FIXED" })} className={inputClass}>
             <option value="PERCENT">Percentage off</option>
@@ -108,15 +108,15 @@ export default function AdminCouponsPage() {
           <input type="date" placeholder="Expiry date" value={form.expiresAt} onChange={(e) => setForm({ ...form, expiresAt: e.target.value })} className={inputClass} />
           <input type="number" placeholder="Total usage limit" value={form.usageLimit} onChange={(e) => setForm({ ...form, usageLimit: e.target.value })} className={inputClass} />
           <input type="number" placeholder="Per-customer limit" value={form.perCustomerLimit} onChange={(e) => setForm({ ...form, perCustomerLimit: e.target.value })} className={inputClass} />
-          {error && <p className="col-span-3 text-sm text-rose-600">{error}</p>}
-          <button className="col-span-3 rounded-md bg-black text-white dark:bg-white dark:text-black py-2 text-sm font-medium">Create coupon</button>
+          {error && <p className="col-span-3 text-sm text-[var(--danger)]">{error}</p>}
+          <button className="col-span-3 rounded-md btn-primary py-2 text-sm font-medium">Create coupon</button>
         </form>
       )}
 
-      <div className="border border-black/10 dark:border-white/10 rounded-lg overflow-x-auto">
+      <div className="border border-[var(--border-subtle)] rounded-lg overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left bg-black/5 dark:bg-white/5">
+            <tr className="text-left bg-[var(--surface-muted)]">
               <th className="p-3">Code</th>
               <th className="p-3">Discount</th>
               <th className="p-3">Min order</th>
@@ -129,7 +129,7 @@ export default function AdminCouponsPage() {
           </thead>
           <tbody>
             {coupons.map((c) => (
-              <tr key={c.id} className="border-t border-black/5 dark:border-white/10">
+              <tr key={c.id} className="border-t border-[var(--border-subtle)]">
                 <td className="p-3 font-medium">{c.code}</td>
                 <td className="p-3">{c.type === "PERCENT" ? `${c.value}%` : formatMoney(c.value)}</td>
                 <td className="p-3">{c.minOrderValue ? formatMoney(c.minOrderValue) : "—"}</td>
@@ -140,12 +140,12 @@ export default function AdminCouponsPage() {
                 </td>
                 <td className="p-3">{c.expiresAt ? formatDate(c.expiresAt) : "—"}</td>
                 <td className="p-3">
-                  <button onClick={() => toggleActive(c.id, c.active)} className={c.active ? "text-emerald-600" : "text-black/40 dark:text-white/40"}>
+                  <button onClick={() => toggleActive(c.id, c.active)} className={c.active ? "text-[var(--success)]" : "text-[var(--text-faint)]"}>
                     {c.active ? "Active" : "Inactive"}
                   </button>
                 </td>
                 <td className="p-3">
-                  <button onClick={() => remove(c.id)} className="text-rose-600 underline text-xs">
+                  <button onClick={() => remove(c.id)} className="text-[var(--danger)] underline text-xs">
                     Delete
                   </button>
                 </td>
@@ -153,7 +153,7 @@ export default function AdminCouponsPage() {
             ))}
           </tbody>
         </table>
-        {coupons.length === 0 && <p className="p-6 text-center text-black/50 dark:text-white/50">No coupons yet.</p>}
+        {coupons.length === 0 && <p className="p-6 text-center text-[var(--text-muted)]">No coupons yet.</p>}
       </div>
     </div>
   );

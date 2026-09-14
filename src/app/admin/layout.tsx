@@ -29,11 +29,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="w-48 shrink-0">
         <nav className="flex flex-col gap-1 sticky top-20">
           {NAV.map((item) => (
-            <Link key={item.href} href={item.href} className="px-3 py-2 rounded text-sm hover:bg-black/5 dark:hover:bg-white/10">
+            <Link key={item.href} href={item.href} className="px-3 py-2 rounded text-sm hover:bg-[var(--surface-muted)]">
               {item.label}
             </Link>
           ))}
-          <Link href="/" className="px-3 py-2 rounded text-sm text-black/50 dark:text-white/50 hover:bg-black/5 dark:hover:bg-white/10 mt-4">
+          <Link href="/" className="px-3 py-2 rounded text-sm text-[var(--text-muted)] hover:bg-[var(--surface-muted)] mt-4">
             ← Back to store
           </Link>
         </nav>

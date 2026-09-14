@@ -45,22 +45,30 @@ function LoginForm() {
   }
 
   return (
-    <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="text-xl font-semibold mb-6">Log in</h1>
-      <form onSubmit={onSubmit} className="flex flex-col gap-3">
-        <input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
-        <input required type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent" />
-        {error && <p className="text-sm text-rose-600">{error}</p>}
-        <button disabled={submitting} className="rounded-md bg-black text-white dark:bg-white dark:text-black py-2.5 font-medium disabled:opacity-50">
-          {submitting ? "Logging in..." : "Log in"}
-        </button>
-      </form>
-      <p className="text-sm mt-4 text-black/60 dark:text-white/60">
-        No account?{" "}
-        <Link href="/register" className="underline">
-          Register
-        </Link>
-      </p>
+    <div className="container-page py-16 flex justify-center">
+      <div className="card-surface p-8 w-full max-w-sm">
+        <h1 className="text-xl font-semibold mb-1">Sign in</h1>
+        <p className="text-sm text-[var(--text-muted)] mb-6">Welcome back to NEXORA</p>
+        <form onSubmit={onSubmit} className="flex flex-col gap-3">
+          <input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />
+          <div>
+            <input required type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" />
+            <Link href="/forgot-password" className="text-xs text-[var(--brand-accent)] hover:underline block mt-1.5 text-right">
+              Forgot password?
+            </Link>
+          </div>
+          {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
+          <button disabled={submitting} className="btn-primary py-2.5 font-medium disabled:opacity-50">
+            {submitting ? "Signing in..." : "Sign in"}
+          </button>
+        </form>
+        <p className="text-sm mt-5 text-[var(--text-muted)]">
+          New to NEXORA?{" "}
+          <Link href="/register" className="text-[var(--brand-accent)] hover:underline font-medium">
+            Create an account
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

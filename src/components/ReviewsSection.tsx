@@ -105,18 +105,18 @@ export default function ReviewsSection({ productId, initialReviews }: { productI
         />
       )}
 
-      {!user && <p className="text-sm text-black/50 dark:text-white/50 mb-6">Log in to write a review.</p>}
+      {!user && <p className="text-sm text-[var(--text-muted)] mb-6">Log in to write a review.</p>}
 
       <div className="flex flex-col gap-4 mt-6">
-        {reviews.length === 0 && <p className="text-sm text-black/50 dark:text-white/50">No reviews yet.</p>}
+        {reviews.length === 0 && <p className="text-sm text-[var(--text-muted)]">No reviews yet.</p>}
         {reviews.map((r) => (
-          <div key={r.id} className="border border-black/10 dark:border-white/10 rounded-lg p-4">
+          <div key={r.id} className="border border-[var(--border-subtle)] rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-amber-500">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+                <span className="text-[var(--brand-buy)]">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
                 <span className="text-sm font-medium ml-2">{r.userName}</span>
               </div>
-              <span className="text-xs text-black/40 dark:text-white/40">{formatDate(r.createdAt)}</span>
+              <span className="text-xs text-[var(--text-faint)]">{formatDate(r.createdAt)}</span>
             </div>
             {r.title && <p className="font-medium mt-2">{r.title}</p>}
             {r.body && <p className="text-sm mt-1">{r.body}</p>}
@@ -133,7 +133,7 @@ export default function ReviewsSection({ productId, initialReviews }: { productI
                 >
                   Edit
                 </button>
-                <button className="hover:underline text-rose-600" onClick={() => deleteReview(r.id)}>
+                <button className="hover:underline text-[var(--danger)]" onClick={() => deleteReview(r.id)}>
                   Delete
                 </button>
               </div>
@@ -171,10 +171,10 @@ function ReviewForm({
   onCancel?: () => void;
 }) {
   return (
-    <form onSubmit={onSubmit} className="border border-black/10 dark:border-white/10 rounded-lg p-4 mb-6 flex flex-col gap-3 max-w-lg">
+    <form onSubmit={onSubmit} className="border border-[var(--border-subtle)] rounded-lg p-4 mb-6 flex flex-col gap-3 max-w-lg">
       <div>
         <label className="text-sm font-medium block mb-1">Rating</label>
-        <select value={rating} onChange={(e) => setRating(Number(e.target.value))} className="border border-black/15 dark:border-white/20 rounded px-2 py-1 bg-transparent text-sm">
+        <select value={rating} onChange={(e) => setRating(Number(e.target.value))} className="border border-[var(--border-subtle)] rounded px-2 py-1 bg-transparent text-sm">
           {[5, 4, 3, 2, 1].map((n) => (
             <option key={n} value={n}>
               {n} star{n > 1 ? "s" : ""}
@@ -186,22 +186,22 @@ function ReviewForm({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Title (optional)"
-        className="border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent"
+        className="border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent"
       />
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder="Share your thoughts (optional)"
         rows={3}
-        className="border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent"
+        className="border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent"
       />
-      {error && <p className="text-sm text-rose-600">{error}</p>}
+      {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
       <div className="flex gap-2">
-        <button disabled={submitting} className="rounded-md bg-black text-white dark:bg-white dark:text-black px-4 py-2 text-sm font-medium disabled:opacity-50">
+        <button disabled={submitting} className="rounded-md btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50">
           {submitting ? "Saving..." : submitLabel}
         </button>
         {onCancel && (
-          <button type="button" onClick={onCancel} className="rounded-md border border-black/20 dark:border-white/20 px-4 py-2 text-sm">
+          <button type="button" onClick={onCancel} className="rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm">
             Cancel
           </button>
         )}

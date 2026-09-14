@@ -50,7 +50,7 @@ export default function AdminReviewsPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold">Reviews</h1>
-        <select value={status} onChange={(e) => setStatus(e.target.value)} className="border border-black/15 dark:border-white/20 rounded px-2 py-1.5 text-sm bg-transparent">
+        <select value={status} onChange={(e) => setStatus(e.target.value)} className="border border-[var(--border-subtle)] rounded px-2 py-1.5 text-sm bg-transparent">
           <option value="">All</option>
           <option value="PUBLISHED">Published</option>
           <option value="HIDDEN">Hidden</option>
@@ -59,16 +59,16 @@ export default function AdminReviewsPage() {
 
       <div className="flex flex-col gap-3">
         {reviews.map((r) => (
-          <div key={r.id} className="border border-black/10 dark:border-white/10 rounded-lg p-4">
+          <div key={r.id} className="border border-[var(--border-subtle)] rounded-lg p-4">
             <div className="flex justify-between items-start">
               <div>
                 <p className="font-medium">{r.product.name}</p>
-                <p className="text-xs text-black/50 dark:text-white/50">
+                <p className="text-xs text-[var(--text-muted)]">
                   {r.user.name} ({r.user.email}) · {formatDate(r.createdAt)}
                 </p>
-                <p className="text-amber-500 mt-1">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</p>
+                <p className="text-[var(--brand-buy)] mt-1">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</p>
               </div>
-              <span className={`text-xs font-semibold ${r.status === "PUBLISHED" ? "text-emerald-600" : "text-black/40 dark:text-white/40"}`}>{r.status}</span>
+              <span className={`text-xs font-semibold ${r.status === "PUBLISHED" ? "text-[var(--success)]" : "text-[var(--text-faint)]"}`}>{r.status}</span>
             </div>
             {r.title && <p className="font-medium mt-2">{r.title}</p>}
             {r.body && <p className="text-sm mt-1">{r.body}</p>}
@@ -76,13 +76,13 @@ export default function AdminReviewsPage() {
               <button onClick={() => toggleStatus(r.id, r.status)} className="underline">
                 {r.status === "PUBLISHED" ? "Hide" : "Publish"}
               </button>
-              <button onClick={() => remove(r.id)} className="underline text-rose-600">
+              <button onClick={() => remove(r.id)} className="underline text-[var(--danger)]">
                 Remove
               </button>
             </div>
           </div>
         ))}
-        {reviews.length === 0 && <p className="text-sm text-black/50 dark:text-white/50">No reviews found.</p>}
+        {reviews.length === 0 && <p className="text-sm text-[var(--text-muted)]">No reviews found.</p>}
       </div>
     </div>
   );

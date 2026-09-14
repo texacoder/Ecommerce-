@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { formatDateTime } from "@/lib/format";
 
-const inputClass = "border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent w-full";
+const inputClass = "border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent w-full";
 
 type Category = { id: string; name: string };
 type ImageRow = { id: string; url: string; position: number };
@@ -55,7 +55,7 @@ export default function EditProductPage() {
     load();
   }, [load]);
 
-  if (!product) return <p className="text-sm text-black/50">Loading...</p>;
+  if (!product) return <p className="text-sm text-[var(--text-muted)]">Loading...</p>;
 
   async function save(patch: Record<string, unknown>) {
     setSaving(true);
@@ -196,11 +196,11 @@ export default function EditProductPage() {
     <div className="max-w-3xl">
       <div className="flex justify-between items-center mb-1">
         <h1 className="text-xl font-semibold">{product.name}</h1>
-        <button onClick={deleteProduct} className="text-sm text-rose-600 underline">
+        <button onClick={deleteProduct} className="text-sm text-[var(--danger)] underline">
           Delete product
         </button>
       </div>
-      <p className="text-xs text-black/40 dark:text-white/40 mb-6">
+      <p className="text-xs text-[var(--text-faint)] mb-6">
         Created {formatDateTime(product.createdAt)} · Updated {formatDateTime(product.updatedAt)}
       </p>
 
@@ -273,7 +273,7 @@ export default function EditProductPage() {
         </div>
 
         {message && <p className="text-sm">{message}</p>}
-        <button disabled={saving} className="rounded-md bg-black text-white dark:bg-white dark:text-black py-2.5 font-medium disabled:opacity-50 w-fit px-6">
+        <button disabled={saving} className="rounded-md btn-primary py-2.5 font-medium disabled:opacity-50 w-fit px-6">
           {saving ? "Saving..." : "Save changes"}
         </button>
       </form>
@@ -284,7 +284,7 @@ export default function EditProductPage() {
           {product.images.map((img, idx) => (
             <div key={img.id} className="relative w-28">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img.url} alt="" className="w-28 h-28 object-cover rounded border border-black/10 dark:border-white/10" />
+              <img src={img.url} alt="" className="w-28 h-28 object-cover rounded border border-[var(--border-subtle)]" />
               <div className="flex justify-between mt-1 text-xs">
                 <button disabled={idx === 0} onClick={() => moveImage(img.id, -1)} className="disabled:opacity-30">
                   ↑
@@ -292,7 +292,7 @@ export default function EditProductPage() {
                 <button disabled={idx === product.images.length - 1} onClick={() => moveImage(img.id, 1)} className="disabled:opacity-30">
                   ↓
                 </button>
-                <button onClick={() => removeImage(img.id)} className="text-rose-600">
+                <button onClick={() => removeImage(img.id)} className="text-[var(--danger)]">
                   ✕
                 </button>
               </div>
@@ -323,7 +323,7 @@ export default function EditProductPage() {
         <h2 className="font-semibold mb-3">Variants</h2>
         <div className="flex flex-col gap-2 mb-4">
           {product.variants.map((v) => (
-            <div key={v.id} className="flex gap-2 items-center text-sm border border-black/10 dark:border-white/10 rounded p-2">
+            <div key={v.id} className="flex gap-2 items-center text-sm border border-[var(--border-subtle)] rounded p-2">
               <input
                 className={`${inputClass} w-40`}
                 value={v.name}
@@ -362,7 +362,7 @@ export default function EditProductPage() {
               <button onClick={() => saveVariant(v)} className="underline shrink-0">
                 Save
               </button>
-              <button onClick={() => removeVariant(v.id)} className="text-rose-600 underline shrink-0">
+              <button onClick={() => removeVariant(v.id)} className="text-[var(--danger)] underline shrink-0">
                 Remove
               </button>
             </div>

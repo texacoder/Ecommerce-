@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const inputClass = "border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent w-full";
+const inputClass = "border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent w-full";
 
 type Promotion = {
   id: string;
@@ -91,16 +91,16 @@ export default function AdminPromotionsPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold">Promotions</h1>
-        <button onClick={() => setShowForm((v) => !v)} className="rounded-md bg-black text-white dark:bg-white dark:text-black px-4 py-2 text-sm font-medium">
+        <button onClick={() => setShowForm((v) => !v)} className="rounded-md btn-primary px-4 py-2 text-sm font-medium">
           {showForm ? "Cancel" : "+ New promotion"}
         </button>
       </div>
-      <p className="text-sm text-black/50 dark:text-white/50 mb-4">
+      <p className="text-sm text-[var(--text-muted)] mb-4">
         Banners appear on the homepage carousel. Featured products, best sellers, and new arrivals are controlled per-product from the Products page.
       </p>
 
       {showForm && (
-        <form onSubmit={create} className="border border-black/10 dark:border-white/10 rounded-lg p-4 mb-6 grid grid-cols-2 gap-3">
+        <form onSubmit={create} className="border border-[var(--border-subtle)] rounded-lg p-4 mb-6 grid grid-cols-2 gap-3">
           <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className={inputClass}>
             <option value="BANNER">Homepage banner</option>
             <option value="DEAL">Deal</option>
@@ -126,31 +126,31 @@ export default function AdminPromotionsPage() {
               <img src={imageUrl} alt="" className="w-16 h-16 object-cover rounded mt-2" />
             )}
           </label>
-          {error && <p className="col-span-2 text-sm text-rose-600">{error}</p>}
-          <button className="col-span-2 rounded-md bg-black text-white dark:bg-white dark:text-black py-2 text-sm font-medium">Create promotion</button>
+          {error && <p className="col-span-2 text-sm text-[var(--danger)]">{error}</p>}
+          <button className="col-span-2 rounded-md btn-primary py-2 text-sm font-medium">Create promotion</button>
         </form>
       )}
 
       <div className="flex flex-col gap-3">
         {promotions.map((p) => (
-          <div key={p.id} className="border border-black/10 dark:border-white/10 rounded-lg p-4 flex justify-between items-center">
+          <div key={p.id} className="border border-[var(--border-subtle)] rounded-lg p-4 flex justify-between items-center">
             <div>
               <p className="font-medium">
-                {p.title} <span className="text-xs text-black/40 dark:text-white/40">({p.type})</span>
+                {p.title} <span className="text-xs text-[var(--text-faint)]">({p.type})</span>
               </p>
-              {p.subtitle && <p className="text-sm text-black/60 dark:text-white/60">{p.subtitle}</p>}
+              {p.subtitle && <p className="text-sm text-[var(--text-muted)]">{p.subtitle}</p>}
             </div>
             <div className="flex gap-3 items-center">
-              <button onClick={() => toggleActive(p.id, p.active)} className={`text-sm ${p.active ? "text-emerald-600" : "text-black/40 dark:text-white/40"}`}>
+              <button onClick={() => toggleActive(p.id, p.active)} className={`text-sm ${p.active ? "text-[var(--success)]" : "text-[var(--text-faint)]"}`}>
                 {p.active ? "Active" : "Inactive"}
               </button>
-              <button onClick={() => remove(p.id)} className="text-sm text-rose-600 underline">
+              <button onClick={() => remove(p.id)} className="text-sm text-[var(--danger)] underline">
                 Delete
               </button>
             </div>
           </div>
         ))}
-        {promotions.length === 0 && <p className="text-sm text-black/50 dark:text-white/50">No promotions yet.</p>}
+        {promotions.length === 0 && <p className="text-sm text-[var(--text-muted)]">No promotions yet.</p>}
       </div>
     </div>
   );

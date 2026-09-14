@@ -17,9 +17,9 @@ export async function GET(req: NextRequest) {
     if (status) where.status = status as Prisma.OrderWhereInput["status"];
     if (q) {
       where.OR = [
-        { orderNumber: { contains: q } },
-        { user: { email: { contains: q } } },
-        { user: { name: { contains: q } } },
+        { orderNumber: { contains: q, mode: "insensitive" } },
+        { user: { email: { contains: q, mode: "insensitive" } } },
+        { user: { name: { contains: q, mode: "insensitive" } } },
       ];
     }
 

@@ -34,7 +34,7 @@ export default function AdminCustomerDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  if (!customer) return <p className="text-sm text-black/50">Loading...</p>;
+  if (!customer) return <p className="text-sm text-[var(--text-muted)]">Loading...</p>;
 
   async function toggleStatus() {
     if (!customer) return;
@@ -51,16 +51,16 @@ export default function AdminCustomerDetailPage() {
   return (
     <div className="max-w-2xl">
       <h1 className="text-xl font-semibold mb-1">{customer.name}</h1>
-      <p className="text-sm text-black/50 dark:text-white/50 mb-6">
+      <p className="text-sm text-[var(--text-muted)] mb-6">
         {customer.email} · Joined {formatDate(customer.createdAt)}
       </p>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         <Stat label="Total orders" value={String(totals.totalOrders)} />
         <Stat label="Total spent" value={formatMoney(totals.totalSpent)} />
-        <div className="border border-black/10 dark:border-white/10 rounded-lg p-4">
-          <p className="text-xs text-black/50 dark:text-white/50">Account status</p>
-          <button onClick={toggleStatus} className={`text-sm font-semibold mt-1 underline ${customer.status === "ACTIVE" ? "text-emerald-600" : "text-rose-600"}`}>
+        <div className="border border-[var(--border-subtle)] rounded-lg p-4">
+          <p className="text-xs text-[var(--text-muted)]">Account status</p>
+          <button onClick={toggleStatus} className={`text-sm font-semibold mt-1 underline ${customer.status === "ACTIVE" ? "text-[var(--success)]" : "text-[var(--danger)]"}`}>
             {customer.status === "ACTIVE" ? "Active (click to suspend)" : "Suspended (click to reactivate)"}
           </button>
         </div>
@@ -68,22 +68,22 @@ export default function AdminCustomerDetailPage() {
 
       <h2 className="font-semibold mb-2">Order history</h2>
       <div className="flex flex-col gap-2 mb-6">
-        {customer.orders.length === 0 && <p className="text-sm text-black/50 dark:text-white/50">No orders yet.</p>}
+        {customer.orders.length === 0 && <p className="text-sm text-[var(--text-muted)]">No orders yet.</p>}
         {customer.orders.map((o) => (
-          <Link key={o.id} href={`/admin/orders/${o.id}`} className="border border-black/10 dark:border-white/10 rounded p-3 flex justify-between text-sm hover:bg-black/5 dark:hover:bg-white/10">
+          <Link key={o.id} href={`/admin/orders/${o.id}`} className="border border-[var(--border-subtle)] rounded p-3 flex justify-between text-sm hover:bg-[var(--surface-muted)]">
             <span>#{o.orderNumber}</span>
             <span>{statusLabel(o.status)}</span>
             <span>{formatMoney(o.total)}</span>
-            <span className="text-black/50 dark:text-white/50">{formatDate(o.createdAt)}</span>
+            <span className="text-[var(--text-muted)]">{formatDate(o.createdAt)}</span>
           </Link>
         ))}
       </div>
 
       <h2 className="font-semibold mb-2">Saved addresses</h2>
       <div className="flex flex-col gap-2">
-        {customer.addresses.length === 0 && <p className="text-sm text-black/50 dark:text-white/50">None saved.</p>}
+        {customer.addresses.length === 0 && <p className="text-sm text-[var(--text-muted)]">None saved.</p>}
         {customer.addresses.map((a) => (
-          <p key={a.id} className="text-sm border border-black/10 dark:border-white/10 rounded p-3">
+          <p key={a.id} className="text-sm border border-[var(--border-subtle)] rounded p-3">
             {a.fullName}, {a.line1}, {a.city}, {a.state} {a.postalCode}, {a.country}
           </p>
         ))}
@@ -94,8 +94,8 @@ export default function AdminCustomerDetailPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-black/10 dark:border-white/10 rounded-lg p-4">
-      <p className="text-xs text-black/50 dark:text-white/50">{label}</p>
+    <div className="border border-[var(--border-subtle)] rounded-lg p-4">
+      <p className="text-xs text-[var(--text-muted)]">{label}</p>
       <p className="text-lg font-semibold mt-1">{value}</p>
     </div>
   );

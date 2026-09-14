@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 type Category = { id: string; name: string };
 
-const inputClass = "border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent w-full";
+const inputClass = "border border-[var(--border-subtle)] rounded px-3 py-2 text-sm bg-transparent w-full";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -104,8 +104,8 @@ export default function NewProductPage() {
             <option value="UNPUBLISHED">Unpublished</option>
           </select>
         </Field>
-        {error && <p className="text-sm text-rose-600">{error}</p>}
-        <button disabled={submitting} className="rounded-md bg-black text-white dark:bg-white dark:text-black py-2.5 font-medium disabled:opacity-50">
+        {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
+        <button disabled={submitting} className="rounded-md btn-primary py-2.5 font-medium disabled:opacity-50">
           {submitting ? "Creating..." : "Create product"}
         </button>
       </form>

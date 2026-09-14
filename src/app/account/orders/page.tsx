@@ -15,21 +15,34 @@ export default async function OrdersPage() {
   });
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="text-xl font-semibold mb-6">My orders</h1>
-      {orders.length === 0 && <p className="text-black/60 dark:text-white/60">You haven&apos;t placed any orders yet.</p>}
+    <div className="container-page py-10 max-w-3xl">
+      <h1 className="text-xl font-semibold mb-6">My Orders</h1>
+      {orders.length === 0 && (
+        <div className="card-surface p-10 text-center">
+          <p className="text-[var(--text-muted)] mb-4">You haven&apos;t placed any orders yet.</p>
+          <Link href="/products" className="btn-primary inline-block px-6 py-2.5 text-sm">
+            Start Shopping
+          </Link>
+        </div>
+      )}
       <div className="flex flex-col gap-3">
         {orders.map((o) => (
-          <Link key={o.id} href={`/account/orders/${o.id}`} className="border border-black/10 dark:border-white/10 rounded-lg p-4 flex justify-between items-center hover:bg-black/5 dark:hover:bg-white/10">
+          <Link key={o.id} href={`/account/orders/${o.id}`} className="card-surface p-4 flex justify-between items-center hover:shadow-md transition-shadow">
             <div>
               <p className="font-medium">#{o.orderNumber}</p>
-              <p className="text-sm text-black/50 dark:text-white/50">
+              <p className="text-sm text-[var(--text-muted)]">
                 {formatDate(o.createdAt)} · {o.items.length} item(s)
               </p>
             </div>
             <div className="text-right">
               <p className="font-medium">{formatMoney(o.total)}</p>
-              <p className="text-sm text-black/50 dark:text-white/50">{statusLabel(o.status)}</p>
+              <p
+                className={`text-sm ${
+                  o.paymentStatus === "FAILED" || o.paymentStatus === "PENDING" ? "text-[var(--warning)] font-medium" : "text-[var(--text-muted)]"
+                }`}
+              >
+                {o.paymentStatus === "PENDING" ? "Payment pending" : o.paymentStatus === "FAILED" ? "Payment failed" : statusLabel(o.status)}
+              </p>
             </div>
           </Link>
         ))}

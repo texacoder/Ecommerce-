@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { computeQuote, recordCouponUsage, PricingError } from "@/lib/pricing";
 import { errorResponse, generateOrderNumber } from "@/lib/api";
+import { getRazorpayClient, isRazorpayConfigured } from "@/lib/razorpay";
 
 const addressSchema = z.object({
   fullName: z.string().min(1),
@@ -138,8 +139,8 @@ export async function POST(req: NextRequest) {
           couponCode: quote.couponCode,
           addressId,
           addressSnapshot: JSON.stringify(addressSnapshot),
-          paymentProvider: "manual",
-          paymentStatus: "PAID",
+          paymentProvider: "razorpay",
+          paymentStatus: "PENDING",
           items: {
             create: quote.items.map((i) => ({
               productId: i.productId,
@@ -162,7 +163,51 @@ export async function POST(req: NextRequest) {
       return created;
     });
 
-    return NextResponse.json({ order }, { status: 201 });
+    // Stock is already reserved (decremented above). Now open a payment
+    // attempt: create a real Razorpay order server-side so the amount the
+    // customer is charged can never be manipulated from the client.
+    if (!isRazorpayConfigured()) {
+      return NextResponse.json(
+        {
+          order,
+          payment: null,
+          paymentConfigured: false,
+          message:
+            "Payment gateway is not configured in this environment. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to enable real checkout.",
+        },
+        { status: 201 }
+      );
+    }
+
+    const razorpay = getRazorpayClient()!;
+    const razorpayOrder = await razorpay.orders.create({
+      amount: order.total,
+      currency: order.currency,
+      receipt: order.orderNumber,
+      notes: { orderId: order.id },
+    });
+
+    const payment = await prisma.payment.create({
+      data: {
+        orderId: order.id,
+        provider: "razorpay",
+        providerOrderId: razorpayOrder.id,
+        amount: order.total,
+        currency: order.currency,
+        status: "PENDING",
+      },
+    });
+
+    return NextResponse.json(
+      {
+        order,
+        payment,
+        paymentConfigured: true,
+        razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+        razorpayOrderId: razorpayOrder.id,
+      },
+      { status: 201 }
+    );
   } catch (err) {
     return errorResponse(err);
   }

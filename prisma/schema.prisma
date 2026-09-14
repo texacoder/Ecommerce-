@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -69,10 +69,23 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  orders       Order[]
-  reviews      Review[]
-  addresses    Address[]
-  couponUsages CouponUsage[]
+  orders             Order[]
+  reviews            Review[]
+  addresses          Address[]
+  couponUsages       CouponUsage[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 model Address {
@@ -180,10 +193,11 @@ model Order {
   addressId       String?
   address         Address?      @relation(fields: [addressId], references: [id], onDelete: SetNull)
   addressSnapshot String
-  paymentProvider String        @default("manual")
+  currency        String        @default("INR")
+  paymentProvider String        @default("razorpay")
   paymentStatus   PaymentStatus @default(PENDING)
-  paymentIntentId String?
   refundedAmount  Int           @default(0)
+  stockReserved   Boolean       @default(true)
   trackingCarrier String?
   trackingNumber  String?
   cancelReason    String?
@@ -192,6 +206,27 @@ model Order {
 
   items           OrderItem[]
   couponUsages    CouponUsage[]
+  payments        Payment[]
+}
+
+// One row per payment attempt so a failed attempt can be retried without
+// losing the audit trail (an order may accumulate several rows here).
+model Payment {
+  id                 String        @id @default(cuid())
+  orderId            String
+  order              Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider           String        @default("razorpay")
+  providerOrderId    String?       @unique
+  providerPaymentId  String?
+  signature          String?
+  amount             Int
+  currency           String        @default("INR")
+  status             PaymentStatus @default(PENDING)
+  failureReason      String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([orderId])
 }
 
 model OrderItem {
