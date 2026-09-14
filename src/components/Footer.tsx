@@ -27,9 +27,16 @@ export default function Footer() {
           </ul>
         </div>
         <div>
-          <h3 className="text-white font-semibold mb-3">NEXORA</h3>
-          <p className="text-white/60">Your everyday marketplace for electronics, fashion, home, beauty, accessories and sports.</p>
+          <h3 className="text-white font-semibold mb-3">Policies</h3>
+          <ul className="flex flex-col gap-2">
+            <li><Link href="/refund-policy" className="hover:underline">Refund &amp; Cancellation</Link></li>
+            <li><Link href="/terms" className="hover:underline">Terms &amp; Conditions</Link></li>
+            <li><Link href="/privacy" className="hover:underline">Privacy Policy</Link></li>
+          </ul>
         </div>
+      </div>
+      <div className="container-page py-4 text-white/60 text-sm">
+        Your everyday marketplace for electronics, fashion, home, beauty, accessories and sports.
       </div>
       <div className="border-t border-white/10 py-4 text-center text-xs text-white/50">
         © {new Date().getFullYear()} NEXORA. All rights reserved.

@@ -50,6 +50,11 @@ export default function RegisterPage() {
           <button disabled={submitting} className="btn-primary py-2.5 font-medium disabled:opacity-50">
             {submitting ? "Creating account..." : "Create account"}
           </button>
+          <p className="text-xs text-[var(--text-faint)] text-center">
+            By creating an account, you agree to our{" "}
+            <Link href="/terms" className="text-[var(--brand-accent)] hover:underline">Terms</Link> and{" "}
+            <Link href="/privacy" className="text-[var(--brand-accent)] hover:underline">Privacy Policy</Link>.
+          </p>
         </form>
         <p className="text-sm mt-5 text-[var(--text-muted)]">
           Already have an account?{" "}

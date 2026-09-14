@@ -113,6 +113,29 @@ DATABASE_URL="<production-url>" npx prisma migrate deploy
 DATABASE_URL="<production-url>" npm run db:seed   # optional
 ```
 
+### Before actually going live (real customers, real money)
+
+The app is functional before all of these, but don't accept real payments or
+real customer signups until you've gone through this list:
+
+- [ ] Replace the placeholder legal name "NEXORA" and the placeholder support
+      email `support@nexora.com` in `src/app/terms/page.tsx`,
+      `src/app/privacy/page.tsx`, and `src/app/refund-policy/page.tsx` with
+      your real registered business name and a support email/phone you
+      actually monitor.
+- [ ] Buy and verify your own domain in Resend (see section 9 below), then
+      update `EMAIL_FROM` — until then, password-reset emails only deliver
+      to the email address you signed up to Resend with.
+- [ ] Switch Razorpay from test keys to live keys (see section 10 below) once
+      you're ready to accept real payments.
+- [ ] Change the seed admin password (`Admin123!`) if you haven't already —
+      it's a publicly documented default.
+- [ ] Consider deleting the `SETUP_SECRET` environment variable once initial
+      setup/admin recovery is done — while it's set, it can reset the seed
+      admin account's password (see the `/api/setup/seed` route).
+- [ ] Delete or reseed any placeholder demo products/categories you don't
+      want live.
+
 ## 9. Connect email (Resend) for password resets
 
 1. Create a free account at [resend.com](https://resend.com).
