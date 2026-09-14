@@ -35,10 +35,10 @@ type Quote = {
 
 type Step = "address" | "review" | "payment";
 
-const STEPS: { key: Step; label: string }[] = [
-  { key: "address", label: "Delivery Address" },
-  { key: "review", label: "Order Summary" },
-  { key: "payment", label: "Payment" },
+const STEPS: { key: Step; label: string; shortLabel: string }[] = [
+  { key: "address", label: "Delivery Address", shortLabel: "Address" },
+  { key: "review", label: "Order Summary", shortLabel: "Summary" },
+  { key: "payment", label: "Payment", shortLabel: "Payment" },
 ];
 
 export default function CheckoutPage() {
@@ -170,11 +170,11 @@ export default function CheckoutPage() {
 
   return (
     <div className="container-page py-8">
-      <ol className="flex items-center gap-2 mb-8 text-sm">
+      <ol className="flex flex-wrap items-center gap-1 sm:gap-2 mb-8 text-sm">
         {STEPS.map((s, i) => (
-          <li key={s.key} className="flex items-center gap-2">
+          <li key={s.key} className="flex items-center gap-1 sm:gap-2">
             <span
-              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
                 step === s.key
                   ? "bg-[var(--brand-accent)] text-white"
                   : STEPS.findIndex((x) => x.key === step) > i
@@ -184,8 +184,11 @@ export default function CheckoutPage() {
             >
               {i + 1}
             </span>
-            <span className={step === s.key ? "font-semibold" : "text-[var(--text-muted)]"}>{s.label}</span>
-            {i < STEPS.length - 1 && <span className="w-8 h-px bg-[var(--border-subtle)] mx-1" />}
+            <span className={step === s.key ? "font-semibold" : "text-[var(--text-muted)]"}>
+              <span className="sm:hidden">{s.shortLabel}</span>
+              <span className="hidden sm:inline">{s.label}</span>
+            </span>
+            {i < STEPS.length - 1 && <span className="w-4 sm:w-8 h-px bg-[var(--border-subtle)] mx-1 shrink-0" />}
           </li>
         ))}
       </ol>
