@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -44,7 +45,7 @@ export default function RegisterPage() {
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
           <input required placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} className="input-field" />
           <input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />
-          <input required type="password" minLength={8} placeholder="Password (min 8 characters)" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" />
+          <PasswordInput required minLength={8} placeholder="Password (min 8 characters)" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" />
           {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
           <button disabled={submitting} className="btn-primary py-2.5 font-medium disabled:opacity-50">
             {submitting ? "Creating account..." : "Create account"}

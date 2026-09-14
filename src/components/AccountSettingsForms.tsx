@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function AccountSettingsForms({ name, email }: { name: string; email: string }) {
   return (
@@ -103,15 +104,15 @@ function PasswordForm() {
       <h2 className="font-semibold">Change password</h2>
       <label className="flex flex-col gap-1 text-sm font-medium">
         Current password
-        <input required type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="input-field" />
+        <PasswordInput required value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="input-field" />
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium">
         New password
-        <input required type="password" minLength={8} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="input-field" />
+        <PasswordInput required minLength={8} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="input-field" />
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium">
         Confirm new password
-        <input required type="password" minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="input-field" />
+        <PasswordInput required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="input-field" />
       </label>
       {message && (
         <p className={`text-sm ${message.kind === "error" ? "text-[var(--danger)]" : "text-[var(--success)]"}`}>{message.text}</p>

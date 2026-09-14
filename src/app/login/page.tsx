@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function LoginPage() {
   return (
@@ -52,7 +53,7 @@ function LoginForm() {
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
           <input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />
           <div>
-            <input required type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" />
+            <PasswordInput required placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" />
             <Link href="/forgot-password" className="text-xs text-[var(--brand-accent)] hover:underline block mt-1.5 text-right">
               Forgot password?
             </Link>

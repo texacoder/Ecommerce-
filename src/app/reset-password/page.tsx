@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function ResetPasswordPage() {
   return (
@@ -71,8 +72,8 @@ function ResetPasswordForm() {
       <div className="card-surface p-8 w-full max-w-sm">
         <h1 className="text-xl font-semibold mb-6">Choose a new password</h1>
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
-          <input required type="password" minLength={8} placeholder="New password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" />
-          <input required type="password" minLength={8} placeholder="Confirm new password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="input-field" />
+          <PasswordInput required minLength={8} placeholder="New password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" />
+          <PasswordInput required minLength={8} placeholder="Confirm new password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="input-field" />
           {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
           <button disabled={submitting} className="btn-primary py-2.5 font-medium disabled:opacity-50">
             {submitting ? "Saving..." : "Reset password"}
