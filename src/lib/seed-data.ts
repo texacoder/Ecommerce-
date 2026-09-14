@@ -1,10 +1,14 @@
 import type { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+function escapeXml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 function placeholder(text: string, bg: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600">
     <rect width="100%" height="100%" fill="${bg}"/>
-    <text x="50%" y="50%" font-size="34" font-family="sans-serif" fill="white" text-anchor="middle" dominant-baseline="middle">${text}</text>
+    <text x="50%" y="50%" font-size="34" font-family="sans-serif" fill="white" text-anchor="middle" dominant-baseline="middle">${escapeXml(text)}</text>
   </svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
@@ -89,7 +93,7 @@ export async function seedDatabase(prisma: PrismaClient, adminEmail: string) {
   for (const def of categoryDefs) {
     const parent = await prisma.category.upsert({
       where: { slug: slugify(def.name) },
-      update: {},
+      update: { imageUrl: placeholder(def.name, def.color) },
       create: {
         name: def.name,
         slug: slugify(def.name),
@@ -101,7 +105,7 @@ export async function seedDatabase(prisma: PrismaClient, adminEmail: string) {
     for (const childName of def.children) {
       const child = await prisma.category.upsert({
         where: { slug: slugify(`${def.name}-${childName}`) },
-        update: {},
+        update: { imageUrl: placeholder(childName, def.color) },
         create: {
           name: childName,
           slug: slugify(`${def.name}-${childName}`),
