@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import ProductCard, { type ProductCardData } from "@/components/ProductCard";
+import PromoTile from "@/components/PromoTile";
 
 type RawProduct = {
   id: string;
@@ -36,7 +37,16 @@ function toCardData(p: RawProduct): ProductCardData {
   };
 }
 
+const activePromotionWhere = (now: Date) => ({
+  active: true,
+  AND: [
+    { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+    { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
+  ],
+});
+
 export default async function HomePage() {
+  const now = new Date();
   const baseWhere = { deletedAt: null, status: "PUBLISHED" as const, visible: true };
   const include = {
     images: { orderBy: { position: "asc" as const }, take: 1 },
@@ -44,14 +54,47 @@ export default async function HomePage() {
     reviews: { where: { status: "PUBLISHED" as const }, select: { rating: true } },
   };
 
-  const [banners, featured, newArrivals, bestSellers, deals, categories] = await Promise.all([
-    prisma.promotion.findMany({ where: { type: "BANNER", active: true }, orderBy: { position: "asc" }, take: 3 }),
-    prisma.product.findMany({ where: { ...baseWhere, isFeatured: true }, include, take: 8, orderBy: { updatedAt: "desc" } }),
-    prisma.product.findMany({ where: { ...baseWhere, isNewArrival: true }, include, take: 8, orderBy: { createdAt: "desc" } }),
-    prisma.product.findMany({ where: { ...baseWhere, isBestSeller: true }, include, take: 8, orderBy: { updatedAt: "desc" } }),
-    prisma.product.findMany({ where: { ...baseWhere, discountPercent: { gte: 15 } }, include, take: 8, orderBy: { discountPercent: "desc" } }),
-    prisma.category.findMany({ where: { visible: true, parentId: null }, take: 8, orderBy: { name: "asc" } }),
-  ]);
+  const [banners, featured, newArrivals, bestSellers, deals, categories, saleCampaigns, dealPromos, featuredSectionPromos] =
+    await Promise.all([
+      prisma.promotion.findMany({ where: { type: "BANNER", ...activePromotionWhere(now) }, orderBy: { position: "asc" }, take: 3 }),
+      prisma.product.findMany({ where: { ...baseWhere, isFeatured: true }, include, take: 8, orderBy: { updatedAt: "desc" } }),
+      prisma.product.findMany({ where: { ...baseWhere, isNewArrival: true }, include, take: 8, orderBy: { createdAt: "desc" } }),
+      prisma.product.findMany({ where: { ...baseWhere, isBestSeller: true }, include, take: 8, orderBy: { updatedAt: "desc" } }),
+      prisma.product.findMany({ where: { ...baseWhere, discountPercent: { gte: 15 } }, include, take: 8, orderBy: { discountPercent: "desc" } }),
+      prisma.category.findMany({ where: { visible: true, parentId: null }, take: 8, orderBy: { name: "asc" } }),
+      prisma.promotion.findMany({ where: { type: "SALE_CAMPAIGN", ...activePromotionWhere(now) }, orderBy: { position: "asc" }, take: 3 }),
+      prisma.promotion.findMany({
+        where: { type: "DEAL", ...activePromotionWhere(now) },
+        include: { product: { select: { slug: true } } },
+        orderBy: { position: "asc" },
+        take: 4,
+      }),
+      prisma.promotion.findMany({
+        where: { type: "FEATURED_SECTION", ...activePromotionWhere(now) },
+        include: { product: { select: { slug: true } }, category: { select: { slug: true } } },
+        orderBy: { position: "asc" },
+      }),
+    ]);
+
+  // FEATURED_SECTION promotions can be scoped to a category (render that
+  // category's products) or left as a standalone spotlight banner. A
+  // category scope includes its subcategories' products too — products are
+  // normally assigned to leaf subcategories, not the parent, so a promo
+  // scoped to a parent category (e.g. "Electronics") would otherwise match
+  // nothing even though it obviously should include "Headphones", etc.
+  const featuredSections = await Promise.all(
+    featuredSectionPromos.map(async (promo) => {
+      if (!promo.categoryId) return { promo, products: [] as ProductCardData[] };
+      const children = await prisma.category.findMany({ where: { parentId: promo.categoryId }, select: { id: true } });
+      const categoryIds = [promo.categoryId, ...children.map((c) => c.id)];
+      const products = await prisma.product.findMany({
+        where: { ...baseWhere, categoryId: { in: categoryIds } },
+        include,
+        take: 8,
+      });
+      return { promo, products: products.map(toCardData) };
+    })
+  );
 
   return (
     <div className="flex flex-col">
@@ -70,19 +113,11 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {(banners.length ? banners : []).slice(0, 2).map((b) => (
-              <Link
+            {banners.slice(0, 2).map((b) => (
+              <PromoTile
                 key={b.id}
-                href={b.linkUrl ?? "/products"}
-                className="relative rounded-lg overflow-hidden aspect-[4/3] flex flex-col justify-end p-4 bg-white/5"
-                style={b.imageUrl ? { backgroundImage: `url(${b.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
-              >
-                <div className="absolute inset-0 bg-black/30" />
-                <div className="relative text-white">
-                  <h3 className="font-bold text-sm">{b.title}</h3>
-                  {b.subtitle && <p className="text-xs opacity-90 line-clamp-2">{b.subtitle}</p>}
-                </div>
-              </Link>
+                promo={{ id: b.id, title: b.title, subtitle: b.subtitle, imageUrl: b.imageUrl, linkUrl: b.linkUrl }}
+              />
             ))}
             {banners.length === 0 && (
               <div className="col-span-2 rounded-lg bg-white/5 aspect-[16/9] flex items-center justify-center text-white/40 text-sm">
@@ -92,6 +127,19 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {saleCampaigns.length > 0 && (
+        <section className="bg-[var(--brand-buy)]">
+          <div className="container-page py-4 flex flex-wrap items-center gap-6">
+            {saleCampaigns.map((c) => (
+              <Link key={c.id} href={c.linkUrl ?? "/products"} className="flex items-center gap-2 text-white">
+                <span className="font-bold text-sm uppercase">{c.title}</span>
+                {c.subtitle && <span className="text-sm opacity-90">{c.subtitle}</span>}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="container-page py-10 flex flex-col gap-12">
         {categories.length > 0 && (
@@ -117,12 +165,70 @@ export default async function HomePage() {
           </section>
         )}
 
-        {deals.length > 0 && <ProductSection title="Today's Deals" viewAllHref="/deals" products={deals.map(toCardData)} accent />}
+        {(dealPromos.length > 0 || deals.length > 0) && (
+          <section>
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-lg font-semibold text-[var(--brand-buy)]">Today&apos;s Deals</h2>
+              <Link href="/deals" className="text-sm text-[var(--brand-accent)] hover:underline font-medium">
+                See all
+              </Link>
+            </div>
+            {dealPromos.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                {dealPromos.map((d) => (
+                  <PromoTile
+                    key={d.id}
+                    tone="light"
+                    promo={{
+                      id: d.id,
+                      title: d.title,
+                      subtitle: d.subtitle,
+                      imageUrl: d.imageUrl,
+                      linkUrl: d.linkUrl,
+                      productSlug: d.product?.slug,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            {deals.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {deals.map((p) => (
+                  <ProductCard key={p.id} product={toCardData(p)} />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
         {featured.length > 0 && <ProductSection title="Featured Products" viewAllHref="/products?featured=true" products={featured.map(toCardData)} />}
+
+        {featuredSections.map(({ promo, products }) =>
+          products.length > 0 ? (
+            <ProductSection
+              key={promo.id}
+              title={promo.title}
+              subtitle={promo.subtitle}
+              viewAllHref={promo.categoryId ? `/category/${promo.category?.slug}` : "/products"}
+              products={products}
+            />
+          ) : promo.productId ? (
+            <section key={promo.id} className="card-surface p-6 flex items-center justify-between gap-6 bg-[var(--brand-accent-light)]">
+              <div>
+                <h2 className="text-lg font-semibold">{promo.title}</h2>
+                {promo.subtitle && <p className="text-sm text-[var(--text-muted)] mt-1">{promo.subtitle}</p>}
+              </div>
+              <Link href={promo.product ? `/products/${promo.product.slug}` : "/products"} className="btn-primary px-5 py-2.5 text-sm whitespace-nowrap">
+                Shop Now
+              </Link>
+            </section>
+          ) : null
+        )}
+
         {bestSellers.length > 0 && <ProductSection title="Best Sellers" viewAllHref="/products?bestSeller=true" products={bestSellers.map(toCardData)} />}
         {newArrivals.length > 0 && <ProductSection title="New Arrivals" viewAllHref="/products?sort=newest" products={newArrivals.map(toCardData)} />}
 
-        {featured.length === 0 && bestSellers.length === 0 && newArrivals.length === 0 && deals.length === 0 && (
+        {featured.length === 0 && bestSellers.length === 0 && newArrivals.length === 0 && deals.length === 0 && dealPromos.length === 0 && (
           <div className="text-center py-16 text-[var(--text-muted)]">
             <p className="text-lg font-medium mb-2">No products yet</p>
             <p className="text-sm">Add products from the admin dashboard and they will appear here automatically.</p>
@@ -135,11 +241,13 @@ export default async function HomePage() {
 
 function ProductSection({
   title,
+  subtitle,
   viewAllHref,
   products,
   accent,
 }: {
   title: string;
+  subtitle?: string | null;
   viewAllHref: string;
   products: ProductCardData[];
   accent?: boolean;
@@ -147,7 +255,10 @@ function ProductSection({
   return (
     <section>
       <div className="flex items-baseline justify-between mb-4">
-        <h2 className={`text-lg font-semibold ${accent ? "text-[var(--brand-buy)]" : ""}`}>{title}</h2>
+        <div>
+          <h2 className={`text-lg font-semibold ${accent ? "text-[var(--brand-buy)]" : ""}`}>{title}</h2>
+          {subtitle && <p className="text-sm text-[var(--text-muted)] mt-0.5">{subtitle}</p>}
+        </div>
         <Link href={viewAllHref} className="text-sm text-[var(--brand-accent)] hover:underline font-medium">
           See all
         </Link>

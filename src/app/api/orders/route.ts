@@ -102,27 +102,28 @@ export async function POST(req: NextRequest) {
     }
 
     const order = await prisma.$transaction(async (tx) => {
-      // Re-check stock inside the transaction to close the race window
-      // between the quote and the actual write.
+      // Atomic conditional decrement: the stock check and the write happen
+      // in the same UPDATE statement (WHERE stock >= quantity), so two
+      // concurrent checkouts racing for the last unit can't both pass a
+      // stale read and oversell — the second one's WHERE simply matches
+      // zero rows once the first has committed its decrement.
       for (const item of quote.items) {
         if (item.variantId) {
-          const variant = await tx.productVariant.findUnique({ where: { id: item.variantId } });
-          if (!variant || variant.stock < item.quantity) {
-            throw new PricingError(`"${item.name}" no longer has enough stock`);
-          }
-          await tx.productVariant.update({
-            where: { id: item.variantId },
+          const result = await tx.productVariant.updateMany({
+            where: { id: item.variantId, stock: { gte: item.quantity } },
             data: { stock: { decrement: item.quantity } },
           });
+          if (result.count === 0) {
+            throw new PricingError(`"${item.name}" no longer has enough stock`);
+          }
         } else {
-          const product = await tx.product.findUnique({ where: { id: item.productId } });
-          if (!product || product.stock < item.quantity) {
-            throw new PricingError(`"${item.name}" no longer has enough stock`);
-          }
-          await tx.product.update({
-            where: { id: item.productId },
+          const result = await tx.product.updateMany({
+            where: { id: item.productId, stock: { gte: item.quantity } },
             data: { stock: { decrement: item.quantity } },
           });
+          if (result.count === 0) {
+            throw new PricingError(`"${item.name}" no longer has enough stock`);
+          }
         }
       }
 

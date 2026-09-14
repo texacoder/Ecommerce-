@@ -32,7 +32,7 @@ export default function AdminOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [tracking, setTracking] = useState({ carrier: "", number: "" });
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ text: string; kind: "error" | "info" } | null>(null);
 
   async function load() {
     const res = await fetch(`/api/admin/orders/${id}`);
@@ -58,7 +58,7 @@ export default function AdminOrderDetailPage() {
       body: JSON.stringify({ status }),
     });
     const data = await res.json();
-    if (!res.ok) setMessage(data.error);
+    if (!res.ok) setMessage({ text: data.error, kind: "error" });
     load();
   }
 
@@ -80,7 +80,7 @@ export default function AdminOrderDetailPage() {
       body: JSON.stringify({ reason }),
     });
     const data = await res.json();
-    if (!res.ok) setMessage(data.error);
+    if (!res.ok) setMessage({ text: data.error, kind: "error" });
     load();
   }
 
@@ -88,7 +88,7 @@ export default function AdminOrderDetailPage() {
     if (!confirm("Refund this order in full?")) return;
     const res = await fetch(`/api/admin/orders/${id}/refund`, { method: "POST" });
     const data = await res.json();
-    if (!res.ok) setMessage(data.error);
+    setMessage(res.ok ? { text: data.message, kind: "info" } : { text: data.error, kind: "error" });
     load();
   }
 
@@ -99,7 +99,11 @@ export default function AdminOrderDetailPage() {
     <div className="max-w-3xl">
       <h1 className="text-xl font-semibold mb-1">Order #{order.orderNumber}</h1>
       <p className="text-xs text-[var(--text-faint)] mb-6">Placed {formatDateTime(order.createdAt)}</p>
-      {message && <p className="text-sm text-[var(--danger)] mb-4">{message}</p>}
+      {message && (
+        <p className={`text-sm mb-4 ${message.kind === "error" ? "text-[var(--danger)]" : "text-[var(--text-muted)]"}`}>
+          {message.text}
+        </p>
+      )}
 
       <div className="grid sm:grid-cols-2 gap-4 mb-6">
         <div className="border border-[var(--border-subtle)] rounded-lg p-4">

@@ -23,6 +23,14 @@ export const metadata: Metadata = {
   description: "NEXORA is an online marketplace for electronics, fashion, home, beauty, accessories and sports gear.",
 };
 
+// The header's category list (and every page under this layout) reads live
+// from the database. Without this, Next.js statically prerenders pages that
+// have no other reason to be dynamic — baking in a snapshot at build time
+// that would never reflect admin changes (new categories, products,
+// promotions) until the next deploy. Correctness over the static-render
+// perf win here: this is a store, not a brochure site.
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const categories = await prisma.category.findMany({
     where: { visible: true, parentId: null },

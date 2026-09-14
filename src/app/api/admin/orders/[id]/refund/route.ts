@@ -31,16 +31,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     const razorpay = getRazorpayClient();
+    let gatewayProcessed = false;
+
     if (razorpay && paidPayment?.providerPaymentId) {
       try {
         await razorpay.payments.refund(paidPayment.providerPaymentId, { amount });
+        gatewayProcessed = true;
       } catch (gatewayErr) {
         const message = gatewayErr instanceof Error ? gatewayErr.message : "Razorpay refund failed";
         return NextResponse.json({ error: message }, { status: 502 });
       }
     }
-    // When no payment gateway is configured, the refund is still recorded
-    // so the order's financials and status stay consistent.
+    // When no payment gateway is configured (or there's no matching PAID
+    // payment record to refund through it), the refund is still recorded
+    // in the database so the order's financials and status stay consistent
+    // — but the admin is told plainly that no money was actually returned
+    // via a gateway, so they know to process it manually.
 
     const newRefundedAmount = order.refundedAmount + amount;
     const fullyRefunded = newRefundedAmount >= order.total;
@@ -55,7 +61,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       include: { items: true, user: { select: { id: true, name: true, email: true } } },
     });
 
-    return NextResponse.json({ order: updated });
+    return NextResponse.json({
+      order: updated,
+      gatewayProcessed,
+      message: gatewayProcessed
+        ? "Refund processed through Razorpay."
+        : "No payment gateway configured (or no matching payment to refund) — the refund was only recorded in the order. Process the actual money return manually.",
+    });
   } catch (err) {
     return errorResponse(err);
   }

@@ -141,6 +141,23 @@ export default function EditProductPage() {
     load();
   }
 
+  async function replaceImage(imageId: string, file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    const uploadRes = await fetch("/api/admin/uploads", { method: "POST", body: form });
+    const uploadData = await uploadRes.json();
+    if (!uploadRes.ok) {
+      setMessage(uploadData.error ?? "Upload failed");
+      return;
+    }
+    await fetch(`/api/admin/products/${id}/images/${imageId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: uploadData.url }),
+    });
+    load();
+  }
+
   async function moveImage(imageId: string, direction: -1 | 1) {
     if (!product) return;
     const order = product.images.map((i) => i.id);
@@ -292,6 +309,18 @@ export default function EditProductPage() {
                 <button disabled={idx === product.images.length - 1} onClick={() => moveImage(img.id, 1)} className="disabled:opacity-30">
                   ↓
                 </button>
+                <label className="underline cursor-pointer">
+                  Replace
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) replaceImage(img.id, file);
+                    }}
+                  />
+                </label>
                 <button onClick={() => removeImage(img.id)} className="text-[var(--danger)]">
                   ✕
                 </button>

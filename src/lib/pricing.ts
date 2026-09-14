@@ -181,7 +181,7 @@ export async function validateAndPriceCoupon(
   }
 
   if (coupon.minOrderValue && subtotal < coupon.minOrderValue) {
-    throw new Error(`Order must be at least $${(coupon.minOrderValue / 100).toFixed(2)} to use this coupon`);
+    throw new Error(`Order must be at least ₹${(coupon.minOrderValue / 100).toFixed(0)} to use this coupon`);
   }
 
   const discount =
@@ -192,6 +192,13 @@ export async function validateAndPriceCoupon(
   return discount;
 }
 
+/**
+ * Records a coupon redemption atomically. When the coupon has a total usage
+ * limit, the limit check and the increment happen in the same conditional
+ * UPDATE (WHERE usedCount &lt; usageLimit) so two simultaneous checkouts
+ * can't both slip past a stale count and over-redeem the last use — the
+ * loser's WHERE matches zero rows and the whole order transaction rolls back.
+ */
 export async function recordCouponUsage(
   tx: Prisma.TransactionClient,
   code: string,
@@ -200,6 +207,18 @@ export async function recordCouponUsage(
 ) {
   const coupon = await tx.coupon.findUnique({ where: { code } });
   if (!coupon) return;
+
+  if (coupon.usageLimit !== null) {
+    const result = await tx.coupon.updateMany({
+      where: { id: coupon.id, usedCount: { lt: coupon.usageLimit } },
+      data: { usedCount: { increment: 1 } },
+    });
+    if (result.count === 0) {
+      throw new PricingError(`Coupon "${code}" has just reached its usage limit — please remove it and try again`);
+    }
+  } else {
+    await tx.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
+  }
+
   await tx.couponUsage.create({ data: { couponId: coupon.id, userId, orderId } });
-  await tx.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
 }
