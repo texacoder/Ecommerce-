@@ -1,0 +1,157 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+const inputClass = "border border-black/15 dark:border-white/20 rounded px-3 py-2 text-sm bg-transparent w-full";
+
+type Promotion = {
+  id: string;
+  type: string;
+  title: string;
+  subtitle: string | null;
+  imageUrl: string | null;
+  linkUrl: string | null;
+  position: number;
+  active: boolean;
+  startsAt: string | null;
+  endsAt: string | null;
+  product: { name: string } | null;
+  category: { name: string } | null;
+};
+
+const empty = { type: "BANNER", title: "", subtitle: "", linkUrl: "", position: "0" };
+
+export default function AdminPromotionsPage() {
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [form, setForm] = useState(empty);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function load() {
+    const res = await fetch("/api/admin/promotions");
+    const data = await res.json();
+    setPromotions(data.promotions ?? []);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function uploadImage(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/admin/uploads", { method: "POST", body: formData });
+    const data = await res.json();
+    if (res.ok) setImageUrl(data.url);
+  }
+
+  async function create(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    const res = await fetch("/api/admin/promotions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: form.type,
+        title: form.title,
+        subtitle: form.subtitle || null,
+        linkUrl: form.linkUrl || null,
+        imageUrl,
+        position: Number(form.position) || 0,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error ?? "Failed to create promotion");
+      return;
+    }
+    setForm(empty);
+    setImageUrl(null);
+    setShowForm(false);
+    load();
+  }
+
+  async function toggleActive(id: string, active: boolean) {
+    await fetch(`/api/admin/promotions/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ active: !active }),
+    });
+    load();
+  }
+
+  async function remove(id: string) {
+    if (!confirm("Delete this promotion?")) return;
+    await fetch(`/api/admin/promotions/${id}`, { method: "DELETE" });
+    load();
+  }
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-xl font-semibold">Promotions</h1>
+        <button onClick={() => setShowForm((v) => !v)} className="rounded-md bg-black text-white dark:bg-white dark:text-black px-4 py-2 text-sm font-medium">
+          {showForm ? "Cancel" : "+ New promotion"}
+        </button>
+      </div>
+      <p className="text-sm text-black/50 dark:text-white/50 mb-4">
+        Banners appear on the homepage carousel. Featured products, best sellers, and new arrivals are controlled per-product from the Products page.
+      </p>
+
+      {showForm && (
+        <form onSubmit={create} className="border border-black/10 dark:border-white/10 rounded-lg p-4 mb-6 grid grid-cols-2 gap-3">
+          <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className={inputClass}>
+            <option value="BANNER">Homepage banner</option>
+            <option value="DEAL">Deal</option>
+            <option value="SALE_CAMPAIGN">Sale campaign</option>
+            <option value="FEATURED_SECTION">Featured section</option>
+          </select>
+          <input placeholder="Position (order, 0 first)" type="number" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} className={inputClass} />
+          <input required placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={`${inputClass} col-span-2`} />
+          <input placeholder="Subtitle" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} className={`${inputClass} col-span-2`} />
+          <input placeholder="Link URL (e.g. /products/some-slug)" value={form.linkUrl} onChange={(e) => setForm({ ...form, linkUrl: e.target.value })} className={`${inputClass} col-span-2`} />
+          <label className="col-span-2 text-sm">
+            Image:{" "}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) uploadImage(file);
+              }}
+            />
+            {imageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={imageUrl} alt="" className="w-16 h-16 object-cover rounded mt-2" />
+            )}
+          </label>
+          {error && <p className="col-span-2 text-sm text-rose-600">{error}</p>}
+          <button className="col-span-2 rounded-md bg-black text-white dark:bg-white dark:text-black py-2 text-sm font-medium">Create promotion</button>
+        </form>
+      )}
+
+      <div className="flex flex-col gap-3">
+        {promotions.map((p) => (
+          <div key={p.id} className="border border-black/10 dark:border-white/10 rounded-lg p-4 flex justify-between items-center">
+            <div>
+              <p className="font-medium">
+                {p.title} <span className="text-xs text-black/40 dark:text-white/40">({p.type})</span>
+              </p>
+              {p.subtitle && <p className="text-sm text-black/60 dark:text-white/60">{p.subtitle}</p>}
+            </div>
+            <div className="flex gap-3 items-center">
+              <button onClick={() => toggleActive(p.id, p.active)} className={`text-sm ${p.active ? "text-emerald-600" : "text-black/40 dark:text-white/40"}`}>
+                {p.active ? "Active" : "Inactive"}
+              </button>
+              <button onClick={() => remove(p.id)} className="text-sm text-rose-600 underline">
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+        {promotions.length === 0 && <p className="text-sm text-black/50 dark:text-white/50">No promotions yet.</p>}
+      </div>
+    </div>
+  );
+}
