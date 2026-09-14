@@ -328,8 +328,8 @@ export default function EditProductPage() {
             </div>
           ))}
         </div>
-        <div className="flex gap-2 items-center">
-          <input placeholder="Image URL" value={newImageUrl} onChange={(e) => setNewImageUrl(e.target.value)} className={`${inputClass} max-w-xs`} />
+        <div className="flex flex-wrap gap-2 items-center">
+          <input placeholder="Image URL" value={newImageUrl} onChange={(e) => setNewImageUrl(e.target.value)} className={`${inputClass} w-full sm:max-w-xs`} />
           <button onClick={addImageByUrl} className="text-sm underline">
             Add by URL
           </button>
@@ -352,7 +352,7 @@ export default function EditProductPage() {
         <h2 className="font-semibold mb-3">Variants</h2>
         <div className="flex flex-col gap-2 mb-4">
           {product.variants.map((v) => (
-            <div key={v.id} className="flex gap-2 items-center text-sm border border-[var(--border-subtle)] rounded p-2">
+            <div key={v.id} className="flex flex-wrap gap-2 items-center text-sm border border-[var(--border-subtle)] rounded p-2">
               <input
                 className={`${inputClass} w-40`}
                 value={v.name}
@@ -397,7 +397,7 @@ export default function EditProductPage() {
             </div>
           ))}
         </div>
-        <div className="flex gap-2 items-center text-sm">
+        <div className="flex flex-wrap gap-2 items-center text-sm">
           <input placeholder="Name (e.g. Color: Red)" value={newVariant.name} onChange={(e) => setNewVariant({ ...newVariant, name: e.target.value })} className={`${inputClass} w-40`} />
           <input placeholder="SKU" value={newVariant.sku} onChange={(e) => setNewVariant({ ...newVariant, sku: e.target.value })} className={`${inputClass} w-32`} />
           <input placeholder="Price override" type="number" step="0.01" value={newVariant.priceOverride} onChange={(e) => setNewVariant({ ...newVariant, priceOverride: e.target.value })} className={`${inputClass} w-32`} />

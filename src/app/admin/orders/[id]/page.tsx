@@ -155,9 +155,9 @@ export default function AdminOrderDetailPage() {
 
       <div className="border border-[var(--border-subtle)] rounded-lg p-4 mb-6">
         <h2 className="font-medium mb-3">Tracking</h2>
-        <div className="flex gap-2">
-          <input placeholder="Carrier" value={tracking.carrier} onChange={(e) => setTracking({ ...tracking, carrier: e.target.value })} className="border border-[var(--border-subtle)] rounded px-3 py-1.5 text-sm bg-transparent" />
-          <input placeholder="Tracking number" value={tracking.number} onChange={(e) => setTracking({ ...tracking, number: e.target.value })} className="border border-[var(--border-subtle)] rounded px-3 py-1.5 text-sm bg-transparent" />
+        <div className="flex flex-wrap gap-2">
+          <input placeholder="Carrier" value={tracking.carrier} onChange={(e) => setTracking({ ...tracking, carrier: e.target.value })} className="border border-[var(--border-subtle)] rounded px-3 py-1.5 text-sm bg-transparent w-full sm:w-auto" />
+          <input placeholder="Tracking number" value={tracking.number} onChange={(e) => setTracking({ ...tracking, number: e.target.value })} className="border border-[var(--border-subtle)] rounded px-3 py-1.5 text-sm bg-transparent w-full sm:w-auto" />
           <button onClick={saveTracking} className="text-sm underline">
             Save
           </button>

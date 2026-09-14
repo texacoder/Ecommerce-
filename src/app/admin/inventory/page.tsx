@@ -46,18 +46,18 @@ export default function InventoryPage() {
     <div>
       <h1 className="text-xl font-semibold mb-6">Inventory</h1>
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         <input
           placeholder="Search by name or SKU"
           value={q}
           onKeyDown={(e) => e.key === "Enter" && load()}
           onChange={(e) => setQ(e.target.value)}
-          className="border border-[var(--border-subtle)] rounded px-3 py-1.5 text-sm bg-transparent w-64"
+          className="border border-[var(--border-subtle)] rounded px-3 py-1.5 text-sm bg-transparent w-full sm:w-64"
         />
         <button onClick={load} className="text-sm underline">
           Search
         </button>
-        <select value={filter} onChange={(e) => setFilter(e.target.value)} className="border border-[var(--border-subtle)] rounded px-2 py-1.5 text-sm bg-transparent ml-auto">
+        <select value={filter} onChange={(e) => setFilter(e.target.value)} className="border border-[var(--border-subtle)] rounded px-2 py-1.5 text-sm bg-transparent sm:ml-auto">
           <option value="">All</option>
           <option value="low">Low stock</option>
           <option value="out">Out of stock</option>

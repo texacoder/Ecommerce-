@@ -98,14 +98,14 @@ export default function AdminCategoriesPage() {
     <div>
       <h1 className="text-xl font-semibold mb-6">Categories</h1>
 
-      <form onSubmit={createCategory} className="flex gap-2 mb-6 items-end">
-        <div>
+      <form onSubmit={createCategory} className="flex flex-wrap gap-2 mb-6 items-end">
+        <div className="w-full sm:w-auto">
           <label className="text-sm font-medium block mb-1">New category name</label>
-          <input value={newCat.name} onChange={(e) => setNewCat({ ...newCat, name: e.target.value })} className={inputClass} />
+          <input value={newCat.name} onChange={(e) => setNewCat({ ...newCat, name: e.target.value })} className={`${inputClass} w-full`} />
         </div>
-        <div>
+        <div className="w-full sm:w-auto">
           <label className="text-sm font-medium block mb-1">Parent (optional, for subcategories)</label>
-          <select value={newCat.parentId} onChange={(e) => setNewCat({ ...newCat, parentId: e.target.value })} className={inputClass}>
+          <select value={newCat.parentId} onChange={(e) => setNewCat({ ...newCat, parentId: e.target.value })} className={`${inputClass} w-full`}>
             <option value="">None (top-level)</option>
             {categories.filter((c) => !c.parentId).map((c) => (
               <option key={c.id} value={c.id}>

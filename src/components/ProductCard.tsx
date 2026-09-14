@@ -22,10 +22,12 @@ export type ProductCardData = {
 export default function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <div className="group card-surface hover:shadow-md transition-shadow overflow-hidden flex flex-col">
-      <Link href={`/products/${product.slug}`} className="relative block bg-[var(--surface-muted)] aspect-square overflow-hidden">
-        {product.image && (
+      <Link href={`/products/${product.slug}`} className="relative block bg-[var(--surface-muted)] aspect-square overflow-hidden flex items-center justify-center">
+        {product.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={product.image} alt={product.name} className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform" />
+        ) : (
+          <span className="text-xs text-[var(--text-faint)]">No image</span>
         )}
         {product.stock === 0 && (
           <span className="absolute top-2 left-2 text-[11px] font-semibold bg-[var(--text)] text-white px-2 py-0.5 rounded">

@@ -8,10 +8,12 @@ export default function ProductGallery({ images, name }: { images: { id: string;
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="aspect-square rounded-lg overflow-hidden bg-[var(--surface-muted)] border border-[var(--border-subtle)]">
-        {current && (
+      <div className="aspect-square rounded-lg overflow-hidden bg-[var(--surface-muted)] border border-[var(--border-subtle)] flex items-center justify-center">
+        {current ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={current.url} alt={name} className="w-full h-full object-contain p-6" />
+        ) : (
+          <span className="text-sm text-[var(--text-faint)]">No image available</span>
         )}
       </div>
       {images.length > 1 && (

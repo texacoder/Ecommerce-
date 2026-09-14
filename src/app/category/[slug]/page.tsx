@@ -32,8 +32,9 @@ export default async function CategoryPage({
   if (!category) notFound();
 
   const page = Number(sp.page ?? "1") || 1;
+  const categoryIds = [category.id, ...category.children.map((c) => c.id)];
   const { products, total, pageCount, availableBrands } = await getProductListing({
-    category: slug,
+    categoryIds,
     sort: sp.sort,
     page,
     priceMin: sp.priceMin ? Number(sp.priceMin) * 100 : undefined,

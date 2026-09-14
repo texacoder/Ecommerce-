@@ -5,6 +5,7 @@ import type { ProductCardData } from "@/components/ProductCard";
 export type ListingParams = {
   q?: string;
   category?: string;
+  categoryIds?: string[];
   sort?: string;
   page?: number;
   priceMin?: number;
@@ -21,7 +22,8 @@ const PAGE_SIZE = 24;
 
 export async function getProductListing(params: ListingParams) {
   const where: Prisma.ProductWhereInput = { deletedAt: null, status: "PUBLISHED", visible: true };
-  if (params.category) where.category = { slug: params.category };
+  if (params.categoryIds?.length) where.categoryId = { in: params.categoryIds };
+  else if (params.category) where.category = { slug: params.category };
   if (params.brand) where.brand = params.brand;
   if (params.inStockOnly) where.stock = { gt: 0 };
   if (params.minDiscount) where.discountPercent = { gte: params.minDiscount };

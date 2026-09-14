@@ -25,15 +25,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!user || user.role !== "ADMIN" || user.status === "SUSPENDED") redirect("/");
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 flex gap-8">
-      <aside className="w-48 shrink-0">
-        <nav className="flex flex-col gap-1 sticky top-20">
+    <div className="mx-auto max-w-7xl px-4 py-6 flex flex-col md:flex-row gap-4 md:gap-8">
+      <aside className="md:w-48 md:shrink-0 -mx-4 md:mx-0 border-b md:border-b-0 border-[var(--border-subtle)]">
+        <nav className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible px-4 md:px-0 pb-2 md:pb-0 md:sticky md:top-20">
           {NAV.map((item) => (
-            <Link key={item.href} href={item.href} className="px-3 py-2 rounded text-sm hover:bg-[var(--surface-muted)]">
+            <Link key={item.href} href={item.href} className="px-3 py-2 rounded text-sm whitespace-nowrap hover:bg-[var(--surface-muted)]">
               {item.label}
             </Link>
           ))}
-          <Link href="/" className="px-3 py-2 rounded text-sm text-[var(--text-muted)] hover:bg-[var(--surface-muted)] mt-4">
+          <Link href="/" className="px-3 py-2 rounded text-sm whitespace-nowrap text-[var(--text-muted)] hover:bg-[var(--surface-muted)] md:mt-4">
             ← Back to store
           </Link>
         </nav>
