@@ -72,15 +72,23 @@ export default function AdminOrderDetailPage() {
   }
 
   async function cancelOrder() {
-    const reason = prompt("Reason for cancellation (optional):") ?? "";
+    // A single confirm() rather than chaining prompt()+confirm() — two
+    // native dialogs back to back is flaky on mobile browsers (dismissing
+    // either one silently aborts with no feedback, which looks like the
+    // button did nothing).
     if (!confirm("Cancel this order? Stock will be returned to inventory.")) return;
+    setMessage(null);
     const res = await fetch(`/api/admin/orders/${id}/cancel`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify({}),
     });
     const data = await res.json();
-    if (!res.ok) setMessage({ text: data.error, kind: "error" });
+    if (!res.ok) {
+      setMessage({ text: data.error, kind: "error" });
+    } else {
+      setMessage({ text: "Order cancelled and stock returned to inventory.", kind: "info" });
+    }
     load();
   }
 
