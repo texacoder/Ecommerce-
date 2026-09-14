@@ -113,7 +113,19 @@ DATABASE_URL="<production-url>" npx prisma migrate deploy
 DATABASE_URL="<production-url>" npm run db:seed   # optional
 ```
 
-## 9. Connect Razorpay (real payments)
+## 9. Connect email (Resend) for password resets
+
+1. Create a free account at [resend.com](https://resend.com).
+2. Go to API Keys → create one → copy it into `RESEND_API_KEY`.
+3. Leave `EMAIL_FROM` as the default `onboarding@resend.dev` sender to start — it works immediately with no domain setup. Once you verify your own domain in the Resend dashboard, switch `EMAIL_FROM` to an address on it (e.g. `NEXORA <noreply@yourdomain.com>`) for better deliverability and to avoid landing in spam.
+
+Without `RESEND_API_KEY` set, "Forgot password" still generates a real,
+single-use reset token, but only logs the link server-side instead of
+emailing it — fine for local development (the link is also returned
+directly in the API response outside of production), but customers on a
+real deployment have no way to see that link without this configured.
+
+## 10. Connect Razorpay (real payments)
 
 1. Create a free account at [dashboard.razorpay.com](https://dashboard.razorpay.com).
 2. Grab your **test mode** key pair from Settings → API Keys.
@@ -126,7 +138,7 @@ final payment step — the order is created with a "Payment pending" status
 and the UI tells the customer plainly that the payment gateway isn't
 configured, rather than faking a successful charge.
 
-## 10. Configure image storage (Cloudinary)
+## 11. Configure image storage (Cloudinary)
 
 1. Create a free account at [cloudinary.com](https://cloudinary.com).
 2. From the console dashboard, copy your **Cloud name**, **API key**, and **API secret**.
