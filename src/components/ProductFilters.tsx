@@ -23,8 +23,8 @@ export default function ProductFilters({
   brands: string[];
   categories?: { name: string; slug: string }[];
 }) {
-  return (
-    <form method="get" action={action} className="card-surface p-4 flex flex-col gap-5 text-sm">
+  const fields = (
+    <>
       {filters.q && <input type="hidden" name="q" value={filters.q} />}
 
       <div>
@@ -118,6 +118,34 @@ export default function ProductFilters({
       <a href={action} className="text-center text-[var(--text-muted)] hover:underline text-xs">
         Clear all filters
       </a>
-    </form>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile: collapsed behind a native, JS-free <details> toggle so it
+          doesn't push the product grid below the fold on a phone screen. */}
+      <details className="md:hidden card-surface text-sm">
+        <summary className="font-semibold p-4 cursor-pointer list-none flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+              <path d="M4 6h16M7 12h10M10 18h4" strokeLinecap="round" />
+            </svg>
+            Filters
+          </span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+            <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </summary>
+        <form method="get" action={action} className="flex flex-col gap-5 p-4 pt-0">
+          {fields}
+        </form>
+      </details>
+
+      {/* Desktop: always visible in the sidebar. */}
+      <form method="get" action={action} className="hidden md:flex card-surface p-4 flex-col gap-5 text-sm">
+        {fields}
+      </form>
+    </>
   );
 }

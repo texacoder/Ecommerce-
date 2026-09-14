@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useCart } from "@/lib/cart-context";
@@ -13,8 +13,12 @@ export default function Header({ categories }: { categories: NavCategory[] }) {
   const { user, loading, logout } = useAuth();
   const { totalCount } = useCart();
   const router = useRouter();
+  const pathname = usePathname();
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navLinkClass = (href: string) =>
+    `px-4 py-2.5 hover:bg-[var(--surface-muted)] ${pathname === href ? "bg-[var(--surface-muted)] font-semibold" : ""}`;
 
   return (
     <header className="sticky top-0 z-40">
@@ -128,41 +132,50 @@ export default function Header({ categories }: { categories: NavCategory[] }) {
       )}
 
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-[var(--border-subtle)] shadow-lg">
-          <nav className="flex flex-col text-sm py-2">
-            <Link href="/products" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 hover:bg-[var(--surface-muted)]">All Products</Link>
-            <Link href="/deals" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 hover:bg-[var(--surface-muted)] text-[var(--brand-buy)] font-semibold">Today&apos;s Deals</Link>
-            {categories.map((c) => (
-              <Link key={c.id} href={`/category/${c.slug}`} onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 hover:bg-[var(--surface-muted)]">
-                {c.name}
+        <>
+          <div className="md:hidden fixed inset-0 z-30 bg-black/30" onClick={() => setMobileMenuOpen(false)} aria-hidden="true" />
+          <div className="md:hidden relative z-40 bg-white border-b border-[var(--border-subtle)] shadow-lg">
+            <nav className="flex flex-col text-sm py-2">
+              <Link href="/products" onClick={() => setMobileMenuOpen(false)} className={navLinkClass("/products")}>All Products</Link>
+              <Link
+                href="/deals"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`px-4 py-2.5 hover:bg-[var(--surface-muted)] text-[var(--brand-buy)] font-semibold ${pathname === "/deals" ? "bg-[var(--surface-muted)]" : ""}`}
+              >
+                Today&apos;s Deals
               </Link>
-            ))}
-            <div className="border-t border-[var(--border-subtle)] mt-1 pt-1">
-              {!loading && user ? (
-                <>
-                  <Link href="/account" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 block hover:bg-[var(--surface-muted)]">My Account</Link>
-                  <Link href="/account/orders" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 block hover:bg-[var(--surface-muted)]">My Orders</Link>
-                  {user.role === "ADMIN" && (
-                    <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 block hover:bg-[var(--surface-muted)] font-semibold">Admin Dashboard</Link>
-                  )}
-                  <button
-                    onClick={async () => {
-                      await logout();
-                      setMobileMenuOpen(false);
-                      router.push("/");
-                      router.refresh();
-                    }}
-                    className="px-4 py-2.5 block w-full text-left hover:bg-[var(--surface-muted)] text-[var(--text-muted)]"
-                  >
-                    Log out
-                  </button>
-                </>
-              ) : (
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 block hover:bg-[var(--surface-muted)]">Log in</Link>
-              )}
-            </div>
-          </nav>
-        </div>
+              {categories.map((c) => (
+                <Link key={c.id} href={`/category/${c.slug}`} onClick={() => setMobileMenuOpen(false)} className={navLinkClass(`/category/${c.slug}`)}>
+                  {c.name}
+                </Link>
+              ))}
+              <div className="border-t border-[var(--border-subtle)] mt-1 pt-1">
+                {!loading && user ? (
+                  <>
+                    <Link href="/account" onClick={() => setMobileMenuOpen(false)} className={`block ${navLinkClass("/account")}`}>My Account</Link>
+                    <Link href="/account/orders" onClick={() => setMobileMenuOpen(false)} className={`block ${navLinkClass("/account/orders")}`}>My Orders</Link>
+                    {user.role === "ADMIN" && (
+                      <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className={`block font-semibold ${navLinkClass("/admin")}`}>Admin Dashboard</Link>
+                    )}
+                    <button
+                      onClick={async () => {
+                        await logout();
+                        setMobileMenuOpen(false);
+                        router.push("/");
+                        router.refresh();
+                      }}
+                      className="px-4 py-2.5 block w-full text-left hover:bg-[var(--surface-muted)] text-[var(--text-muted)]"
+                    >
+                      Log out
+                    </button>
+                  </>
+                ) : (
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)} className={`block ${navLinkClass("/login")}`}>Log in</Link>
+                )}
+              </div>
+            </nav>
+          </div>
+        </>
       )}
     </header>
   );
