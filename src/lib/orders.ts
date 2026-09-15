@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { AppError } from "@/lib/errors";
 
 export const ORDER_STATUS_FLOW = [
   "PENDING",
@@ -20,19 +21,19 @@ const TERMINAL: OrderStatus[] = ["DELIVERED", "CANCELLED", "REFUNDED"];
 export function assertValidTransition(current: OrderStatus, next: OrderStatus) {
   if (current === next) return;
   if (TERMINAL.includes(current)) {
-    throw new Error(`Order is already ${current.toLowerCase()} and cannot be changed`);
+    throw new AppError(`Order is already ${current.toLowerCase()} and cannot be changed`);
   }
   if (next === "CANCELLED") return;
   if (next === "REFUNDED") {
-    throw new Error("Use the refund action to move an order to refunded");
+    throw new AppError("Use the refund action to move an order to refunded");
   }
   const currentIdx = ORDER_STATUS_FLOW.indexOf(current as (typeof ORDER_STATUS_FLOW)[number]);
   const nextIdx = ORDER_STATUS_FLOW.indexOf(next as (typeof ORDER_STATUS_FLOW)[number]);
   if (currentIdx === -1 || nextIdx === -1) {
-    throw new Error(`Cannot move order from ${current} to ${next}`);
+    throw new AppError(`Cannot move order from ${current} to ${next}`);
   }
   if (nextIdx < currentIdx) {
-    throw new Error(`Cannot move order status backwards from ${current} to ${next}`);
+    throw new AppError(`Cannot move order status backwards from ${current} to ${next}`);
   }
 }
 

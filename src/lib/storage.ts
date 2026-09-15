@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
+import { AppError } from "@/lib/errors";
 
 export interface StorageAdapter {
   upload(buffer: Buffer, opts: { contentType: string; extension: string }): Promise<string>;
@@ -47,7 +48,7 @@ function getAdapter(): StorageAdapter {
   return isCloudStorageConfigured() ? new CloudinaryAdapter() : new LocalDiskAdapter();
 }
 
-export class UploadValidationError extends Error {}
+export class UploadValidationError extends AppError {}
 
 /** Single entry point used by every admin upload endpoint. Swapping storage
  * backends (S3, Supabase Storage, etc.) only means adding another adapter

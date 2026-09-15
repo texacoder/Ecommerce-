@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
+import { AppError } from "@/lib/errors";
 
 // Amounts everywhere are in paise (smallest INR unit), matching Razorpay.
 // Listed product prices are treated as tax-inclusive (the common convention
@@ -34,13 +35,7 @@ export type Quote = {
   couponError: string | null;
 };
 
-export class PricingError extends Error {
-  status: number;
-  constructor(message: string, status = 400) {
-    super(message);
-    this.status = status;
-  }
-}
+export class PricingError extends AppError {}
 
 /**
  * Recomputes the entire cart server-side from product/variant records in the
@@ -148,25 +143,25 @@ export async function validateAndPriceCoupon(
   userId: string
 ): Promise<number> {
   const coupon = await prisma.coupon.findUnique({ where: { code } });
-  if (!coupon || !coupon.active) throw new Error("Coupon not found");
+  if (!coupon || !coupon.active) throw new AppError("Coupon not found");
   if (coupon.expiresAt && coupon.expiresAt.getTime() < Date.now()) {
-    throw new Error("Coupon has expired");
+    throw new AppError("Coupon has expired");
   }
   if (coupon.usageLimit !== null && coupon.usedCount >= coupon.usageLimit) {
-    throw new Error("Coupon usage limit reached");
+    throw new AppError("Coupon usage limit reached");
   }
 
   if (coupon.perCustomerLimit !== null) {
     const used = await prisma.couponUsage.count({ where: { couponId: coupon.id, userId } });
     if (used >= coupon.perCustomerLimit) {
-      throw new Error("You have already used this coupon the maximum number of times");
+      throw new AppError("You have already used this coupon the maximum number of times");
     }
   }
 
   let eligibleSubtotal = subtotal;
   if (coupon.productId) {
     const eligibleItems = items.filter((i) => i.productId === coupon.productId);
-    if (!eligibleItems.length) throw new Error("Coupon does not apply to items in your cart");
+    if (!eligibleItems.length) throw new AppError("Coupon does not apply to items in your cart");
     eligibleSubtotal = eligibleItems.reduce((s, i) => s + i.lineTotal, 0);
   } else if (coupon.categoryId) {
     const productIds = items.map((i) => i.productId);
@@ -176,12 +171,12 @@ export async function validateAndPriceCoupon(
     });
     const idSet = new Set(productsInCategory.map((p) => p.id));
     const eligibleItems = items.filter((i) => idSet.has(i.productId));
-    if (!eligibleItems.length) throw new Error("Coupon does not apply to items in your cart");
+    if (!eligibleItems.length) throw new AppError("Coupon does not apply to items in your cart");
     eligibleSubtotal = eligibleItems.reduce((s, i) => s + i.lineTotal, 0);
   }
 
   if (coupon.minOrderValue && subtotal < coupon.minOrderValue) {
-    throw new Error(`Order must be at least ₹${(coupon.minOrderValue / 100).toFixed(0)} to use this coupon`);
+    throw new AppError(`Order must be at least ₹${(coupon.minOrderValue / 100).toFixed(0)} to use this coupon`);
   }
 
   const discount =
