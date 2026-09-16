@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { wipeDemoData } from "@/lib/wipe-demo-data";
+import { secureCompare } from "@/lib/secure-compare";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ async function runWipe(req: NextRequest) {
     return NextResponse.json({ error: "SETUP_SECRET is not configured" }, { status: 503 });
   }
   const provided = req.headers.get("x-setup-secret") || req.nextUrl.searchParams.get("secret");
-  if (provided !== secret) {
+  if (!secureCompare(provided, secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   if (req.nextUrl.searchParams.get("confirm") !== "WIPE") {
