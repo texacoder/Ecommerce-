@@ -16,6 +16,7 @@ export default function Header({ categories }: { categories: NavCategory[] }) {
   const pathname = usePathname();
   const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
   const navLinkClass = (href: string) =>
     `px-4 py-2.5 hover:bg-[var(--surface-muted)] ${pathname === href ? "bg-[var(--surface-muted)] font-semibold" : ""}`;
@@ -57,11 +58,40 @@ export default function Header({ categories }: { categories: NavCategory[] }) {
 
           <nav className="flex items-center gap-3 sm:gap-4 text-sm ml-auto shrink-0">
             {!loading && user ? (
-              <div className="hidden sm:block">
-                <Link href="/account" className="block leading-tight hover:underline">
+              <div className="hidden sm:block relative">
+                <button onClick={() => setAccountMenuOpen((v) => !v)} className="block leading-tight hover:underline text-left">
                   <span className="text-[11px] text-white/70">Hello, {user.name.split(" ")[0]}</span>
                   <span className="block font-medium">Account</span>
-                </Link>
+                </button>
+                {accountMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-30" onClick={() => setAccountMenuOpen(false)} aria-hidden="true" />
+                    <div className="absolute right-0 top-full mt-1 z-40 bg-white shadow-lg border border-[var(--border-subtle)] rounded-md w-48 py-2 text-[var(--text)]">
+                      <Link href="/account" onClick={() => setAccountMenuOpen(false)} className="block px-4 py-2 text-sm hover:bg-[var(--surface-muted)]">
+                        My Account
+                      </Link>
+                      <Link href="/account/orders" onClick={() => setAccountMenuOpen(false)} className="block px-4 py-2 text-sm hover:bg-[var(--surface-muted)]">
+                        My Orders
+                      </Link>
+                      {user.role === "ADMIN" && (
+                        <Link href="/admin" onClick={() => setAccountMenuOpen(false)} className="block px-4 py-2 text-sm font-semibold hover:bg-[var(--surface-muted)]">
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <button
+                        onClick={async () => {
+                          await logout();
+                          setAccountMenuOpen(false);
+                          router.push("/");
+                          router.refresh();
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-[var(--text-muted)] hover:bg-[var(--surface-muted)] border-t border-[var(--border-subtle)] mt-1"
+                      >
+                        Log out
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               <Link href="/login" className="hidden sm:block leading-tight hover:underline">
@@ -117,18 +147,25 @@ export default function Header({ categories }: { categories: NavCategory[] }) {
       </div>
 
       {categoryMenuOpen && (
-        <div className="hidden md:block absolute left-0 top-full bg-white shadow-lg border border-[var(--border-subtle)] rounded-b-md w-64 py-2 z-50">
-          {categories.map((c) => (
-            <Link
-              key={c.id}
-              href={`/category/${c.slug}`}
-              onClick={() => setCategoryMenuOpen(false)}
-              className="block px-4 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-muted)]"
-            >
-              {c.name}
-            </Link>
-          ))}
-        </div>
+        <>
+          <div className="hidden md:block fixed inset-0 z-30" onClick={() => setCategoryMenuOpen(false)} aria-hidden="true" />
+          <div className="hidden md:block absolute left-0 top-full bg-white shadow-lg border border-[var(--border-subtle)] rounded-b-md w-64 py-2 z-40">
+            {categories.length > 0 ? (
+              categories.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/category/${c.slug}`}
+                  onClick={() => setCategoryMenuOpen(false)}
+                  className="block px-4 py-2 text-sm text-[var(--text)] hover:bg-[var(--surface-muted)]"
+                >
+                  {c.name}
+                </Link>
+              ))
+            ) : (
+              <p className="px-4 py-2 text-sm text-[var(--text-faint)]">No categories yet.</p>
+            )}
+          </div>
+        </>
       )}
 
       {mobileMenuOpen && (
