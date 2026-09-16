@@ -3,16 +3,25 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { verifyPassword, createSessionToken, SESSION_COOKIE } from "@/lib/auth";
 import { errorResponse } from "@/lib/api";
+import { enforceRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const schema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
 });
 
+const FIFTEEN_MIN = 15 * 60 * 1000;
+
 export async function POST(req: NextRequest) {
   try {
     const body = schema.parse(await req.json());
     const email = body.email.toLowerCase().trim();
+
+    // Rate-limited by IP (catches credential stuffing across many
+    // accounts) and by email (protects one account from being brute-
+    // forced from many different IPs) before touching the password hash.
+    await enforceRateLimit(prisma, `login:ip:${getClientIp(req)}`, { max: 10, windowMs: FIFTEEN_MIN });
+    await enforceRateLimit(prisma, `login:email:${email}`, { max: 5, windowMs: FIFTEEN_MIN });
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user || !(await verifyPassword(body.password, user.passwordHash))) {

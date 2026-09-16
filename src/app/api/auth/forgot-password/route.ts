@@ -4,10 +4,12 @@ import { prisma } from "@/lib/db";
 import { generateToken } from "@/lib/tokens";
 import { errorResponse } from "@/lib/api";
 import { sendEmail, isEmailConfigured } from "@/lib/email";
+import { enforceRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const schema = z.object({ email: z.string().email() });
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
+const FIFTEEN_MIN = 15 * 60 * 1000;
 
 /**
  * Real password-reset architecture: a single-use, hashed, expiring token is
@@ -23,6 +25,12 @@ export async function POST(req: NextRequest) {
   try {
     const body = schema.parse(await req.json());
     const email = body.email.toLowerCase().trim();
+
+    // Limits both spamming one inbox with reset emails and using this
+    // endpoint to enumerate accounts en masse from one source.
+    await enforceRateLimit(prisma, `forgot-password:ip:${getClientIp(req)}`, { max: 5, windowMs: FIFTEEN_MIN });
+    await enforceRateLimit(prisma, `forgot-password:email:${email}`, { max: 3, windowMs: FIFTEEN_MIN });
+
     const user = await prisma.user.findUnique({ where: { email } });
 
     let devResetLink: string | undefined;

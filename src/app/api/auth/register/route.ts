@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { hashPassword, createSessionToken, SESSION_COOKIE } from "@/lib/auth";
 import { errorResponse } from "@/lib/api";
+import { enforceRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const schema = z.object({
   name: z.string().min(1).max(120),
@@ -14,6 +15,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = schema.parse(await req.json());
     const email = body.email.toLowerCase().trim();
+
+    // Limits mass account creation from a single source (bots, abuse).
+    await enforceRateLimit(prisma, `register:ip:${getClientIp(req)}`, { max: 5, windowMs: 60 * 60 * 1000 });
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {

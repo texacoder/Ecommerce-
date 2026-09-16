@@ -317,3 +317,16 @@ model Promotion {
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
 }
+
+// Sliding-window rate limiting for auth endpoints (login/register/
+// forgot-password), backed by Postgres rather than an in-memory store so
+// it stays correct across Vercel's independent serverless instances. One
+// row per attempt; rows are pruned as they age out of the window they'd
+// apply to (see enforceRateLimit in src/lib/rate-limit.ts).
+model RateLimitAttempt {
+  id        String   @id @default(cuid())
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
