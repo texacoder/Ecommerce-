@@ -22,7 +22,7 @@ const rupees = (n: number) => n * 100;
 
 export async function seedDatabase(prisma: PrismaClient, adminEmail: string) {
   const log: string[] = [];
-  log.push(`Seeding NEXORA database (admin: ${adminEmail})...`);
+  log.push(`Seeding EXORASTORE database (admin: ${adminEmail})...`);
 
   const adminPasswordHash = await bcrypt.hash("Admin123!", 10);
   await prisma.user.upsert({
@@ -30,7 +30,7 @@ export async function seedDatabase(prisma: PrismaClient, adminEmail: string) {
     update: { role: "ADMIN", status: "ACTIVE" },
     create: {
       email: adminEmail,
-      name: "NEXORA Admin",
+      name: "EXORASTORE Admin",
       role: "ADMIN",
       status: "ACTIVE",
       passwordHash: adminPasswordHash,

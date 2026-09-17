@@ -7,7 +7,7 @@ export default function TermsPage() {
       <div className="flex flex-col gap-6 text-sm">
         <Section title="1. Who we are">
           <p>
-            NEXORA (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) operates this website. By creating an
+            EXORASTORE (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) operates this website. By creating an
             account, browsing, or placing an order on this site, you agree to these Terms &amp; Conditions.
           </p>
         </Section>
@@ -78,7 +78,7 @@ export default function TermsPage() {
         <Section title="10. Contact">
           <p>
             Questions about these terms? Email{" "}
-            <a href="mailto:support@nexora.com" className="text-[var(--brand-accent)] hover:underline">support@nexora.com</a>.
+            <a href="mailto:support@exorastore.com" className="text-[var(--brand-accent)] hover:underline">support@exorastore.com</a>.
           </p>
         </Section>
       </div>

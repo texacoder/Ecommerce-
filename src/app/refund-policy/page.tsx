@@ -9,7 +9,7 @@ export default function RefundPolicyPage() {
           <p>
             You can cancel an order yourself, free of charge, at any time before it has been paid for. Once
             an order has been paid and confirmed, please contact us at{" "}
-            <a href="mailto:support@nexora.com" className="text-[var(--brand-accent)] hover:underline">support@nexora.com</a>{" "}
+            <a href="mailto:support@exorastore.com" className="text-[var(--brand-accent)] hover:underline">support@exorastore.com</a>{" "}
             with your order number as soon as possible — we can usually still cancel it if it hasn&apos;t
             shipped yet.
           </p>
@@ -53,7 +53,7 @@ export default function RefundPolicyPage() {
         <Section title="How to reach us">
           <p>
             For any cancellation, return, or refund request, email{" "}
-            <a href="mailto:support@nexora.com" className="text-[var(--brand-accent)] hover:underline">support@nexora.com</a>{" "}
+            <a href="mailto:support@exorastore.com" className="text-[var(--brand-accent)] hover:underline">support@exorastore.com</a>{" "}
             with your order number. We aim to respond within 24-48 hours.
           </p>
         </Section>

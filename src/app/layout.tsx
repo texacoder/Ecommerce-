@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NEXORA — Shop everything you need",
-  description: "NEXORA is an online marketplace for electronics, fashion, home, beauty, accessories and sports gear.",
+  title: "EXORASTORE — Shop everything you need",
+  description: "EXORASTORE is an online marketplace for electronics, fashion, home, beauty, accessories and sports gear.",
 };
 
 // The header's category list (and every page under this layout) reads live

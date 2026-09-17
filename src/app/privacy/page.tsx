@@ -6,7 +6,7 @@ export default function PrivacyPage() {
 
       <div className="flex flex-col gap-6 text-sm">
         <Section title="1. What we collect">
-          <p>When you use NEXORA, we collect:</p>
+          <p>When you use EXORASTORE, we collect:</p>
           <ul className="list-disc pl-5 mt-2 flex flex-col gap-1">
             <li>Account details: name, email address, password (stored as a secure hash, never in plain text)</li>
             <li>Order details: items purchased, delivery address, phone number, order history</li>
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
             You can view and update your name and email at any time from{" "}
             <a href="/account" className="text-[var(--brand-accent)] hover:underline">My Account</a>. To
             request a copy of your data, or to have your account and personal data deleted, email us at{" "}
-            <a href="mailto:support@nexora.com" className="text-[var(--brand-accent)] hover:underline">support@nexora.com</a>{" "}
+            <a href="mailto:support@exorastore.com" className="text-[var(--brand-accent)] hover:underline">support@exorastore.com</a>{" "}
             — we&apos;ll keep only what we&apos;re legally required to retain (e.g. order records for tax
             purposes).
           </p>
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
         <Section title="8. Contact">
           <p>
             Questions about this policy or your data? Email{" "}
-            <a href="mailto:support@nexora.com" className="text-[var(--brand-accent)] hover:underline">support@nexora.com</a>.
+            <a href="mailto:support@exorastore.com" className="text-[var(--brand-accent)] hover:underline">support@exorastore.com</a>.
           </p>
         </Section>
       </div>

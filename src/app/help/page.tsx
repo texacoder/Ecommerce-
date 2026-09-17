@@ -11,7 +11,7 @@ const FAQS = [
   },
   {
     q: "What payment methods are accepted?",
-    a: "NEXORA uses Razorpay for secure checkout, supporting cards, UPI, netbanking and wallets.",
+    a: "EXORASTORE uses Razorpay for secure checkout, supporting cards, UPI, netbanking and wallets.",
   },
   {
     q: "How do I apply a coupon code?",

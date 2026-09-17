@@ -37,7 +37,7 @@ export default function Header({ categories }: { categories: NavCategory[] }) {
           </button>
 
           <Link href="/" className="shrink-0 flex items-baseline gap-1">
-            <span className="text-xl font-extrabold tracking-tight">NEXORA</span>
+            <span className="text-xl font-extrabold tracking-tight">EXORASTORE</span>
           </Link>
 
           <div className="hidden md:block">

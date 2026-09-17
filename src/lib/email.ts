@@ -21,7 +21,7 @@ export async function sendEmail({
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return false;
 
-  const from = process.env.EMAIL_FROM || "NEXORA <onboarding@resend.dev>";
+  const from = process.env.EMAIL_FROM || "EXORASTORE <onboarding@resend.dev>";
 
   try {
     const res = await fetch("https://api.resend.com/emails", {

@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { errorResponse } from "@/lib/api";
 import { getRazorpayClient, isRazorpayConfigured } from "@/lib/razorpay";
 
-// Opens a fresh Razorpay order for an existing NEXORA order whose previous
+// Opens a fresh Razorpay order for an existing EXORASTORE order whose previous
 // payment attempt failed or was abandoned. Stock stays reserved from the
 // original checkout, so retrying never re-checks/re-decrements inventory.
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

@@ -101,7 +101,7 @@ export default async function HomePage() {
       <section className="bg-[var(--brand-navy)]">
         <div className="container-page py-10 sm:py-14 grid md:grid-cols-2 gap-8 items-center">
           <div className="text-white">
-            <p className="text-[var(--brand-buy)] font-semibold text-sm uppercase tracking-wide mb-2">Welcome to NEXORA</p>
+            <p className="text-[var(--brand-buy)] font-semibold text-sm uppercase tracking-wide mb-2">Welcome to EXORASTORE</p>
             <h1 className="text-3xl sm:text-4xl font-bold leading-tight mb-4">
               Everything you need, delivered to your door.
             </h1>

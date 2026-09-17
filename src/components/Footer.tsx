@@ -7,7 +7,7 @@ export default function Footer() {
         <div>
           <h3 className="text-white font-semibold mb-3">Get to Know Us</h3>
           <ul className="flex flex-col gap-2">
-            <li><Link href="/about" className="hover:underline">About NEXORA</Link></li>
+            <li><Link href="/about" className="hover:underline">About EXORASTORE</Link></li>
             <li><Link href="/products" className="hover:underline">Careers</Link></li>
           </ul>
         </div>
@@ -39,7 +39,7 @@ export default function Footer() {
         Your everyday marketplace for electronics, fashion, home, beauty, accessories and sports.
       </div>
       <div className="border-t border-white/10 py-4 text-center text-xs text-white/50">
-        © {new Date().getFullYear()} NEXORA. All rights reserved.
+        © {new Date().getFullYear()} EXORASTORE. All rights reserved.
       </div>
     </footer>
   );

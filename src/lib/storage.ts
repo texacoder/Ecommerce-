@@ -33,7 +33,7 @@ class CloudinaryAdapter implements StorageAdapter {
       api_secret: process.env.CLOUDINARY_API_SECRET,
     });
     const dataUri = `data:${opts.contentType};base64,${buffer.toString("base64")}`;
-    const result = await cloudinary.uploader.upload(dataUri, { folder: "nexora/products" });
+    const result = await cloudinary.uploader.upload(dataUri, { folder: "exorastore/products" });
     return result.secure_url;
   }
 }

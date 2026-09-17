@@ -49,7 +49,7 @@ function LoginForm() {
     <div className="container-page py-16 flex justify-center">
       <div className="card-surface p-8 w-full max-w-sm">
         <h1 className="text-xl font-semibold mb-1">Sign in</h1>
-        <p className="text-sm text-[var(--text-muted)] mb-6">Welcome back to NEXORA</p>
+        <p className="text-sm text-[var(--text-muted)] mb-6">Welcome back to EXORASTORE</p>
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
           <input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />
           <div>
@@ -64,7 +64,7 @@ function LoginForm() {
           </button>
         </form>
         <p className="text-sm mt-5 text-[var(--text-muted)]">
-          New to NEXORA?{" "}
+          New to EXORASTORE?{" "}
           <Link href="/register" className="text-[var(--brand-accent)] hover:underline font-medium">
             Create an account
           </Link>

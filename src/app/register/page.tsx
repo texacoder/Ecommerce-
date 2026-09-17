@@ -41,7 +41,7 @@ export default function RegisterPage() {
     <div className="container-page py-16 flex justify-center">
       <div className="card-surface p-8 w-full max-w-sm">
         <h1 className="text-xl font-semibold mb-1">Create your account</h1>
-        <p className="text-sm text-[var(--text-muted)] mb-6">Join NEXORA to start shopping</p>
+        <p className="text-sm text-[var(--text-muted)] mb-6">Join EXORASTORE to start shopping</p>
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
           <input required placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} className="input-field" />
           <input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />

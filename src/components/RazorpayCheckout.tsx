@@ -60,7 +60,7 @@ export default function RazorpayCheckout({
       order_id: razorpayOrderId,
       amount,
       currency,
-      name: "NEXORA",
+      name: "EXORASTORE",
       description: "Order payment",
       prefill: { name: customerName, email: customerEmail },
       theme: { color: "#101a2c" },
