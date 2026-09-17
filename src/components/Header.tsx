@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
@@ -36,7 +37,8 @@ export default function Header({ categories }: { categories: NavCategory[] }) {
             </svg>
           </button>
 
-          <Link href="/" className="shrink-0 flex items-baseline gap-1">
+          <Link href="/" className="shrink-0 flex items-center gap-2">
+            <Image src="/logo-mark-96.png" alt="" width={32} height={32} className="rounded-full" priority />
             <span className="text-xl font-extrabold tracking-tight">EXORASTORE</span>
           </Link>
 
