@@ -19,7 +19,7 @@ type Props = {
 };
 
 export default function ProductPurchasePanel({ productId, slug, name, image, basePrice, baseStock, variants }: Props) {
-  const { addItem } = useCart();
+  const { addItem, setBuyNowItem } = useCart();
   const { notify } = useToast();
   const router = useRouter();
   const [variantId, setVariantId] = useState<string | null>(variants[0]?.id ?? null);
@@ -96,7 +96,7 @@ export default function ProductPurchasePanel({ productId, slug, name, image, bas
           onClick={() => {
             if (buying) return;
             setBuying(true);
-            addItem({ productId, variantId, name, slug, image, unitPrice: price }, qty);
+            setBuyNowItem({ productId, variantId, name, slug, image, unitPrice: price }, qty);
             router.push("/checkout");
           }}
           className="btn-buy py-2.5 disabled:opacity-60"

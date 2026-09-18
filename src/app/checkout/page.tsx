@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
@@ -43,9 +43,19 @@ const STEPS: { key: Step; label: string; shortLabel: string }[] = [
 
 export default function CheckoutPage() {
   const { user, loading } = useAuth();
-  const { items, clear } = useCart();
+  const { items: cartItems, clear, buyNowItem, clearBuyNowItem } = useCart();
   const { notify } = useToast();
   const router = useRouter();
+
+  // Buy Now checks out a single item independently of the saved cart, so
+  // abandoning it (back button, navigating away) must never touch the
+  // customer's real cart. Leaving this page for any reason drops the
+  // one-off item rather than letting it linger and get reused by mistake.
+  const items = useMemo(() => (buyNowItem ? [buyNowItem] : cartItems), [buyNowItem, cartItems]);
+  useEffect(() => {
+    return () => clearBuyNowItem();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [step, setStep] = useState<Step>("address");
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -137,7 +147,8 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to place order");
 
-      clear();
+      if (buyNowItem) clearBuyNowItem();
+      else clear();
       setPlacedOrder({
         id: data.order.id,
         razorpayOrderId: data.razorpayOrderId,
@@ -244,6 +255,11 @@ export default function CheckoutPage() {
           {step === "review" && (
             <div className="card-surface p-5">
               <h2 className="font-semibold mb-4">Review your order</h2>
+              {buyNowItem && (
+                <p className="text-xs text-[var(--text-muted)] mb-3">
+                  Buying this item now — your saved cart isn&apos;t affected.
+                </p>
+              )}
               <div className="flex flex-col gap-3 mb-5">
                 {items.map((item) => (
                   <div key={`${item.productId}-${item.variantId ?? ""}`} className="flex justify-between text-sm">

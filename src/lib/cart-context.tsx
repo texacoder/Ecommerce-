@@ -20,6 +20,12 @@ type CartContextValue = {
   clear: () => void;
   totalCount: number;
   subtotalEstimate: number;
+  // "Buy Now" is a one-off purchase of a single item, kept entirely separate
+  // from the saved cart above (never written to localStorage). Abandoning
+  // a Buy Now checkout must leave the customer's real cart untouched.
+  buyNowItem: CartItem | null;
+  setBuyNowItem: (item: Omit<CartItem, "quantity">, quantity: number) => void;
+  clearBuyNowItem: () => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -32,6 +38,7 @@ function keyOf(productId: string, variantId: string | null) {
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [buyNowItem, setBuyNowItemState] = useState<CartItem | null>(null);
 
   useEffect(() => {
     try {
@@ -81,12 +88,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clear = useCallback(() => setItems([]), []);
 
+  const setBuyNowItem = useCallback((item: Omit<CartItem, "quantity">, quantity: number) => {
+    setBuyNowItemState({ ...item, quantity });
+  }, []);
+  const clearBuyNowItem = useCallback(() => setBuyNowItemState(null), []);
+
   const totalCount = useMemo(() => items.reduce((s, i) => s + i.quantity, 0), [items]);
   const subtotalEstimate = useMemo(() => items.reduce((s, i) => s + i.unitPrice * i.quantity, 0), [items]);
 
   const value = useMemo(
-    () => ({ items, addItem, removeItem, setQuantity, clear, totalCount, subtotalEstimate }),
-    [items, addItem, removeItem, setQuantity, clear, totalCount, subtotalEstimate]
+    () => ({
+      items,
+      addItem,
+      removeItem,
+      setQuantity,
+      clear,
+      totalCount,
+      subtotalEstimate,
+      buyNowItem,
+      setBuyNowItem,
+      clearBuyNowItem,
+    }),
+    [items, addItem, removeItem, setQuantity, clear, totalCount, subtotalEstimate, buyNowItem, setBuyNowItem, clearBuyNowItem]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
