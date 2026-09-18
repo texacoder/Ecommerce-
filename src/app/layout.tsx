@@ -6,6 +6,7 @@ import { CartProvider } from "@/lib/cart-context";
 import { ToastProvider } from "@/lib/toast-context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import { prisma } from "@/lib/db";
 
 const geistSans = Geist({
@@ -51,6 +52,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <Header categories={categories} />
               <main className="flex-1">{children}</main>
               <Footer />
+              <WhatsAppButton />
             </CartProvider>
           </AuthProvider>
         </ToastProvider>

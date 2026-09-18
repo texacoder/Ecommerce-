@@ -48,7 +48,7 @@ export default function PrivacyPage() {
             You can view and update your name and email at any time from{" "}
             <a href="/account" className="text-[var(--brand-accent)] hover:underline">My Account</a>. To
             request a copy of your data, or to have your account and personal data deleted, email us at{" "}
-            <a href="mailto:support@exorastore.com" className="text-[var(--brand-accent)] hover:underline">support@exorastore.com</a>{" "}
+            <a href="mailto:exorastorebuz@gmail.com" className="text-[var(--brand-accent)] hover:underline">exorastorebuz@gmail.com</a>{" "}
             — we&apos;ll keep only what we&apos;re legally required to retain (e.g. order records for tax
             purposes).
           </p>
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
         <Section title="8. Contact">
           <p>
             Questions about this policy or your data? Email{" "}
-            <a href="mailto:support@exorastore.com" className="text-[var(--brand-accent)] hover:underline">support@exorastore.com</a>.
+            <a href="mailto:exorastorebuz@gmail.com" className="text-[var(--brand-accent)] hover:underline">exorastorebuz@gmail.com</a>.
           </p>
         </Section>
       </div>

@@ -118,11 +118,10 @@ DATABASE_URL="<production-url>" npm run db:seed   # optional
 The app is functional before all of these, but don't accept real payments or
 real customer signups until you've gone through this list:
 
-- [ ] Replace the placeholder legal name "EXORASTORE" and the placeholder support
-      email `support@exorastore.com` in `src/app/terms/page.tsx`,
+- [ ] Replace the placeholder legal name "EXORASTORE" in `src/app/terms/page.tsx`,
       `src/app/privacy/page.tsx`, and `src/app/refund-policy/page.tsx` with
-      your real registered business name and a support email/phone you
-      actually monitor.
+      your real registered business name (the support email/phone are
+      already set to real values).
 - [ ] Buy and verify your own domain in Resend (see section 9 below), then
       update `EMAIL_FROM` — until then, password-reset emails only deliver
       to the email address you signed up to Resend with.

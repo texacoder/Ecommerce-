@@ -32,7 +32,11 @@ export default function HelpPage() {
         ))}
       </div>
       <p className="text-sm text-[var(--text-muted)] mt-6">
-        Still need help? Reach out from your{" "}
+        Still need help? Chat with us on WhatsApp (tap the chat icon in the corner of your screen) or email{" "}
+        <a href="mailto:exorastorebuz@gmail.com" className="text-[var(--brand-accent)] hover:underline">
+          exorastorebuz@gmail.com
+        </a>
+        . You can also reach out from your{" "}
         <Link href="/account/orders" className="text-[var(--brand-accent)] hover:underline">
           order details page
         </Link>

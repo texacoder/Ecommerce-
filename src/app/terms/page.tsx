@@ -78,7 +78,7 @@ export default function TermsPage() {
         <Section title="10. Contact">
           <p>
             Questions about these terms? Email{" "}
-            <a href="mailto:support@exorastore.com" className="text-[var(--brand-accent)] hover:underline">support@exorastore.com</a>.
+            <a href="mailto:exorastorebuz@gmail.com" className="text-[var(--brand-accent)] hover:underline">exorastorebuz@gmail.com</a>.
           </p>
         </Section>
       </div>
