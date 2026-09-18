@@ -8,7 +8,6 @@ export default function Footer() {
           <h3 className="text-white font-semibold mb-3">Get to Know Us</h3>
           <ul className="flex flex-col gap-2">
             <li><Link href="/about" className="hover:underline">About EXORASTORE</Link></li>
-            <li><Link href="/products" className="hover:underline">Careers</Link></li>
           </ul>
         </div>
         <div>
