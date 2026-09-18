@@ -60,6 +60,16 @@ export async function uploadImage(file: File): Promise<string> {
   if (file.size > MAX_UPLOAD_SIZE) {
     throw new UploadValidationError("Image is too large (max 5MB).");
   }
+  // A running production server (Vercel or otherwise) never reliably serves
+  // files written to /public after it started — Vercel's filesystem is
+  // read-only at request time, and even a persistent Node server only
+  // serves the /public snapshot taken at boot. Refuse plainly here instead
+  // of silently writing a file the app can never actually show back.
+  if (process.env.NODE_ENV === "production" && !isCloudStorageConfigured()) {
+    throw new UploadValidationError(
+      "Image uploads aren't configured yet — set up Cloudinary (see README) or add the image by its URL instead."
+    );
+  }
   const extension = file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];
   const buffer = Buffer.from(await file.arrayBuffer());
   return getAdapter().upload(buffer, { contentType: file.type, extension });

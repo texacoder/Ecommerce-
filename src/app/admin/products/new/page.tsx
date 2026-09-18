@@ -23,12 +23,42 @@ export default function NewProductPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
+  const [newImageUrl, setNewImageUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/categories")
       .then((r) => r.json())
       .then((d) => setCategories(d.categories ?? []));
   }, []);
+
+  function addImageByUrl() {
+    if (!newImageUrl.trim()) return;
+    setImages((prev) => [...prev, newImageUrl.trim()]);
+    setNewImageUrl("");
+  }
+
+  async function uploadImage(file: File) {
+    setUploading(true);
+    setError(null);
+    try {
+      const uploadForm = new FormData();
+      uploadForm.append("file", file);
+      const res = await fetch("/api/admin/uploads", { method: "POST", body: uploadForm });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Upload failed");
+      setImages((prev) => [...prev, data.url]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function removeImage(url: string) {
+    setImages((prev) => prev.filter((u) => u !== url));
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,6 +82,15 @@ export default function NewProductPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to create product");
+
+      for (const url of images) {
+        await fetch(`/api/admin/products/${data.product.id}/images`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+      }
+
       router.push(`/admin/products/${data.product.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -104,6 +143,52 @@ export default function NewProductPage() {
             <option value="UNPUBLISHED">Unpublished</option>
           </select>
         </Field>
+
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium">Images (optional)</span>
+          {images.length > 0 && (
+            <div className="flex flex-wrap gap-3 mb-1">
+              {images.map((url) => (
+                <div key={url} className="relative w-24">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" className="w-24 h-24 object-cover rounded border border-[var(--border-subtle)]" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(url)}
+                    className="absolute -top-1.5 -right-1.5 bg-white border border-[var(--border-subtle)] rounded-full w-5 h-5 text-xs text-[var(--danger)] leading-none"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex flex-wrap gap-2 items-center">
+            <input
+              placeholder="Image URL"
+              value={newImageUrl}
+              onChange={(e) => setNewImageUrl(e.target.value)}
+              className={`${inputClass} w-full sm:max-w-xs`}
+            />
+            <button type="button" onClick={addImageByUrl} className="text-sm underline shrink-0">
+              Add by URL
+            </button>
+            <label className="text-sm underline cursor-pointer shrink-0">
+              {uploading ? "Uploading..." : "Upload file"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadImage(file);
+                }}
+              />
+            </label>
+          </div>
+        </div>
+
         {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
         <button disabled={submitting} className="rounded-md btn-primary py-2.5 font-medium disabled:opacity-50">
           {submitting ? "Creating..." : "Create product"}
