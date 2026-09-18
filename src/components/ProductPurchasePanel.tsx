@@ -100,12 +100,6 @@ export default function ProductPurchasePanel({ productId, slug, name, image, bas
 
       <div className="border border-[var(--border-subtle)] rounded-md p-3 text-sm flex flex-col gap-2">
         <div className="flex gap-2">
-          <span aria-hidden>🚚</span>
-          <span>
-            <span className="font-medium">Free delivery</span> on orders over ₹499. Estimated delivery in 3–5 business days.
-          </span>
-        </div>
-        <div className="flex gap-2">
           <span aria-hidden>↩️</span>
           <span>
             <span className="font-medium">7-day returns.</span> Change of mind? Return it within 7 days of delivery.
