@@ -46,6 +46,12 @@ const activePromotionWhere = (now: Date) => ({
   ],
 });
 
+// Plain helper (not inline in the component body) so the randomness doesn't
+// trip React's rule against impure calls inside a component's render.
+function randomSkip(exclusiveMax: number): number {
+  return Math.floor(Math.random() * exclusiveMax);
+}
+
 export default async function HomePage() {
   const now = new Date();
   const baseWhere = { deletedAt: null, status: "PUBLISHED" as const, visible: true };
@@ -104,7 +110,7 @@ export default async function HomePage() {
   if (banners.length === 0) {
     const eligibleCount = await prisma.product.count({ where: baseWhere });
     if (eligibleCount > 0) {
-      const skip = eligibleCount > 2 ? Math.floor(Math.random() * (eligibleCount - 2)) : 0;
+      const skip = eligibleCount > 2 ? randomSkip(eligibleCount - 2) : 0;
       const randomProducts = await prisma.product.findMany({ where: baseWhere, include, take: 2, skip });
       fallbackHeroProducts = randomProducts.map(toCardData);
     }

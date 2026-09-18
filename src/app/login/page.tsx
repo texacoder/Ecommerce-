@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import PasswordInput from "@/components/PasswordInput";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 export default function LoginPage() {
   return (
@@ -36,7 +37,7 @@ function LoginForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Login failed");
       await refresh();
-      router.push(searchParams.get("next") ?? "/");
+      router.push(safeRedirectPath(searchParams.get("next")));
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

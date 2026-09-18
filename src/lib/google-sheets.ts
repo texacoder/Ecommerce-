@@ -42,10 +42,13 @@ export async function syncOrderToSheet(order: OrderForSheet, customerEmail: stri
   };
 
   try {
+    // A slow/hung third-party endpoint must never hold up the customer's
+    // payment confirmation response - bound the wait explicitly.
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) {
       console.error(`[google-sheets] sync responded with ${res.status}: ${await res.text()}`);
