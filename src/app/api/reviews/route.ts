@@ -45,6 +45,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "You have already reviewed this product" }, { status: 409 });
     }
 
+    const purchase = await prisma.orderItem.findFirst({
+      where: {
+        productId: body.productId,
+        order: { userId: user.id, paymentStatus: "PAID", status: { not: "CANCELLED" } },
+      },
+    });
+    if (!purchase) {
+      return NextResponse.json(
+        { error: "You can only review products you've purchased." },
+        { status: 403 }
+      );
+    }
+
     const review = await prisma.review.create({
       data: {
         productId: body.productId,

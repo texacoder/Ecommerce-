@@ -14,7 +14,15 @@ export type ReviewData = {
   userName: string;
 };
 
-export default function ReviewsSection({ productId, initialReviews }: { productId: string; initialReviews: ReviewData[] }) {
+export default function ReviewsSection({
+  productId,
+  initialReviews,
+  hasPurchased,
+}: {
+  productId: string;
+  initialReviews: ReviewData[];
+  hasPurchased: boolean;
+}) {
   const { user } = useAuth();
   const [reviews, setReviews] = useState(initialReviews);
   const [rating, setRating] = useState(5);
@@ -74,7 +82,7 @@ export default function ReviewsSection({ productId, initialReviews }: { productI
     <div>
       <h2 className="text-xl font-semibold mb-4">Customer reviews</h2>
 
-      {user && !myReview && !editingId && (
+      {user && hasPurchased && !myReview && !editingId && (
         <ReviewForm
           rating={rating}
           setRating={setRating}
@@ -106,6 +114,9 @@ export default function ReviewsSection({ productId, initialReviews }: { productI
       )}
 
       {!user && <p className="text-sm text-[var(--text-muted)] mb-6">Log in to write a review.</p>}
+      {user && !hasPurchased && !myReview && (
+        <p className="text-sm text-[var(--text-muted)] mb-6">Only customers who&apos;ve purchased this product can leave a review.</p>
+      )}
 
       <div className="flex flex-col gap-4 mt-6">
         {reviews.length === 0 && <p className="text-sm text-[var(--text-muted)]">No reviews yet.</p>}

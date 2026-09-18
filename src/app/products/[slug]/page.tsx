@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
 import { formatMoney } from "@/lib/format";
 import ProductPurchasePanel from "@/components/ProductPurchasePanel";
 import ReviewsSection from "@/components/ReviewsSection";
@@ -24,6 +25,18 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     },
   });
   if (!product) notFound();
+
+  const session = await getSession();
+  const hasPurchased = session
+    ? Boolean(
+        await prisma.orderItem.findFirst({
+          where: {
+            productId: product.id,
+            order: { userId: session.sub, paymentStatus: "PAID", status: { not: "CANCELLED" } },
+          },
+        })
+      )
+    : false;
 
   const avgRating = product.reviews.length
     ? product.reviews.reduce((s, r) => s + r.rating, 0) / product.reviews.length
@@ -158,6 +171,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       <div className="mt-14">
         <ReviewsSection
           productId={product.id}
+          hasPurchased={hasPurchased}
           initialReviews={product.reviews.map((r) => ({
             id: r.id,
             rating: r.rating,
