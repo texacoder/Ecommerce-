@@ -174,6 +174,51 @@ To swap in S3 or Supabase Storage instead, add another adapter class in
 `src/lib/storage.ts` implementing the same `StorageAdapter` interface and
 select it in `getAdapter()` — no other code needs to change.
 
+## 12. Sync orders to Google Sheets (optional)
+
+Every order that's successfully paid gets pushed as a new row to a Google
+Sheet, via a Google Apps Script "Web App" — no Google Cloud project, API
+key, or service account required.
+
+1. Create a Google Sheet with this header row: `Order Number | Date | Customer Name | Email | Phone | Address | Products | Total | Payment Status`.
+2. In that sheet, go to **Extensions → Apps Script**. Delete the placeholder code and paste in:
+
+   ```js
+   function doPost(e) {
+     var SECRET = "choose-your-own-long-random-string-here";
+     try {
+       var data = JSON.parse(e.postData.contents);
+       if (data.secret !== SECRET) {
+         return ContentService.createTextOutput(JSON.stringify({ error: "Unauthorized" }))
+           .setMimeType(ContentService.MimeType.JSON);
+       }
+       var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+       sheet.appendRow([
+         data.orderNumber, data.date, data.customerName, data.email,
+         data.phone, data.address, data.products, data.total, data.paymentStatus,
+       ]);
+       return ContentService.createTextOutput(JSON.stringify({ success: true }))
+         .setMimeType(ContentService.MimeType.JSON);
+     } catch (err) {
+       return ContentService.createTextOutput(JSON.stringify({ error: err.message }))
+         .setMimeType(ContentService.MimeType.JSON);
+     }
+   }
+   ```
+
+3. Change `SECRET` to a long random string of your choosing — this is what stops random strangers from posting fake rows into your sheet.
+4. Click **Deploy → New deployment** → gear icon → type **Web app** → Execute as **Me** → Who has access **Anyone** → **Deploy**.
+5. Google will ask you to authorize it (it's your own script, acting on your own sheet) — click through **Authorize access → [your account] → Advanced → Go to (your project name) → Allow**.
+6. Copy the **Web app URL** it gives you (ends in `/exec`).
+7. Set `GOOGLE_SHEETS_WEBHOOK_URL` to that URL, and `GOOGLE_SHEETS_SECRET` to the same string you put in `SECRET` above.
+
+Leave both blank to skip this feature entirely — nothing else depends on it,
+and a missing/failed sync never blocks an order from completing
+(`src/lib/google-sheets.ts`). If you ever edit the Apps Script code after
+it's already deployed, you need to create a **new version** of the
+deployment (Deploy → Manage deployments → edit → New version) for the
+change to actually take effect.
+
 ## How the core flows actually work
 
 - **Checkout → payment:** `POST /api/orders` recomputes prices/stock/coupon

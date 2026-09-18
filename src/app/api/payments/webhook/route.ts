@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyWebhookSignature } from "@/lib/razorpay";
+import { syncOrderToSheet } from "@/lib/google-sheets";
 
 type RazorpayWebhookPayload = {
   event: string;
@@ -48,19 +49,27 @@ export async function POST(req: NextRequest) {
   if (!payment) return NextResponse.json({ ok: true });
 
   if (body.event === "payment.captured" && payment.status !== "PAID") {
-    await prisma.$transaction(async (tx) => {
+    const paidOrder = await prisma.$transaction(async (tx) => {
       await tx.payment.update({
         where: { id: payment.id },
         data: { status: "PAID", providerPaymentId: paymentEntity.id },
       });
       const order = await tx.order.findUnique({ where: { id: payment.orderId } });
       if (order && order.paymentStatus !== "PAID") {
-        await tx.order.update({
+        return tx.order.update({
           where: { id: order.id },
           data: { paymentStatus: "PAID", status: order.status === "PENDING" ? "CONFIRMED" : order.status },
+          include: { items: true, user: { select: { email: true } } },
         });
       }
+      return null;
     });
+
+    // Awaited, not fire-and-forget - the function can be torn down right
+    // after responding, which would kill a detached background fetch.
+    if (paidOrder) {
+      await syncOrderToSheet(paidOrder, paidOrder.user.email);
+    }
   } else if (body.event === "payment.failed" && payment.status !== "PAID") {
     await prisma.payment.update({
       where: { id: payment.id },

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { errorResponse } from "@/lib/api";
 import { verifyPaymentSignature } from "@/lib/razorpay";
+import { syncOrderToSheet } from "@/lib/google-sheets";
 
 const schema = z.object({
   razorpay_order_id: z.string(),
@@ -47,6 +48,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Payment verification failed" }, { status: 400 });
     }
 
+    const wasAlreadyPaid = order.paymentStatus === "PAID";
+
     const updated = await prisma.$transaction(async (tx) => {
       await tx.payment.update({
         where: { id: payment.id },
@@ -62,6 +65,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         include: { items: true },
       });
     });
+
+    // Awaited (not fire-and-forget) - a serverless function can be torn
+    // down right after it returns a response, which would kill a detached
+    // background fetch before it completes.
+    if (!wasAlreadyPaid) {
+      await syncOrderToSheet(updated, user.email);
+    }
 
     return NextResponse.json({ order: updated });
   } catch (err) {
