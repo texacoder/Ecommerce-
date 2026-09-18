@@ -1,12 +1,14 @@
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { AppError } from "@/lib/errors";
+import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 
 // Amounts everywhere are in paise (smallest INR unit), matching Razorpay.
 // Listed product prices are treated as tax-inclusive (the common convention
 // for Indian retail), so TAX_RATE is 0 by default — change it here if your
 // catalog needs an explicit tax line.
 export const TAX_RATE = 0;
+export { FREE_SHIPPING_THRESHOLD };
 
 export type QuoteItemInput = { productId: string; variantId?: string | null; quantity: number };
 
@@ -119,7 +121,13 @@ export async function computeQuote(
   }
 
   const discountedSubtotal = Math.max(0, subtotal - discount);
-  const shipping = items.reduce((sum, item) => sum + item.shippingCost * item.quantity, 0);
+  // Shipping is charged once per distinct product line, not per unit -
+  // buying 3 of the same item doesn't triple its shipping cost. Waived
+  // entirely once the order clears the free-shipping threshold.
+  const shipping =
+    discountedSubtotal >= FREE_SHIPPING_THRESHOLD
+      ? 0
+      : items.reduce((sum, item) => sum + item.shippingCost, 0);
   const tax = Math.round(discountedSubtotal * TAX_RATE);
   const total = discountedSubtotal + shipping + tax;
 

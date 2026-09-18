@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { formatMoney } from "@/lib/format";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
+import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 
 type Variant = { id: string; name: string; sku: string; stock: number; price: number };
 
@@ -106,6 +107,12 @@ export default function ProductPurchasePanel({ productId, slug, name, image, bas
       </div>
 
       <div className="border border-[var(--border-subtle)] rounded-md p-3 text-sm flex flex-col gap-2">
+        <div className="flex gap-2">
+          <span aria-hidden>🚚</span>
+          <span>
+            <span className="font-medium">Free delivery</span> on orders over {formatMoney(FREE_SHIPPING_THRESHOLD)}.
+          </span>
+        </div>
         <div className="flex gap-2">
           <span aria-hidden>↩️</span>
           <span>
