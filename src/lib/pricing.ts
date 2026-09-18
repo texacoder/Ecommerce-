@@ -7,8 +7,6 @@ import { AppError } from "@/lib/errors";
 // for Indian retail), so TAX_RATE is 0 by default — change it here if your
 // catalog needs an explicit tax line.
 export const TAX_RATE = 0;
-export const FREE_SHIPPING_THRESHOLD = 49900; // ₹499
-export const FLAT_SHIPPING = 4900; // ₹49
 
 export type QuoteItemInput = { productId: string; variantId?: string | null; quantity: number };
 
@@ -22,6 +20,7 @@ export type QuoteLineItem = {
   quantity: number;
   lineTotal: number;
   availableStock: number;
+  shippingCost: number;
 };
 
 export type Quote = {
@@ -99,6 +98,7 @@ export async function computeQuote(
       quantity,
       lineTotal: unitPrice * quantity,
       availableStock,
+      shippingCost: product.shippingCost,
     });
   }
 
@@ -119,7 +119,7 @@ export async function computeQuote(
   }
 
   const discountedSubtotal = Math.max(0, subtotal - discount);
-  const shipping = discountedSubtotal >= FREE_SHIPPING_THRESHOLD || discountedSubtotal === 0 ? 0 : FLAT_SHIPPING;
+  const shipping = items.reduce((sum, item) => sum + item.shippingCost * item.quantity, 0);
   const tax = Math.round(discountedSubtotal * TAX_RATE);
   const total = discountedSubtotal + shipping + tax;
 

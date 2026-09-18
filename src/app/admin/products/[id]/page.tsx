@@ -18,6 +18,7 @@ type Product = {
   price: number;
   originalPrice: number | null;
   discountPercent: number | null;
+  shippingCost: number;
   sku: string;
   brand: string | null;
   categoryId: string | null;
@@ -88,6 +89,7 @@ export default function EditProductPage() {
       price: product.price,
       originalPrice: product.originalPrice,
       discountPercent: product.discountPercent,
+      shippingCost: product.shippingCost,
       sku: product.sku,
       brand: product.brand,
       categoryId: product.categoryId,
@@ -253,6 +255,9 @@ export default function EditProductPage() {
           </Field>
           <Field label="Stock quantity">
             <input type="number" min={0} className={inputClass} value={product.stock} onChange={(e) => setProduct({ ...product, stock: Number(e.target.value) })} />
+          </Field>
+          <Field label="Shipping cost (₹ per unit)">
+            <input type="number" step="0.01" min={0} className={inputClass} value={(product.shippingCost / 100).toString()} onChange={(e) => setProduct({ ...product, shippingCost: Math.round(Number(e.target.value) * 100) })} />
           </Field>
           <Field label="Status">
             <select className={inputClass} value={product.status} onChange={(e) => setProduct({ ...product, status: e.target.value })}>

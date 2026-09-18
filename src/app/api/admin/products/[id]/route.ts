@@ -11,6 +11,7 @@ const updateSchema = z.object({
   price: z.number().int().min(0).optional(),
   originalPrice: z.number().int().min(0).nullable().optional(),
   discountPercent: z.number().int().min(0).max(100).nullable().optional(),
+  shippingCost: z.number().int().min(0).optional(),
   sku: z.string().min(1).max(80).optional(),
   brand: z.string().max(120).nullable().optional(),
   categoryId: z.string().nullable().optional(),

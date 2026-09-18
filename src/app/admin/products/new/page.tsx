@@ -17,6 +17,7 @@ export default function NewProductPage() {
     categoryId: "",
     price: "",
     originalPrice: "",
+    shippingCost: "0",
     stock: "0",
     description: "",
     status: "DRAFT",
@@ -75,6 +76,7 @@ export default function NewProductPage() {
           categoryId: form.categoryId || null,
           price: Math.round(Number(form.price) * 100),
           originalPrice: form.originalPrice ? Math.round(Number(form.originalPrice) * 100) : null,
+          shippingCost: form.shippingCost ? Math.round(Number(form.shippingCost) * 100) : 0,
           stock: Number(form.stock),
           description: form.description || null,
           status: form.status,
@@ -130,9 +132,14 @@ export default function NewProductPage() {
             <input type="number" step="0.01" min="0" value={form.originalPrice} onChange={(e) => setForm({ ...form, originalPrice: e.target.value })} className={inputClass} />
           </Field>
         </div>
-        <Field label="Stock quantity">
-          <input required type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className={inputClass} />
-        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Stock quantity">
+            <input required type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className={inputClass} />
+          </Field>
+          <Field label="Shipping cost (₹ per unit)">
+            <input type="number" step="0.01" min="0" value={form.shippingCost} onChange={(e) => setForm({ ...form, shippingCost: e.target.value })} className={inputClass} />
+          </Field>
+        </div>
         <Field label="Description">
           <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={inputClass} />
         </Field>

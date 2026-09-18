@@ -137,6 +137,7 @@ model Product {
   price           Int
   originalPrice   Int?
   discountPercent Int?
+  shippingCost    Int           @default(0)
   sku             String        @unique
   brand           String?
   categoryId      String?
