@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { formatMoney } from "@/lib/format";
 import ProductCard, { type ProductCardData } from "@/components/ProductCard";
 import PromoTile from "@/components/PromoTile";
 
@@ -96,6 +97,19 @@ export default async function HomePage() {
     })
   );
 
+  // No admin banners set up yet - fill that hero space with a couple of
+  // random products instead of a "nothing here" placeholder, so the
+  // homepage never looks empty even before any promotions are configured.
+  let fallbackHeroProducts: ProductCardData[] = [];
+  if (banners.length === 0) {
+    const eligibleCount = await prisma.product.count({ where: baseWhere });
+    if (eligibleCount > 0) {
+      const skip = eligibleCount > 2 ? Math.floor(Math.random() * (eligibleCount - 2)) : 0;
+      const randomProducts = await prisma.product.findMany({ where: baseWhere, include, take: 2, skip });
+      fallbackHeroProducts = randomProducts.map(toCardData);
+    }
+  }
+
   return (
     <div className="flex flex-col">
       <section className="bg-[var(--brand-navy)]">
@@ -119,11 +133,20 @@ export default async function HomePage() {
                 promo={{ id: b.id, title: b.title, subtitle: b.subtitle, imageUrl: b.imageUrl, linkUrl: b.linkUrl }}
               />
             ))}
-            {banners.length === 0 && (
-              <div className="col-span-2 rounded-lg bg-white/5 aspect-[16/9] flex items-center justify-center text-white/40 text-sm">
-                Promotional banners appear here once added from the admin dashboard.
-              </div>
-            )}
+            {banners.length === 0 &&
+              fallbackHeroProducts.map((p) => (
+                <PromoTile
+                  key={p.id}
+                  promo={{
+                    id: p.id,
+                    title: p.name,
+                    subtitle: formatMoney(p.price),
+                    imageUrl: p.image,
+                    linkUrl: null,
+                    productSlug: p.slug,
+                  }}
+                />
+              ))}
           </div>
         </div>
       </section>
