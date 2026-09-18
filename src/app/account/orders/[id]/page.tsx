@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { formatMoney, formatDateTime, statusLabel } from "@/lib/format";
@@ -33,7 +34,15 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className="container-page py-10 max-w-3xl">
-      <h1 className="text-xl font-semibold mb-1">Order #{order.orderNumber}</h1>
+      <div className="flex items-start justify-between gap-4 mb-1">
+        <h1 className="text-xl font-semibold">Order #{order.orderNumber}</h1>
+        <Link
+          href={`/customer-service?order=${order.orderNumber}`}
+          className="text-sm text-[var(--brand-accent)] hover:underline shrink-0 whitespace-nowrap"
+        >
+          Need help?
+        </Link>
+      </div>
       <p className="text-sm text-[var(--text-muted)] mb-6">Placed {formatDateTime(order.createdAt)}</p>
 
       {isFailedOrPending && (

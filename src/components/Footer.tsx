@@ -17,6 +17,7 @@ export default function Footer() {
             <li><Link href="/account/orders" className="hover:underline">Your Orders</Link></li>
             <li><Link href="/account/addresses" className="hover:underline">Your Addresses</Link></li>
             <li><Link href="/help" className="hover:underline">Help Center</Link></li>
+            <li><Link href="/customer-service" className="hover:underline">Customer Service</Link></li>
           </ul>
         </div>
         <div>

@@ -16,7 +16,12 @@ export default async function OrdersPage() {
 
   return (
     <div className="container-page py-10 max-w-3xl">
-      <h1 className="text-xl font-semibold mb-6">My Orders</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-xl font-semibold">My Orders</h1>
+        <Link href="/customer-service" className="text-sm text-[var(--brand-accent)] hover:underline">
+          Need help?
+        </Link>
+      </div>
       {orders.length === 0 && (
         <div className="card-surface p-10 text-center">
           <p className="text-[var(--text-muted)] mb-4">You haven&apos;t placed any orders yet.</p>

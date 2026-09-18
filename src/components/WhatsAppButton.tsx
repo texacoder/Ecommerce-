@@ -1,18 +1,15 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { whatsappLink } from "@/lib/contact";
 
-// WhatsApp Click-to-Chat deep link format: wa.me/<country code><number>, no
-// "+", spaces or dashes. This number is for chat only - never render it as
-// visible text anywhere on the site.
-const WHATSAPP_NUMBER = "918089568674";
 const DEFAULT_MESSAGE = "Hi, I have a question about my order.";
 
 export default function WhatsAppButton() {
   const pathname = usePathname();
   if (pathname?.startsWith("/admin")) return null;
 
-  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(DEFAULT_MESSAGE)}`;
+  const href = whatsappLink(DEFAULT_MESSAGE);
 
   return (
     <a
