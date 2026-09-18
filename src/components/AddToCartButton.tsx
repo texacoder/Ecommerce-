@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
 
@@ -28,6 +29,7 @@ export default function AddToCartButton({
 }: Props) {
   const { addItem } = useCart();
   const { notify } = useToast();
+  const [adding, setAdding] = useState(false);
 
   if (disabled || maxQuantity <= 0) {
     return (
@@ -39,11 +41,15 @@ export default function AddToCartButton({
 
   return (
     <button
+      disabled={adding}
       onClick={() => {
+        if (adding) return;
+        setAdding(true);
         addItem({ productId, variantId, name, slug, image, unitPrice }, quantity);
         notify(`Added "${name}" to cart`, "success");
+        setTimeout(() => setAdding(false), 800);
       }}
-      className="btn-primary w-full py-2 text-sm"
+      className="btn-primary w-full py-2 text-sm disabled:opacity-60"
     >
       Add to Cart
     </button>

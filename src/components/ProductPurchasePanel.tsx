@@ -24,6 +24,8 @@ export default function ProductPurchasePanel({ productId, slug, name, image, bas
   const router = useRouter();
   const [variantId, setVariantId] = useState<string | null>(variants[0]?.id ?? null);
   const [qty, setQty] = useState(1);
+  const [adding, setAdding] = useState(false);
+  const [buying, setBuying] = useState(false);
 
   const selected = useMemo(() => variants.find((v) => v.id === variantId) ?? null, [variants, variantId]);
   const price = selected ? selected.price : basePrice;
@@ -77,22 +79,27 @@ export default function ProductPurchasePanel({ productId, slug, name, image, bas
 
       <div className="grid grid-cols-2 gap-3">
         <button
-          disabled={stock <= 0}
+          disabled={stock <= 0 || adding}
           onClick={() => {
+            if (adding) return;
+            setAdding(true);
             addItem({ productId, variantId, name, slug, image, unitPrice: price }, qty);
             notify(`Added "${name}" to cart`, "success");
+            setTimeout(() => setAdding(false), 800);
           }}
-          className="btn-primary py-2.5"
+          className="btn-primary py-2.5 disabled:opacity-60"
         >
           Add to Cart
         </button>
         <button
-          disabled={stock <= 0}
+          disabled={stock <= 0 || buying}
           onClick={() => {
+            if (buying) return;
+            setBuying(true);
             addItem({ productId, variantId, name, slug, image, unitPrice: price }, qty);
             router.push("/checkout");
           }}
-          className="btn-buy py-2.5"
+          className="btn-buy py-2.5 disabled:opacity-60"
         >
           Buy Now
         </button>
