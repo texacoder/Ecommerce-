@@ -74,6 +74,15 @@ export default function AdminCategoriesPage() {
     load();
   }
 
+  async function updateDescription(id: string, description: string) {
+    await fetch(`/api/admin/categories/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ description: description.trim() || null }),
+    });
+    load();
+  }
+
   async function toggleVisible(id: string, visible: boolean) {
     await fetch(`/api/admin/categories/${id}`, {
       method: "PATCH",
@@ -125,6 +134,7 @@ export default function AdminCategoriesPage() {
             <tr className="text-left bg-[var(--surface-muted)]">
               <th className="p-3">Image</th>
               <th className="p-3">Name</th>
+              <th className="p-3">Description (for SEO &amp; the category page)</th>
               <th className="p-3">Parent</th>
               <th className="p-3">Products</th>
               <th className="p-3">Visible</th>
@@ -166,6 +176,17 @@ export default function AdminCategoriesPage() {
                       if (e.target.value !== c.name) rename(c.id, e.target.value);
                     }}
                     className="bg-transparent border-b border-transparent hover:border-black/20 dark:hover:border-white/20 focus:border-black/40"
+                  />
+                </td>
+                <td className="p-3 min-w-[240px]">
+                  <textarea
+                    defaultValue={c.description ?? ""}
+                    onBlur={(e) => {
+                      if (e.target.value !== (c.description ?? "")) updateDescription(c.id, e.target.value);
+                    }}
+                    placeholder="2-3 sentences about this category…"
+                    rows={2}
+                    className="w-full bg-transparent border border-transparent hover:border-[var(--border-subtle)] focus:border-[var(--brand-accent)] rounded px-1.5 py-1 text-xs resize-none"
                   />
                 </td>
                 <td className="p-3 text-[var(--text-muted)]">{c.parent?.name ?? "—"}</td>

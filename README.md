@@ -134,6 +134,15 @@ real customer signups until you've gone through this list:
       admin account's password (see the `/api/setup/seed` route).
 - [ ] Delete or reseed any placeholder demo products/categories you don't
       want live.
+- [ ] Once you buy a domain: set `NEXT_PUBLIC_APP_URL` in Vercel's
+      environment variables to that domain (e.g. `https://exorastore.com`).
+      Every canonical link, Open Graph URL, and sitemap/robots.txt entry is
+      generated from this variable — left unset, they all still say
+      `localhost:3000`.
+- [ ] Once you're on that domain: verify it in
+      [Google Search Console](https://search.google.com/search-console) and
+      [Bing Webmaster Tools](https://www.bing.com/webmasters), then submit
+      `https://yourdomain.com/sitemap.xml` in both.
 
 ## 9. Connect email (Resend) for password resets and order emails
 
