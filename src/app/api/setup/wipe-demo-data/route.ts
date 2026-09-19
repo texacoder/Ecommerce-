@@ -10,10 +10,15 @@ export const dynamic = "force-dynamic";
 // One-time pre-launch cleanup: wipes every product, category, coupon,
 // promotion, order, review, and customer account, leaving only the admin
 // account(s). Protected by SETUP_SECRET (same lever as the seed endpoint)
-// plus a separate, explicit confirm=WIPE query param — deliberately not
-// enough to trigger this by just visiting the URL with the secret alone,
-// since this action is destructive and irreversible.
-async function runWipe(req: NextRequest) {
+// plus a separate, explicit confirm=WIPE body field. POST-only, secret via
+// header only - no GET, no secret-in-query-string. A GET with the secret
+// and confirm baked into the URL fires the instant that URL is resolved
+// (browser address bar, search suggestions, a prefetch, proxy/browser
+// history) with no confirmation step, which is exactly how this endpoint
+// previously got triggered by accident. Requiring an explicit POST with
+// the secret as a header means it can only be triggered by a deliberate
+// authenticated request (e.g. curl), never by a URL alone.
+export async function POST(req: NextRequest) {
   const secret = process.env.SETUP_SECRET;
   if (!secret) {
     return NextResponse.json({ error: "SETUP_SECRET is not configured" }, { status: 503 });
@@ -27,13 +32,15 @@ async function runWipe(req: NextRequest) {
     throw err;
   }
 
-  const provided = req.headers.get("x-setup-secret") || req.nextUrl.searchParams.get("secret");
+  const provided = req.headers.get("x-setup-secret");
   if (!secureCompare(provided, secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (req.nextUrl.searchParams.get("confirm") !== "WIPE") {
+
+  const body = await req.json().catch(() => ({}));
+  if (body.confirm !== "WIPE") {
     return NextResponse.json(
-      { error: "Add &confirm=WIPE to the URL to actually run this. This permanently deletes all products, categories, coupons, promotions, orders, reviews, and customer accounts." },
+      { error: 'Pass {"confirm":"WIPE"} in the request body to actually run this. This permanently deletes all products, categories, coupons, promotions, orders, reviews, and customer accounts.' },
       { status: 400 }
     );
   }
@@ -47,12 +54,4 @@ async function runWipe(req: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-export async function GET(req: NextRequest) {
-  return runWipe(req);
-}
-
-export async function POST(req: NextRequest) {
-  return runWipe(req);
 }

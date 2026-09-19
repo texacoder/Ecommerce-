@@ -11,8 +11,12 @@ export const dynamic = "force-dynamic";
 // the catalog, categories, coupons, and customer accounts untouched -
 // restocking reserved inventory and rolling back coupon usage counts
 // first. Protected the same way as the other /api/setup/* endpoints:
-// SETUP_SECRET plus an explicit confirm=WIPE, since this is destructive.
-async function runWipe(req: NextRequest) {
+// SETUP_SECRET plus an explicit confirm=WIPE. POST-only, secret via header
+// only - no GET, no secret-in-query-string, so a URL alone (browser
+// address bar, search suggestions, history, a prefetch) can never trigger
+// this destructive action; it now requires a deliberate authenticated
+// request.
+export async function POST(req: NextRequest) {
   const secret = process.env.SETUP_SECRET;
   if (!secret) {
     return NextResponse.json({ error: "SETUP_SECRET is not configured" }, { status: 503 });
@@ -28,13 +32,15 @@ async function runWipe(req: NextRequest) {
     throw err;
   }
 
-  const provided = req.headers.get("x-setup-secret") || req.nextUrl.searchParams.get("secret");
+  const provided = req.headers.get("x-setup-secret");
   if (!secureCompare(provided, secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (req.nextUrl.searchParams.get("confirm") !== "WIPE") {
+
+  const body = await req.json().catch(() => ({}));
+  if (body.confirm !== "WIPE") {
     return NextResponse.json(
-      { error: "Add &confirm=WIPE to the URL to actually run this. This permanently deletes every order (restocking their items and rolling back coupon usage first) but leaves products, categories, coupons, and customer accounts untouched." },
+      { error: 'Pass {"confirm":"WIPE"} in the request body to actually run this. This permanently deletes every order (restocking their items and rolling back coupon usage first) but leaves products, categories, coupons, and customer accounts untouched.' },
       { status: 400 }
     );
   }
@@ -48,12 +54,4 @@ async function runWipe(req: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-export async function GET(req: NextRequest) {
-  return runWipe(req);
-}
-
-export async function POST(req: NextRequest) {
-  return runWipe(req);
 }
