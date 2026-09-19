@@ -31,6 +31,7 @@ const createSchema = z.object({
   couponCode: z.string().optional().nullable(),
   addressId: z.string().optional(),
   address: addressSchema.optional(),
+  paymentMethod: z.enum(["online", "cod"]).optional().default("online"),
 });
 
 export async function GET(req: NextRequest) {
@@ -101,6 +102,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: quote.couponError }, { status: 400 });
     }
 
+    // Re-checked here rather than trusted from the client - the client only
+    // decides whether to show the COD option, not whether it's actually
+    // allowed.
+    if (body.paymentMethod === "cod" && !quote.codAvailable) {
+      return NextResponse.json(
+        { error: "Cash on Delivery isn't available for one or more items in your cart" },
+        { status: 400 }
+      );
+    }
+
     const order = await prisma.$transaction(async (tx) => {
       // Atomic conditional decrement: the stock check and the write happen
       // in the same UPDATE statement (WHERE stock >= quantity), so two
@@ -131,7 +142,10 @@ export async function POST(req: NextRequest) {
         data: {
           orderNumber: generateOrderNumber(),
           userId: user.id,
-          status: "PENDING",
+          // A COD order has nothing to wait on payment-wise, so it's
+          // confirmed immediately; an online order stays PENDING until
+          // verify-payment/webhook marks it paid.
+          status: body.paymentMethod === "cod" ? "CONFIRMED" : "PENDING",
           subtotal: quote.subtotal,
           discount: quote.discount,
           shipping: quote.shipping,
@@ -140,7 +154,7 @@ export async function POST(req: NextRequest) {
           couponCode: quote.couponCode,
           addressId,
           addressSnapshot: JSON.stringify(addressSnapshot),
-          paymentProvider: "razorpay",
+          paymentProvider: body.paymentMethod === "cod" ? "cod" : "razorpay",
           paymentStatus: "PENDING",
           items: {
             create: quote.items.map((i) => ({
@@ -163,6 +177,15 @@ export async function POST(req: NextRequest) {
 
       return created;
     });
+
+    // A COD order needs no payment gateway step at all - it's already
+    // CONFIRMED, and payment is collected in cash at delivery.
+    if (body.paymentMethod === "cod") {
+      return NextResponse.json(
+        { order, payment: null, paymentConfigured: false, paymentMethod: "cod" },
+        { status: 201 }
+      );
+    }
 
     // Stock is already reserved (decremented above). Now open a payment
     // attempt: create a real Razorpay order server-side so the amount the

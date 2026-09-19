@@ -23,6 +23,7 @@ export type QuoteLineItem = {
   lineTotal: number;
   availableStock: number;
   shippingCost: number;
+  codAvailable: boolean;
 };
 
 export type Quote = {
@@ -34,6 +35,10 @@ export type Quote = {
   total: number;
   couponCode: string | null;
   couponError: string | null;
+  // Cash on Delivery is only offered when every item in the cart allows it
+  // - a mixed cart with even one COD-ineligible item can't split into two
+  // payment methods for a single order.
+  codAvailable: boolean;
 };
 
 export class PricingError extends AppError {}
@@ -101,6 +106,7 @@ export async function computeQuote(
       lineTotal: unitPrice * quantity,
       availableStock,
       shippingCost: product.shippingCost,
+      codAvailable: product.codAvailable,
     });
   }
 
@@ -140,6 +146,7 @@ export async function computeQuote(
     total,
     couponCode: couponError ? null : normalizedCode,
     couponError,
+    codAvailable: items.every((i) => i.codAvailable),
   };
 }
 

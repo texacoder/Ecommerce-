@@ -48,6 +48,7 @@ type Product = {
   isBestSeller: boolean;
   isNewArrival: boolean;
   isReturnable: boolean;
+  codAvailable: boolean;
   visible: boolean;
   createdAt: string;
   updatedAt: string;
@@ -139,6 +140,7 @@ export default function EditProductPage() {
       isBestSeller: product.isBestSeller,
       isNewArrival: product.isNewArrival,
       isReturnable: product.isReturnable,
+      codAvailable: product.codAvailable,
       visible: product.visible,
     });
   }
@@ -398,6 +400,10 @@ export default function EditProductPage() {
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={product.isReturnable} onChange={(e) => setProduct({ ...product, isReturnable: e.target.checked })} />
             Returnable
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={product.codAvailable} onChange={(e) => setProduct({ ...product, codAvailable: e.target.checked })} />
+            Cash on Delivery
           </label>
         </div>
 

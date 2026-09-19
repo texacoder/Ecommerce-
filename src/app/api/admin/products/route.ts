@@ -21,6 +21,7 @@ const createSchema = z.object({
   isBestSeller: z.boolean().optional().default(false),
   isNewArrival: z.boolean().optional().default(false),
   isReturnable: z.boolean().optional().default(true),
+  codAvailable: z.boolean().optional().default(true),
   visible: z.boolean().optional().default(true),
   images: z.array(z.string()).optional().default([]),
 });
@@ -99,6 +100,7 @@ export async function POST(req: NextRequest) {
         isBestSeller: body.isBestSeller,
         isNewArrival: body.isNewArrival,
         isReturnable: body.isReturnable,
+        codAvailable: body.codAvailable,
         visible: body.visible,
         images: {
           create: body.images.map((url, position) => ({ url, position })),

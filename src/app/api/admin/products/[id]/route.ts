@@ -21,6 +21,7 @@ const updateSchema = z.object({
   isBestSeller: z.boolean().optional(),
   isNewArrival: z.boolean().optional(),
   isReturnable: z.boolean().optional(),
+  codAvailable: z.boolean().optional(),
   visible: z.boolean().optional(),
 });
 

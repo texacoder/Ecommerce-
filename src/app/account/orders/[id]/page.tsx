@@ -38,9 +38,13 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     phone: string;
   };
 
+  const isCod = order.paymentProvider === "cod";
   const isPaid = order.paymentStatus === "PAID" || order.paymentStatus === "PARTIALLY_REFUNDED" || order.paymentStatus === "REFUNDED";
   const isCancelledOrDone = order.status === "CANCELLED" || order.status === "REFUNDED";
-  const isFailedOrPending = (order.paymentStatus === "PENDING" || order.paymentStatus === "FAILED") && !isCancelledOrDone;
+  // A COD order sitting at paymentStatus PENDING is normal (cash isn't
+  // collected until delivery) - it never needs the online "retry payment"
+  // action an unpaid Razorpay order would.
+  const isFailedOrPending = !isCod && (order.paymentStatus === "PENDING" || order.paymentStatus === "FAILED") && !isCancelledOrDone;
 
   return (
     <div className="container-page py-10 max-w-3xl">
@@ -61,7 +65,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         </div>
       )}
 
-      {isPaid && (
+      {(isPaid || isCod) && (
         <div className="card-surface p-4 mb-6">
           <OrderStatusTimeline status={order.status as OrderStatus} />
         </div>
@@ -76,7 +80,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               Tracking: {order.trackingCarrier ?? ""} {order.trackingNumber}
             </p>
           )}
-          <p className="text-sm text-[var(--text-muted)] mt-1">Payment: {statusLabel(order.paymentStatus)}</p>
+          <p className="text-sm text-[var(--text-muted)] mt-1">
+            Payment: {isCod && order.paymentStatus === "PENDING" ? "Cash on Delivery" : statusLabel(order.paymentStatus)}
+          </p>
         </div>
         <div className="card-surface p-4">
           <h2 className="font-medium mb-2">Delivery address</h2>

@@ -9,6 +9,7 @@ type Order = {
   orderNumber: string;
   status: string;
   paymentStatus: string;
+  paymentProvider: string;
   total: number;
   createdAt: string;
   user: { name: string; email: string };
@@ -124,7 +125,10 @@ export default function AdminOrdersPage() {
                 <td className="p-3">{o.items.length}</td>
                 <td className="p-3">{formatMoney(o.total)}</td>
                 <td className="p-3">{statusLabel(o.status)}</td>
-                <td className="p-3">{statusLabel(o.paymentStatus)}</td>
+                <td className="p-3">
+                  {statusLabel(o.paymentStatus)}
+                  {o.paymentProvider === "cod" && <span className="text-[var(--text-faint)]"> (COD)</span>}
+                </td>
                 <td className="p-3 text-[var(--text-muted)]">{formatDate(o.createdAt)}</td>
               </tr>
             ))}

@@ -22,6 +22,7 @@ export default function NewProductPage() {
     description: "",
     status: "DRAFT",
     isReturnable: true,
+    codAvailable: true,
   });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -82,6 +83,7 @@ export default function NewProductPage() {
           description: form.description || null,
           status: form.status,
           isReturnable: form.isReturnable,
+          codAvailable: form.codAvailable,
         }),
       });
       const data = await res.json();
@@ -155,6 +157,10 @@ export default function NewProductPage() {
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={form.isReturnable} onChange={(e) => setForm({ ...form, isReturnable: e.target.checked })} />
           This product can be returned
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={form.codAvailable} onChange={(e) => setForm({ ...form, codAvailable: e.target.checked })} />
+          Cash on Delivery available for this product
         </label>
 
         <div className="flex flex-col gap-2">

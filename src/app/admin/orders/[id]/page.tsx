@@ -12,6 +12,7 @@ type Order = {
   orderNumber: string;
   status: string;
   paymentStatus: string;
+  paymentProvider: string;
   subtotal: number;
   discount: number;
   shipping: number;
@@ -103,8 +104,18 @@ export default function AdminOrderDetailPage() {
     load();
   }
 
+  async function markCodPaid() {
+    if (!confirm("Mark this order as paid? Only do this once you've actually collected the cash.")) return;
+    setMessage(null);
+    const res = await fetch(`/api/admin/orders/${id}/mark-cod-paid`, { method: "POST" });
+    const data = await res.json();
+    if (!res.ok) setMessage({ text: data.error, kind: "error" });
+    load();
+  }
+
   const canCancel = !["CANCELLED", "DELIVERED", "REFUNDED"].includes(order.status);
   const canRefund = (order.paymentStatus === "PAID" || order.paymentStatus === "PARTIALLY_REFUNDED") && order.refundedAmount < order.total;
+  const isCod = order.paymentProvider === "cod";
 
   return (
     <div className="max-w-3xl">
@@ -164,9 +175,17 @@ export default function AdminOrderDetailPage() {
               Refund payment
             </button>
           )}
+          {isCod && order.paymentStatus === "PENDING" && (
+            <button onClick={markCodPaid} className="text-[var(--success)] underline">
+              Mark as paid (cash collected)
+            </button>
+          )}
         </div>
         {order.cancelReason && <p className="text-sm text-[var(--text-muted)] mt-2">Cancel reason: {order.cancelReason}</p>}
         <p className="text-sm mt-2">
+          Payment method: {isCod ? "Cash on Delivery" : "Online (Razorpay)"}
+        </p>
+        <p className="text-sm mt-1">
           Payment: {statusLabel(order.paymentStatus)}
           {order.refundedAmount > 0 && ` (refunded ${formatMoney(order.refundedAmount)})`}
         </p>

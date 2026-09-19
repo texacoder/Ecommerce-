@@ -155,6 +155,7 @@ model Product {
   isBestSeller    Boolean       @default(false)
   isNewArrival    Boolean       @default(false)
   isReturnable    Boolean       @default(true)
+  codAvailable    Boolean       @default(true)
   visible         Boolean       @default(true)
   deletedAt       DateTime?
   createdAt       DateTime      @default(now())

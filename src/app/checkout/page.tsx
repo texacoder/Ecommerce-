@@ -31,6 +31,7 @@ type Quote = {
   total: number;
   couponCode: string | null;
   couponError: string | null;
+  codAvailable: boolean;
 };
 
 type Step = "address" | "review" | "payment";
@@ -76,11 +77,13 @@ export default function CheckoutPage() {
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [placing, setPlacing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("online");
   const [placedOrder, setPlacedOrder] = useState<{
     id: string;
     razorpayOrderId?: string;
     razorpayKeyId?: string;
     paymentConfigured: boolean;
+    paymentMethod: "online" | "cod";
     total: number;
     currency: string;
   } | null>(null);
@@ -114,7 +117,10 @@ export default function CheckoutPage() {
       body: JSON.stringify(body),
     })
       .then((r) => r.json())
-      .then((d) => setQuote(d.quote ?? null))
+      .then((d) => {
+        setQuote(d.quote ?? null);
+        if (!d.quote?.codAvailable) setPaymentMethod("online");
+      })
       .finally(() => setQuoteLoading(false));
   }, [user, items, couponCode]);
 
@@ -133,6 +139,7 @@ export default function CheckoutPage() {
       const body: Record<string, unknown> = {
         items: items.map((i) => ({ productId: i.productId, variantId: i.variantId, quantity: i.quantity })),
         couponCode: couponCode || null,
+        paymentMethod,
       };
       if (addressId) {
         body.addressId = addressId;
@@ -154,11 +161,14 @@ export default function CheckoutPage() {
         razorpayOrderId: data.razorpayOrderId,
         razorpayKeyId: data.razorpayKeyId,
         paymentConfigured: data.paymentConfigured,
+        paymentMethod: data.paymentMethod === "cod" ? "cod" : "online",
         total: data.order.total,
         currency: data.order.currency,
       });
       setStep("payment");
-      if (!data.paymentConfigured) {
+      if (data.paymentMethod === "cod") {
+        notify("Order confirmed. Pay in cash on delivery.", "success");
+      } else if (!data.paymentConfigured) {
         notify("Order created. Payment gateway isn't configured in this environment.", "info");
       }
     } catch (err) {
@@ -283,6 +293,26 @@ export default function CheckoutPage() {
                 {quote?.couponCode && <p className="text-sm text-[var(--success)] mt-1">Coupon &quot;{quote.couponCode}&quot; applied!</p>}
               </div>
 
+              <div className="mb-5">
+                <h3 className="text-sm font-semibold mb-2">Payment method</h3>
+                <div className="flex flex-col gap-2">
+                  <label className="flex gap-2 items-start text-sm border border-[var(--border-subtle)] rounded p-3 cursor-pointer hover:border-[var(--brand-accent)]">
+                    <input type="radio" name="paymentMethod" checked={paymentMethod === "online"} onChange={() => setPaymentMethod("online")} className="mt-0.5" />
+                    <span>Pay online now</span>
+                  </label>
+                  {quote?.codAvailable ? (
+                    <label className="flex gap-2 items-start text-sm border border-[var(--border-subtle)] rounded p-3 cursor-pointer hover:border-[var(--brand-accent)]">
+                      <input type="radio" name="paymentMethod" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} className="mt-0.5" />
+                      <span>Cash on Delivery</span>
+                    </label>
+                  ) : (
+                    <p className="text-xs text-[var(--text-faint)] px-1">
+                      Cash on Delivery isn&apos;t available for one or more items in your cart.
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div className="flex gap-3">
                 <button onClick={() => setStep("address")} className="btn-outline px-6 py-2.5 text-sm">
                   Back
@@ -292,7 +322,7 @@ export default function CheckoutPage() {
                   disabled={placing || quoteLoading || !quote}
                   className="btn-primary px-6 py-2.5 text-sm"
                 >
-                  {placing ? "Placing order..." : "Continue to Payment"}
+                  {placing ? "Placing order..." : paymentMethod === "cod" ? "Place order (Cash on Delivery)" : "Continue to Payment"}
                 </button>
               </div>
               {error && <p className="text-sm text-[var(--danger)] mt-3">{error}</p>}
@@ -301,30 +331,42 @@ export default function CheckoutPage() {
 
           {step === "payment" && placedOrder && (
             <div className="card-surface p-5">
-              <h2 className="font-semibold mb-2">Payment</h2>
-              <p className="text-sm text-[var(--text-muted)] mb-5">
-                Order <span className="font-medium">created</span>. Complete payment to confirm it.
-              </p>
-
-              {placedOrder.paymentConfigured && placedOrder.razorpayOrderId && placedOrder.razorpayKeyId ? (
-                <RazorpayCheckout
-                  orderId={placedOrder.id}
-                  razorpayOrderId={placedOrder.razorpayOrderId}
-                  razorpayKeyId={placedOrder.razorpayKeyId}
-                  amount={placedOrder.total}
-                  currency={placedOrder.currency}
-                  customerName={user?.name ?? ""}
-                  customerEmail={user?.email ?? ""}
-                />
+              {placedOrder.paymentMethod === "cod" ? (
+                <>
+                  <h2 className="font-semibold mb-2">Order confirmed</h2>
+                  <div className="rounded-md bg-[var(--surface-muted)] border border-[var(--success)] p-4 text-sm">
+                    <p className="font-medium mb-1 text-[var(--success)]">Pay {formatMoney(placedOrder.total)} in cash when your order is delivered.</p>
+                    <p className="text-[var(--text-muted)]">No online payment is needed for this order.</p>
+                  </div>
+                </>
               ) : (
-                <div className="rounded-md bg-[var(--surface-muted)] border border-[var(--border-subtle)] p-4 text-sm">
-                  <p className="font-medium mb-1">Payment gateway not configured</p>
-                  <p className="text-[var(--text-muted)]">
-                    This environment doesn&apos;t have RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET set, so real checkout is
-                    disabled. Your order has been created with payment status &quot;Pending&quot; — configure
-                    Razorpay to accept real payments.
+                <>
+                  <h2 className="font-semibold mb-2">Payment</h2>
+                  <p className="text-sm text-[var(--text-muted)] mb-5">
+                    Order <span className="font-medium">created</span>. Complete payment to confirm it.
                   </p>
-                </div>
+
+                  {placedOrder.paymentConfigured && placedOrder.razorpayOrderId && placedOrder.razorpayKeyId ? (
+                    <RazorpayCheckout
+                      orderId={placedOrder.id}
+                      razorpayOrderId={placedOrder.razorpayOrderId}
+                      razorpayKeyId={placedOrder.razorpayKeyId}
+                      amount={placedOrder.total}
+                      currency={placedOrder.currency}
+                      customerName={user?.name ?? ""}
+                      customerEmail={user?.email ?? ""}
+                    />
+                  ) : (
+                    <div className="rounded-md bg-[var(--surface-muted)] border border-[var(--border-subtle)] p-4 text-sm">
+                      <p className="font-medium mb-1">Payment gateway not configured</p>
+                      <p className="text-[var(--text-muted)]">
+                        This environment doesn&apos;t have RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET set, so real checkout is
+                        disabled. Your order has been created with payment status &quot;Pending&quot; — configure
+                        Razorpay to accept real payments.
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
 
               <Link href={`/order-confirmation/${placedOrder.id}`} className="block text-sm text-[var(--text-muted)] hover:underline mt-4">
