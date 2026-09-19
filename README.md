@@ -135,17 +135,23 @@ real customer signups until you've gone through this list:
 - [ ] Delete or reseed any placeholder demo products/categories you don't
       want live.
 
-## 9. Connect email (Resend) for password resets
+## 9. Connect email (Resend) for password resets and order emails
 
 1. Create a free account at [resend.com](https://resend.com).
 2. Go to API Keys → create one → copy it into `RESEND_API_KEY`.
 3. Leave `EMAIL_FROM` as the default `onboarding@resend.dev` sender to start — it works immediately with no domain setup. Once you verify your own domain in the Resend dashboard, switch `EMAIL_FROM` to an address on it (e.g. `EXORASTORE <noreply@yourdomain.com>`) for better deliverability and to avoid landing in spam.
 
+The same `RESEND_API_KEY` also turns on customer order emails (`src/lib/order-emails.ts`):
+confirmation (on payment success or a Cash on Delivery order), shipped (with tracking info,
+if set), delivered, cancelled, and refunded. Each is sent once, exactly at that status
+transition — re-clicking an already-current status in the admin doesn't re-send it.
+
 Without `RESEND_API_KEY` set, "Forgot password" still generates a real,
 single-use reset token, but only logs the link server-side instead of
 emailing it — fine for local development (the link is also returned
 directly in the API response outside of production), but customers on a
-real deployment have no way to see that link without this configured.
+real deployment have no way to see that link without this configured. Order
+emails simply don't send at all without it (the order flow itself is unaffected).
 
 ## 10. Connect Razorpay (real payments)
 

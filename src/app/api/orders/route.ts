@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { computeQuote, recordCouponUsage, PricingError } from "@/lib/pricing";
 import { errorResponse, generateOrderNumber } from "@/lib/api";
 import { getRazorpayClient, isRazorpayConfigured } from "@/lib/razorpay";
+import { sendOrderConfirmedEmail } from "@/lib/order-emails";
 
 const addressSchema = z.object({
   fullName: z.string().min(1),
@@ -181,6 +182,7 @@ export async function POST(req: NextRequest) {
     // A COD order needs no payment gateway step at all - it's already
     // CONFIRMED, and payment is collected in cash at delivery.
     if (body.paymentMethod === "cod") {
+      await sendOrderConfirmedEmail(order, user.email);
       return NextResponse.json(
         { order, payment: null, paymentConfigured: false, paymentMethod: "cod" },
         { status: 201 }

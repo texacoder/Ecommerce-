@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { errorResponse } from "@/lib/api";
 import { restockOrderItems } from "@/lib/orders";
+import { sendOrderCancelledEmail } from "@/lib/order-emails";
 
 const schema = z.object({ reason: z.string().max(500).optional() });
 
@@ -33,6 +34,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         include: { items: true, user: { select: { id: true, name: true, email: true } } },
       });
     });
+
+    await sendOrderCancelledEmail(updated, updated.user.email, updated.cancelReason);
 
     return NextResponse.json({ order: updated });
   } catch (err) {

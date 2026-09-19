@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { errorResponse } from "@/lib/api";
 import { getRazorpayClient } from "@/lib/razorpay";
+import { sendOrderRefundedEmail } from "@/lib/order-emails";
 
 const schema = z.object({ amount: z.number().int().min(1).optional() });
 
@@ -60,6 +61,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       },
       include: { items: true, user: { select: { id: true, name: true, email: true } } },
     });
+
+    await sendOrderRefundedEmail(updated, updated.user.email, amount, fullyRefunded);
 
     return NextResponse.json({
       order: updated,

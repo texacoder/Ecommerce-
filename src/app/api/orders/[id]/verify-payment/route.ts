@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { errorResponse } from "@/lib/api";
 import { verifyPaymentSignature } from "@/lib/razorpay";
 import { syncOrderToSheet } from "@/lib/google-sheets";
+import { sendOrderConfirmedEmail } from "@/lib/order-emails";
 
 const schema = z.object({
   razorpay_order_id: z.string(),
@@ -71,6 +72,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // background fetch before it completes.
     if (!wasAlreadyPaid) {
       await syncOrderToSheet(updated, user.email);
+      await sendOrderConfirmedEmail(updated, user.email);
     }
 
     return NextResponse.json({ order: updated });

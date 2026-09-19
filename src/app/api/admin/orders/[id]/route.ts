@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { errorResponse } from "@/lib/api";
 import { assertValidTransition, type OrderStatus } from "@/lib/orders";
+import { sendOrderShippedEmail, sendOrderDeliveredEmail } from "@/lib/order-emails";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -44,6 +45,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       assertValidTransition(existing.status as OrderStatus, body.status);
     }
 
+    // Re-clicking a status that's already current is a harmless no-op
+    // transition (assertValidTransition allows it), but must not re-send
+    // the shipped/delivered email every time - only an actual change does.
+    const statusChanged = Boolean(body.status) && body.status !== existing.status;
+
     const order = await prisma.order.update({
       where: { id },
       data: {
@@ -54,6 +60,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       },
       include: { items: true, user: { select: { id: true, name: true, email: true } } },
     });
+
+    if (statusChanged && body.status === "SHIPPED") {
+      await sendOrderShippedEmail(order, order.user.email, { carrier: order.trackingCarrier, number: order.trackingNumber });
+    } else if (statusChanged && body.status === "DELIVERED") {
+      await sendOrderDeliveredEmail(order, order.user.email);
+    }
 
     return NextResponse.json({ order });
   } catch (err) {
