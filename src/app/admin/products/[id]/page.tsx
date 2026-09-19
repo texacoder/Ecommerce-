@@ -9,6 +9,8 @@ const inputClass = "border border-[var(--border-subtle)] rounded px-3 py-2 text-
 type Category = { id: string; name: string; parent?: { name: string } | null };
 type ImageRow = { id: string; url: string; position: number };
 type VariantRow = { id: string; name: string; sku: string; priceOverride: number | null; stock: number; attributes: string | null };
+type OptionLinkRow = { id: string; optionProduct: { id: string; name: string; sku: string; price: number } };
+type ProductSearchResult = { id: string; name: string; sku: string; price: number };
 type SpecRow = { key: string; value: string };
 
 // Specifications are stored as a JSON object string. Older data (or a value
@@ -51,6 +53,7 @@ type Product = {
   updatedAt: string;
   images: ImageRow[];
   variants: VariantRow[];
+  optionLinks: OptionLinkRow[];
 };
 
 export default function EditProductPage() {
@@ -63,6 +66,9 @@ export default function EditProductPage() {
   const [newImageUrl, setNewImageUrl] = useState("");
   const [newVariant, setNewVariant] = useState({ name: "", sku: "", priceOverride: "", stock: "0" });
   const [specRows, setSpecRows] = useState<SpecRow[]>([]);
+  const [optionSearch, setOptionSearch] = useState("");
+  const [optionResults, setOptionResults] = useState<ProductSearchResult[]>([]);
+  const [searchingOptions, setSearchingOptions] = useState(false);
 
   const load = useCallback(async () => {
     const [pRes, cRes] = await Promise.all([fetch(`/api/admin/products/${id}`), fetch("/api/admin/categories")]);
@@ -243,6 +249,42 @@ export default function EditProductPage() {
   async function removeVariant(variantId: string) {
     if (!confirm("Remove this variant?")) return;
     await fetch(`/api/admin/products/${id}/variants/${variantId}`, { method: "DELETE" });
+    load();
+  }
+
+  async function searchOptionProducts() {
+    if (!optionSearch.trim()) {
+      setOptionResults([]);
+      return;
+    }
+    setSearchingOptions(true);
+    try {
+      const res = await fetch(`/api/admin/products?q=${encodeURIComponent(optionSearch.trim())}&pageSize=10`);
+      const data = await res.json();
+      const linkedIds = new Set(product?.optionLinks.map((l) => l.optionProduct.id) ?? []);
+      setOptionResults(
+        (data.products ?? [])
+          .filter((p: { id: string }) => p.id !== id && !linkedIds.has(p.id))
+          .map((p: { id: string; name: string; sku: string; price: number }) => ({ id: p.id, name: p.name, sku: p.sku, price: p.price }))
+      );
+    } finally {
+      setSearchingOptions(false);
+    }
+  }
+
+  async function addOptionLink(optionProductId: string) {
+    await fetch(`/api/admin/products/${id}/options`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ optionProductId }),
+    });
+    setOptionSearch("");
+    setOptionResults([]);
+    load();
+  }
+
+  async function removeOptionLink(optionProductId: string) {
+    await fetch(`/api/admin/products/${id}/options/${optionProductId}`, { method: "DELETE" });
     load();
   }
 
@@ -475,6 +517,56 @@ export default function EditProductPage() {
           <button onClick={addVariant} className="underline shrink-0">
             + Add variant
           </button>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="font-semibold mb-1">Linked options</h2>
+        <p className="text-xs text-[var(--text-faint)] mb-3">
+          Other, separately-listed products a customer can switch to from this product's page (e.g. a different
+          design of the same item). Unlike variants, each option keeps its own name, photo and price - selecting
+          one takes the customer to that product's own page.
+        </p>
+        <div className="flex flex-col gap-2 mb-4">
+          {product.optionLinks.length === 0 && <p className="text-sm text-[var(--text-faint)]">No linked options yet.</p>}
+          {product.optionLinks.map((link) => (
+            <div key={link.id} className="flex items-center justify-between text-sm border border-[var(--border-subtle)] rounded p-2">
+              <span>
+                {link.optionProduct.name} <span className="text-[var(--text-faint)]">({link.optionProduct.sku}) · ₹{(link.optionProduct.price / 100).toFixed(2)}</span>
+              </span>
+              <button onClick={() => removeOptionLink(link.optionProduct.id)} className="text-[var(--danger)] underline shrink-0">
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap gap-2 items-center text-sm">
+            <input
+              placeholder="Search products by name or SKU"
+              value={optionSearch}
+              onChange={(e) => setOptionSearch(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), searchOptionProducts())}
+              className={`${inputClass} w-full sm:max-w-xs`}
+            />
+            <button type="button" onClick={searchOptionProducts} className="underline shrink-0">
+              {searchingOptions ? "Searching..." : "Search"}
+            </button>
+          </div>
+          {optionResults.length > 0 && (
+            <div className="flex flex-col gap-2">
+              {optionResults.map((r) => (
+                <div key={r.id} className="flex items-center justify-between text-sm border border-[var(--border-subtle)] rounded p-2">
+                  <span>
+                    {r.name} <span className="text-[var(--text-faint)]">({r.sku}) · ₹{(r.price / 100).toFixed(2)}</span>
+                  </span>
+                  <button type="button" onClick={() => addOptionLink(r.id)} className="underline shrink-0">
+                    + Add as option
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>

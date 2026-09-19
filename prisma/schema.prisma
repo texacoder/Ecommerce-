@@ -159,6 +159,26 @@ model Product {
   orderItems      OrderItem[]
   promotions      Promotion[]
   coupons         Coupon[]
+  optionLinks     ProductOptionLink[] @relation("ProductOptions")
+  linkedAsOptionOf ProductOptionLink[] @relation("ProductOptionOf")
+}
+
+// Lets a product point at other, fully separate products as selectable
+// "options" (e.g. a Spiderman-themed mousepad linking to a Batman-themed
+// one). Unlike ProductVariant (same product, different price/stock), each
+// option here is its own Product with its own name/image/price - picking
+// one on the storefront navigates to that product's real page. Links are
+// always created and removed symmetrically (see the options API route) so
+// either product lists the other regardless of which side was edited.
+model ProductOptionLink {
+  id              String   @id @default(cuid())
+  productId       String
+  product         Product  @relation("ProductOptions", fields: [productId], references: [id], onDelete: Cascade)
+  optionProductId String
+  optionProduct   Product  @relation("ProductOptionOf", fields: [optionProductId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+
+  @@unique([productId, optionProductId])
 }
 
 model ProductImage {

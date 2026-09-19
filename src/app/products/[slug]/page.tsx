@@ -9,6 +9,7 @@ import ReviewsSection from "@/components/ReviewsSection";
 import ProductGallery from "@/components/ProductGallery";
 import StarRating from "@/components/StarRating";
 import ProductCard, { type ProductCardData } from "@/components/ProductCard";
+import ProductOptionsSelector from "@/components/ProductOptionsSelector";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -32,6 +33,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         where: { status: "PUBLISHED" },
         include: { user: { select: { id: true, name: true } } },
         orderBy: { createdAt: "desc" },
+      },
+      optionLinks: {
+        where: { optionProduct: { deletedAt: null, status: "PUBLISHED", visible: true } },
+        include: { optionProduct: { select: { id: true, slug: true, name: true, price: true } } },
       },
     },
   });
@@ -140,6 +145,15 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           </p>
 
           {product.description && <p className="mt-4 text-sm leading-relaxed text-[var(--text-muted)]">{product.description}</p>}
+
+          {product.optionLinks.length > 0 && (
+            <div className="mt-4">
+              <ProductOptionsSelector
+                current={{ id: product.id, slug: product.slug, name: product.name, price: product.price }}
+                options={product.optionLinks.map((l) => l.optionProduct)}
+              />
+            </div>
+          )}
 
           <div className="mt-6">
             <ProductPurchasePanel

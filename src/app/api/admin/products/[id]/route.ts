@@ -34,6 +34,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         category: true,
         images: { orderBy: { position: "asc" } },
         variants: true,
+        optionLinks: {
+          include: { optionProduct: { select: { id: true, name: true, sku: true, price: true } } },
+        },
       },
     });
     if (!product) return NextResponse.json({ error: "Product not found" }, { status: 404 });
@@ -64,7 +67,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const product = await prisma.product.update({
       where: { id },
       data,
-      include: { category: true, images: { orderBy: { position: "asc" } }, variants: true },
+      include: {
+        category: true,
+        images: { orderBy: { position: "asc" } },
+        variants: true,
+        optionLinks: {
+          include: { optionProduct: { select: { id: true, name: true, sku: true, price: true } } },
+        },
+      },
     });
 
     return NextResponse.json({ product });
