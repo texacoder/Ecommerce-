@@ -13,10 +13,17 @@ export async function sendEmail({
   to,
   subject,
   html,
+  replyTo,
 }: {
   to: string;
   subject: string;
   html: string;
+  // The sending address (EMAIL_FROM) only needs to exist for Resend's DNS
+  // verification - there's no requirement it's an actual mailbox. If a
+  // customer hits "reply" though, it has to land somewhere real, so this
+  // routes replies to an inbox that already exists instead of requiring a
+  // second mailbox to be bought just for that.
+  replyTo?: string;
 }): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return false;
@@ -30,7 +37,7 @@ export async function sendEmail({
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from, to, subject, html }),
+      body: JSON.stringify({ from, to, subject, html, ...(replyTo ? { reply_to: replyTo } : {}) }),
     });
     if (!res.ok) {
       console.error(`[email] Resend send failed (${res.status}): ${await res.text()}`);

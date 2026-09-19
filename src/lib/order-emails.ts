@@ -1,5 +1,6 @@
 import { sendEmail } from "@/lib/email";
 import { formatMoney } from "@/lib/format";
+import { SUPPORT_EMAIL } from "@/lib/contact";
 
 // Customer-facing order lifecycle emails. Every function here just calls
 // sendEmail(), which already never throws and no-ops silently when
@@ -41,6 +42,7 @@ function itemsList(items: EmailOrderItem[]): string {
 export async function sendOrderConfirmedEmail(order: EmailOrder, email: string): Promise<void> {
   await sendEmail({
     to: email,
+    replyTo: SUPPORT_EMAIL,
     subject: `Order confirmed — #${order.orderNumber}`,
     html: shell(
       "Your order is confirmed!",
@@ -64,6 +66,7 @@ export async function sendOrderShippedEmail(
     : "";
   await sendEmail({
     to: email,
+    replyTo: SUPPORT_EMAIL,
     subject: `Your order has shipped — #${order.orderNumber}`,
     html: shell(
       "Your order is on its way!",
@@ -79,6 +82,7 @@ export async function sendOrderShippedEmail(
 export async function sendOrderDeliveredEmail(order: EmailOrder, email: string): Promise<void> {
   await sendEmail({
     to: email,
+    replyTo: SUPPORT_EMAIL,
     subject: `Delivered — #${order.orderNumber}`,
     html: shell(
       "Your order has been delivered",
@@ -94,6 +98,7 @@ export async function sendOrderDeliveredEmail(order: EmailOrder, email: string):
 export async function sendOrderCancelledEmail(order: EmailOrder, email: string, reason: string | null): Promise<void> {
   await sendEmail({
     to: email,
+    replyTo: SUPPORT_EMAIL,
     subject: `Order cancelled — #${order.orderNumber}`,
     html: shell(
       "Your order was cancelled",
@@ -113,6 +118,7 @@ export async function sendOrderRefundedEmail(
 ): Promise<void> {
   await sendEmail({
     to: email,
+    replyTo: SUPPORT_EMAIL,
     subject: `Refund ${fullyRefunded ? "completed" : "processed"} — #${order.orderNumber}`,
     html: shell(
       "Your refund has been processed",
