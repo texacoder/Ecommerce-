@@ -27,6 +27,12 @@ export default function TermsPage() {
             and are inclusive of applicable taxes unless stated otherwise. We reserve the right to change
             prices, discontinue products, or limit order quantities at any time.
           </p>
+          <p className="mt-2">
+            Some products are sourced through third-party suppliers and marketplaces. Your order may arrive
+            in packaging bearing the supplier&apos;s branding rather than EXORASTORE&apos;s — this
+            doesn&apos;t affect the item&apos;s authenticity, your order, or your rights under our{" "}
+            <a href="/refund-policy" className="text-[var(--brand-accent)] hover:underline">Refund &amp; Cancellation Policy</a>.
+          </p>
         </Section>
 
         <Section title="4. Orders &amp; payment">
