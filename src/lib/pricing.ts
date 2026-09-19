@@ -208,6 +208,14 @@ export async function validateAndPriceCoupon(
  * UPDATE (WHERE usedCount &lt; usageLimit) so two simultaneous checkouts
  * can't both slip past a stale count and over-redeem the last use — the
  * loser's WHERE matches zero rows and the whole order transaction rolls back.
+ *
+ * The per-customer limit can't use the same trick (it's a COUNT over a
+ * related table, not a column with a conditional UPDATE), so instead this
+ * takes a Postgres advisory lock scoped to (couponId, userId) before
+ * counting - a second concurrent checkout for the same coupon+customer
+ * blocks here until the first one's transaction commits or rolls back
+ * (advisory xact locks release automatically then), so the count it sees
+ * is never stale.
  */
 export async function recordCouponUsage(
   tx: Prisma.TransactionClient,
@@ -217,6 +225,15 @@ export async function recordCouponUsage(
 ) {
   const coupon = await tx.coupon.findUnique({ where: { code } });
   if (!coupon) return;
+
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${coupon.id}), hashtext(${userId}))`;
+
+  if (coupon.perCustomerLimit !== null) {
+    const used = await tx.couponUsage.count({ where: { couponId: coupon.id, userId } });
+    if (used >= coupon.perCustomerLimit) {
+      throw new PricingError("You have already used this coupon the maximum number of times");
+    }
+  }
 
   if (coupon.usageLimit !== null) {
     const result = await tx.coupon.updateMany({
