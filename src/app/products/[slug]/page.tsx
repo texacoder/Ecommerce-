@@ -52,7 +52,17 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const avgRating = product.reviews.length
     ? product.reviews.reduce((s, r) => s + r.rating, 0) / product.reviews.length
     : null;
-  const specs: Record<string, string> = product.specifications ? JSON.parse(product.specifications) : {};
+  let specs: Record<string, string> = {};
+  if (product.specifications) {
+    try {
+      const parsed = JSON.parse(product.specifications);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) specs = parsed;
+    } catch {
+      // Specifications predates the key/value editor or was hand-edited into
+      // invalid JSON - degrade to "no structured specs" rather than crashing
+      // the page a shopper is trying to buy from.
+    }
+  }
 
   const related = product.categoryId
     ? await prisma.product.findMany({

@@ -9,6 +9,24 @@ const inputClass = "border border-[var(--border-subtle)] rounded px-3 py-2 text-
 type Category = { id: string; name: string; parent?: { name: string } | null };
 type ImageRow = { id: string; url: string; position: number };
 type VariantRow = { id: string; name: string; sku: string; priceOverride: number | null; stock: number; attributes: string | null };
+type SpecRow = { key: string; value: string };
+
+// Specifications are stored as a JSON object string. Older data (or a value
+// typed by hand before this editor existed) may not be valid JSON at all -
+// salvage it into a single row instead of losing it, rather than crashing
+// when the storefront tries to parse it.
+function parseSpecRows(raw: string | null): SpecRow[] {
+  if (!raw) return [];
+  try {
+    const obj = JSON.parse(raw);
+    if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+      return Object.entries(obj).map(([key, value]) => ({ key, value: String(value) }));
+    }
+  } catch {
+    // fall through to salvage below
+  }
+  return [{ key: "Note", value: raw }];
+}
 type Product = {
   id: string;
   name: string;
@@ -44,14 +62,29 @@ export default function EditProductPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [newImageUrl, setNewImageUrl] = useState("");
   const [newVariant, setNewVariant] = useState({ name: "", sku: "", priceOverride: "", stock: "0" });
+  const [specRows, setSpecRows] = useState<SpecRow[]>([]);
 
   const load = useCallback(async () => {
     const [pRes, cRes] = await Promise.all([fetch(`/api/admin/products/${id}`), fetch("/api/admin/categories")]);
     const pData = await pRes.json();
     const cData = await cRes.json();
     setProduct(pData.product);
+    setSpecRows(parseSpecRows(pData.product.specifications));
     setCategories(cData.categories ?? []);
   }, [id]);
+
+  // Specifications editing works on key/value rows so nobody has to
+  // hand-type JSON; this serializes them back into the JSON string the API
+  // and storefront expect, dropping rows with no key.
+  function applySpecRows(rows: SpecRow[]) {
+    setSpecRows(rows);
+    const obj: Record<string, string> = {};
+    for (const row of rows) {
+      const key = row.key.trim();
+      if (key) obj[key] = row.value;
+    }
+    setProduct((p) => (p ? { ...p, specifications: Object.keys(obj).length ? JSON.stringify(obj) : null } : p));
+  }
 
   useEffect(() => {
     load();
@@ -273,9 +306,35 @@ export default function EditProductPage() {
         <Field label="Description">
           <textarea rows={4} className={inputClass} value={product.description ?? ""} onChange={(e) => setProduct({ ...product, description: e.target.value })} />
         </Field>
-        <Field label="Specifications (JSON, e.g. {&quot;Weight&quot;: &quot;1kg&quot;})">
-          <textarea rows={3} className={inputClass} value={product.specifications ?? ""} onChange={(e) => setProduct({ ...product, specifications: e.target.value })} />
-        </Field>
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium">Specifications</span>
+          {specRows.map((row, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <input
+                placeholder="Name (e.g. Size)"
+                value={row.key}
+                onChange={(e) => applySpecRows(specRows.map((r, idx) => (idx === i ? { ...r, key: e.target.value } : r)))}
+                className={`${inputClass} w-2/5`}
+              />
+              <input
+                placeholder="Value (e.g. Free size)"
+                value={row.value}
+                onChange={(e) => applySpecRows(specRows.map((r, idx) => (idx === i ? { ...r, value: e.target.value } : r)))}
+                className={inputClass}
+              />
+              <button
+                type="button"
+                onClick={() => applySpecRows(specRows.filter((_, idx) => idx !== i))}
+                className="text-[var(--danger)] text-xs shrink-0"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+          <button type="button" onClick={() => applySpecRows([...specRows, { key: "", value: "" }])} className="text-sm underline w-fit">
+            + Add specification
+          </button>
+        </div>
 
         <div className="flex gap-6 text-sm">
           <label className="flex items-center gap-2">
