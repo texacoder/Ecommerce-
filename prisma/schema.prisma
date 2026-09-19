@@ -47,6 +47,12 @@ enum PaymentStatus {
   FAILED
 }
 
+enum ReturnRequestStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+}
+
 enum ReviewStatus {
   PUBLISHED
   HIDDEN
@@ -79,6 +85,7 @@ model User {
   addresses          Address[]
   couponUsages       CouponUsage[]
   passwordResetTokens PasswordResetToken[]
+  returnRequests     ReturnRequest[]
 }
 
 model PasswordResetToken {
@@ -228,12 +235,17 @@ model Order {
   trackingCarrier String?
   trackingNumber  String?
   cancelReason    String?
+  // Set once, the first time status transitions to DELIVERED - the return
+  // window (see ReturnRequest) counts from this, not from updatedAt, which
+  // changes on every unrelated edit (tracking info, etc).
+  deliveredAt     DateTime?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
   items           OrderItem[]
   couponUsages    CouponUsage[]
   payments        Payment[]
+  returnRequests  ReturnRequest[]
 }
 
 // One row per payment attempt so a failed attempt can be retried without
@@ -269,6 +281,28 @@ model OrderItem {
   priceSnapshot Int
   imageSnapshot String?
   quantity      Int
+
+  returnRequest ReturnRequest?
+}
+
+// A customer's request to return one line item of a delivered order.
+// One-to-one with OrderItem (@unique below) - a rejected request means
+// "contact customer service" rather than letting the customer spam
+// re-requests on the same item.
+model ReturnRequest {
+  id          String              @id @default(cuid())
+  orderId     String
+  order       Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItemId String              @unique
+  orderItem   OrderItem           @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User                @relation(fields: [userId], references: [id])
+  reason      String
+  status      ReturnRequestStatus @default(REQUESTED)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([orderId])
 }
 
 model Review {

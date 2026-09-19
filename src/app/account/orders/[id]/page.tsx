@@ -5,17 +5,27 @@ import { prisma } from "@/lib/db";
 import { formatMoney, formatDateTime, statusLabel } from "@/lib/format";
 import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 import OrderPaymentActions from "@/components/OrderPaymentActions";
+import ReturnItemControl from "@/components/ReturnItemControl";
 import type { OrderStatus } from "@/lib/orders";
+import { isReturnWindowOpen } from "@/lib/returns";
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await getSession();
   if (!session) redirect(`/login?next=/account/orders/${id}`);
 
-  const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      items: { include: { product: { select: { isReturnable: true } }, returnRequest: true } },
+    },
+  });
   if (!order || (order.userId !== session.sub && session.role !== "ADMIN")) {
     redirect("/account/orders");
   }
+
+  const isOwnOrder = order.userId === session.sub;
+  const returnWindowOpen = isReturnWindowOpen(order.deliveredAt);
 
   const address = JSON.parse(order.addressSnapshot) as {
     fullName: string;
@@ -85,11 +95,21 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
       <div className="card-surface p-4">
         {order.items.map((item) => (
-          <div key={item.id} className="flex justify-between text-sm py-1.5 border-b border-[var(--border-subtle)] last:border-0">
-            <span>
-              {item.nameSnapshot} × {item.quantity}
-            </span>
-            <span>{formatMoney(item.priceSnapshot * item.quantity)}</span>
+          <div key={item.id} className="py-1.5 border-b border-[var(--border-subtle)] last:border-0">
+            <div className="flex justify-between text-sm">
+              <span>
+                {item.nameSnapshot} × {item.quantity}
+              </span>
+              <span>{formatMoney(item.priceSnapshot * item.quantity)}</span>
+            </div>
+            {isOwnOrder && order.status === "DELIVERED" && item.product?.isReturnable && (
+              <ReturnItemControl
+                orderId={order.id}
+                itemId={item.id}
+                returnWindowOpen={returnWindowOpen}
+                existingRequest={item.returnRequest ? { status: item.returnRequest.status, reason: item.returnRequest.reason } : null}
+              />
+            )}
           </div>
         ))}
         <div className="flex flex-col gap-1 text-sm mt-3 pt-3 border-t border-[var(--border-subtle)]">

@@ -48,6 +48,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       where: { id },
       data: {
         ...(body.status ? { status: body.status } : {}),
+        ...(body.status === "DELIVERED" && !existing.deliveredAt ? { deliveredAt: new Date() } : {}),
         ...(body.trackingCarrier !== undefined ? { trackingCarrier: body.trackingCarrier } : {}),
         ...(body.trackingNumber !== undefined ? { trackingNumber: body.trackingNumber } : {}),
       },
