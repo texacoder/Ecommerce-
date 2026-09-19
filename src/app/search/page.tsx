@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import ProductCard from "@/components/ProductCard";
 import ProductFilters from "@/components/ProductFilters";
 import { getProductListing } from "@/lib/product-listing";
@@ -16,6 +17,18 @@ type SearchParams = {
   minDiscount?: string;
   category?: string;
 };
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
+  const sp = await searchParams;
+  return {
+    title: sp.q ? `Search results for "${sp.q}"` : "Search",
+    // Internal search result pages are thin/duplicate by nature (the same
+    // catalog sliced a different way for every query) - Google's own
+    // guidance is to keep them out of the index but still let links from
+    // them be followed/crawled, rather than blocking the page outright.
+    robots: { index: false, follow: true },
+  };
+}
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;

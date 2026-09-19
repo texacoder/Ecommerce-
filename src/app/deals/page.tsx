@@ -1,7 +1,18 @@
+import type { Metadata } from "next";
 import ProductCard from "@/components/ProductCard";
 import PromoTile from "@/components/PromoTile";
 import { getProductListing } from "@/lib/product-listing";
 import { prisma } from "@/lib/db";
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }): Promise<Metadata> {
+  const sp = await searchParams;
+  const page = Number(sp.page ?? "1") || 1;
+  return {
+    title: "Today's Deals",
+    description: "Discounted electronics, fashion, home & kitchen, beauty, accessories and sports gear at EXORASTORE — deals updated daily.",
+    alternates: { canonical: page > 1 ? `/deals?page=${page}` : "/deals" },
+  };
+}
 
 export default async function DealsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const sp = await searchParams;

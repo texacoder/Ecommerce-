@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms & Conditions",
+  description: "Read EXORASTORE's terms and conditions covering orders, payments, delivery, and your responsibilities as a customer.",
+  alternates: { canonical: "/terms" },
+};
+
 export default function TermsPage() {
   return (
     <div className="container-page py-12 max-w-2xl">

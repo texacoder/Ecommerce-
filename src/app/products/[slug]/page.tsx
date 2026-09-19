@@ -10,15 +10,49 @@ import ProductGallery from "@/components/ProductGallery";
 import StarRating from "@/components/StarRating";
 import ProductCard, { type ProductCardData } from "@/components/ProductCard";
 import ProductOptionsSelector from "@/components/ProductOptionsSelector";
+import { SITE_URL, isCrawlableImageUrl } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const product = await prisma.product.findFirst({
     where: { slug, deletedAt: null, status: "PUBLISHED", visible: true },
-    select: { name: true },
+    select: {
+      name: true,
+      description: true,
+      brand: true,
+      images: { orderBy: { position: "asc" }, take: 1, select: { url: true } },
+    },
   });
   if (!product) return {};
-  return { title: product.name };
+
+  const description = product.description
+    ? product.description.slice(0, 160)
+    : `Buy ${product.name}${product.brand ? ` by ${product.brand}` : ""} online at EXORASTORE.`;
+  const image = product.images[0]?.url;
+  // A child segment's own `openGraph`/`twitter` object replaces the root
+  // layout's rather than merging field-by-field, so leaving `images`
+  // undefined here would drop the site's default OG image entirely
+  // instead of falling back to it - fall back explicitly instead.
+  const ogImage = isCrawlableImageUrl(image) ? image : "/opengraph-image";
+
+  return {
+    title: product.name,
+    description,
+    alternates: { canonical: `/products/${slug}` },
+    openGraph: {
+      title: product.name,
+      description,
+      url: `/products/${slug}`,
+      type: "website",
+      images: [{ url: ogImage }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description,
+      images: [ogImage],
+    },
+  };
 }
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -97,8 +131,62 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     hasVariants: p._count.variants > 0,
   }));
 
+  const crawlableImages = product.images.map((i) => i.url).filter(isCrawlableImageUrl);
+
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description ?? undefined,
+    image: crawlableImages.length > 0 ? crawlableImages : undefined,
+    sku: product.sku,
+    brand: product.brand ? { "@type": "Brand", name: product.brand } : undefined,
+    offers: {
+      "@type": "Offer",
+      url: `${SITE_URL}/products/${slug}`,
+      priceCurrency: "INR",
+      price: (product.price / 100).toFixed(2),
+      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    },
+    ...(product.reviews.length > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: avgRating?.toFixed(1),
+            reviewCount: product.reviews.length,
+          },
+        }
+      : {}),
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Products", item: `${SITE_URL}/products` },
+      ...(product.category
+        ? [
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: product.category.name,
+              item: `${SITE_URL}/category/${product.category.slug}`,
+            },
+          ]
+        : []),
+      {
+        "@type": "ListItem",
+        position: product.category ? 3 : 2,
+        name: product.name,
+        item: `${SITE_URL}/products/${slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="container-page py-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <div className="text-sm text-[var(--text-muted)] mb-4 flex gap-1">
         <Link href="/products" className="hover:underline">
           Products

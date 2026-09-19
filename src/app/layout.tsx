@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { prisma } from "@/lib/db";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,11 +21,27 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "EXORASTORE — Shop everything you need",
-    template: "%s | EXORASTORE",
+    default: `${SITE_NAME} — Shop everything you need`,
+    template: `%s | ${SITE_NAME}`,
   },
-  description: "EXORASTORE is an online marketplace for electronics, fashion, home, beauty, accessories and sports gear.",
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — Shop everything you need`,
+    description: SITE_DESCRIPTION,
+    locale: "en_IN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — Shop everything you need`,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 // The header's category list (and every page under this layout) reads live

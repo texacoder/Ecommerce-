@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { whatsappLink } from "@/lib/contact";
+
+export const metadata: Metadata = {
+  title: "Refund & Cancellation Policy",
+  description: "EXORASTORE's refund, return, and order cancellation policy — including timelines, eligibility, and how to request one.",
+  alternates: { canonical: "/refund-policy" },
+};
 
 export default function RefundPolicyPage() {
   return (

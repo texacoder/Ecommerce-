@@ -1,4 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Help Center",
+  description: "Answers to common questions about tracking orders, returns, payment methods, and coupon codes on EXORASTORE.",
+  alternates: { canonical: "/help" },
+};
 
 const FAQS = [
   {
@@ -20,8 +27,19 @@ const FAQS = [
 ];
 
 export default function HelpPage() {
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+
   return (
     <div className="container-page py-12 max-w-2xl">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <h1 className="text-2xl font-semibold mb-6">Help Center</h1>
       <div className="flex flex-col gap-4">
         {FAQS.map((item) => (

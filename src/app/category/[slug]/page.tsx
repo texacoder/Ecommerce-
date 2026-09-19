@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 import ProductFilters from "@/components/ProductFilters";
 import { getProductListing } from "@/lib/product-listing";
+import { SITE_URL } from "@/lib/seo";
 
 type SearchParams = {
   sort?: string;
@@ -17,11 +18,38 @@ type SearchParams = {
   minDiscount?: string;
 };
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<SearchParams>;
+}): Promise<Metadata> {
   const { slug } = await params;
-  const category = await prisma.category.findFirst({ where: { slug, visible: true }, select: { name: true } });
+  const sp = await searchParams;
+  const category = await prisma.category.findFirst({ where: { slug, visible: true }, select: { name: true, description: true } });
   if (!category) return {};
-  return { title: `Buy ${category.name}` };
+
+  const title = `Buy ${category.name}`;
+  const description =
+    category.description?.slice(0, 160) ??
+    `Shop ${category.name} online at EXORASTORE — great prices, fast delivery, easy returns.`;
+  // Every filter/sort combination canonicalizes to the plain category page
+  // (or its own page number) - those are near-duplicate views of the same
+  // catalog, and consolidating them keeps ranking signals on one URL
+  // instead of splitting them across every ?sort=/?brand= permutation.
+  const page = Number(sp.page ?? "1") || 1;
+  const canonical = page > 1 ? `/category/${slug}?page=${page}` : `/category/${slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    // A child segment's own `openGraph` object replaces the root layout's
+    // rather than merging field-by-field, so this needs its own explicit
+    // image or it would drop the site's default OG image entirely.
+    openGraph: { title, description, url: canonical, images: [{ url: "/opengraph-image" }] },
+  };
 }
 
 export default async function CategoryPage({
@@ -53,8 +81,18 @@ export default async function CategoryPage({
     minDiscount: sp.minDiscount ? Number(sp.minDiscount) : undefined,
   });
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Products", item: `${SITE_URL}/products` },
+      { "@type": "ListItem", position: 2, name: category.name, item: `${SITE_URL}/category/${slug}` },
+    ],
+  };
+
   return (
     <div className="container-page py-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <h1 className="text-2xl font-semibold mb-2">{category.name}</h1>
       {category.description && <p className="text-[var(--text-muted)] mb-4">{category.description}</p>}
 

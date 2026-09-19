@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import ProductCard from "@/components/ProductCard";
 import ProductFilters from "@/components/ProductFilters";
 import { getProductListing } from "@/lib/product-listing";
@@ -18,6 +19,20 @@ type SearchParams = {
   featured?: string;
   bestSeller?: string;
 };
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
+  const sp = await searchParams;
+  const page = Number(sp.page ?? "1") || 1;
+  // Every filter/sort combination canonicalizes to the plain listing (or
+  // its own page number) to avoid splitting ranking signals across near-
+  // duplicate query-param variants of the same catalog.
+  const canonical = page > 1 ? `/products?page=${page}` : "/products";
+  return {
+    title: "All Products",
+    description: "Browse EXORASTORE's full catalog of electronics, fashion, home & kitchen, beauty, accessories and sports gear.",
+    alternates: { canonical },
+  };
+}
 
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;

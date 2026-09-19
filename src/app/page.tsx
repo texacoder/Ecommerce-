@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
 import ProductCard, { type ProductCardData } from "@/components/ProductCard";
 import PromoTile from "@/components/PromoTile";
+import { SITE_NAME, SITE_URL } from "@/lib/seo";
 
 type RawProduct = {
   id: string;
@@ -136,8 +137,31 @@ export default async function HomePage() {
     }
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        name: SITE_NAME,
+        url: SITE_URL,
+        logo: `${SITE_URL}/logo-mark-96.png`,
+      },
+      {
+        "@type": "WebSite",
+        name: SITE_NAME,
+        url: SITE_URL,
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${SITE_URL}/search?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
+
   return (
     <div className="flex flex-col">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <section className="bg-[var(--brand-navy)]">
         <div className="container-page py-10 sm:py-14 grid md:grid-cols-2 gap-8 items-center">
           <div className="text-white">

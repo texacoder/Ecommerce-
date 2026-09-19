@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About Us",
+  description: "EXORASTORE is an online marketplace for electronics, fashion, home essentials, beauty, accessories and sports gear — learn what we're about.",
+  alternates: { canonical: "/about" },
+};
+
 export default function AboutPage() {
   return (
     <div className="container-page py-12 max-w-2xl">

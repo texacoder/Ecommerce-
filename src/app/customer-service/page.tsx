@@ -1,5 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { whatsappLink, supportMailtoLink, SUPPORT_EMAIL } from "@/lib/contact";
+
+export const metadata: Metadata = {
+  title: "Customer Service",
+  description: "Reach EXORASTORE customer support via WhatsApp or email for order, return, and refund questions.",
+  alternates: { canonical: "/customer-service" },
+};
 
 export default async function CustomerServicePage({
   searchParams,

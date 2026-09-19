@@ -10,7 +10,7 @@ export default function robots(): MetadataRoute.Robots {
       // Account/checkout/admin/auth pages are either private, require a
       // session, or have nothing worth indexing (a cart, a login form) -
       // keep crawlers on the actual storefront and product pages instead.
-      disallow: ["/admin", "/account", "/api", "/checkout", "/cart", "/login", "/register", "/forgot-password", "/reset-password"],
+      disallow: ["/admin", "/account", "/api", "/checkout", "/cart", "/login", "/register", "/forgot-password", "/reset-password", "/order-confirmation"],
     },
     sitemap: `${baseUrl}/sitemap.xml`,
   };
