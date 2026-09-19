@@ -125,6 +125,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             )}
           </div>
           <p className="text-xs text-[var(--text-faint)] mt-1">Inclusive of all taxes</p>
+          <p className="text-xs mt-1 text-[var(--text-muted)]">
+            {product.isReturnable ? "Eligible for 7-day returns" : "This item is not eligible for return"}
+          </p>
 
           {product.description && <p className="mt-4 text-sm leading-relaxed text-[var(--text-muted)]">{product.description}</p>}
 

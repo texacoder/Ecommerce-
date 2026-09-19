@@ -20,6 +20,7 @@ const updateSchema = z.object({
   isFeatured: z.boolean().optional(),
   isBestSeller: z.boolean().optional(),
   isNewArrival: z.boolean().optional(),
+  isReturnable: z.boolean().optional(),
   visible: z.boolean().optional(),
 });
 

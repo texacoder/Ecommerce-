@@ -21,6 +21,7 @@ export default function NewProductPage() {
     stock: "0",
     description: "",
     status: "DRAFT",
+    isReturnable: true,
   });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -80,6 +81,7 @@ export default function NewProductPage() {
           stock: Number(form.stock),
           description: form.description || null,
           status: form.status,
+          isReturnable: form.isReturnable,
         }),
       });
       const data = await res.json();
@@ -150,6 +152,10 @@ export default function NewProductPage() {
             <option value="UNPUBLISHED">Unpublished</option>
           </select>
         </Field>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={form.isReturnable} onChange={(e) => setForm({ ...form, isReturnable: e.target.checked })} />
+          This product can be returned
+        </label>
 
         <div className="flex flex-col gap-2">
           <span className="text-sm font-medium">Images (optional)</span>

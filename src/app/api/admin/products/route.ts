@@ -20,6 +20,7 @@ const createSchema = z.object({
   isFeatured: z.boolean().optional().default(false),
   isBestSeller: z.boolean().optional().default(false),
   isNewArrival: z.boolean().optional().default(false),
+  isReturnable: z.boolean().optional().default(true),
   visible: z.boolean().optional().default(true),
   images: z.array(z.string()).optional().default([]),
 });
@@ -97,6 +98,7 @@ export async function POST(req: NextRequest) {
         isFeatured: body.isFeatured,
         isBestSeller: body.isBestSeller,
         isNewArrival: body.isNewArrival,
+        isReturnable: body.isReturnable,
         visible: body.visible,
         images: {
           create: body.images.map((url, position) => ({ url, position })),
