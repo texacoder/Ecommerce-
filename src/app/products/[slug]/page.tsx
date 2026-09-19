@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { formatMoney } from "@/lib/format";
@@ -8,6 +9,16 @@ import ReviewsSection from "@/components/ReviewsSection";
 import ProductGallery from "@/components/ProductGallery";
 import StarRating from "@/components/StarRating";
 import ProductCard, { type ProductCardData } from "@/components/ProductCard";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await prisma.product.findFirst({
+    where: { slug, deletedAt: null, status: "PUBLISHED", visible: true },
+    select: { name: true },
+  });
+  if (!product) return {};
+  return { title: product.name };
+}
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

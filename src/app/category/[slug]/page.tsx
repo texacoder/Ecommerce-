@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 import ProductFilters from "@/components/ProductFilters";
@@ -15,6 +16,13 @@ type SearchParams = {
   inStockOnly?: string;
   minDiscount?: string;
 };
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const category = await prisma.category.findFirst({ where: { slug, visible: true }, select: { name: true } });
+  if (!category) return {};
+  return { title: `Buy ${category.name}` };
+}
 
 export default async function CategoryPage({
   params,

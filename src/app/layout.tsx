@@ -20,7 +20,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EXORASTORE — Shop everything you need",
+  title: {
+    default: "EXORASTORE — Shop everything you need",
+    template: "%s | EXORASTORE",
+  },
   description: "EXORASTORE is an online marketplace for electronics, fashion, home, beauty, accessories and sports gear.",
 };
 
