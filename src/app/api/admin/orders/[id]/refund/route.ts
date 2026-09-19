@@ -52,13 +52,29 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const newRefundedAmount = order.refundedAmount + amount;
     const fullyRefunded = newRefundedAmount >= order.total;
 
-    const updated = await prisma.order.update({
-      where: { id },
+    // Guard against two concurrent refund requests (e.g. an admin
+    // double-clicking) both reading the same stale refundedAmount and
+    // together refunding more than the order total. The where clause only
+    // matches if refundedAmount is still what we read above; a concurrent
+    // request that already applied its own refund makes this a no-op match
+    // failure instead of silently stacking amounts.
+    const { count } = await prisma.order.updateMany({
+      where: { id, refundedAmount: order.refundedAmount },
       data: {
         refundedAmount: newRefundedAmount,
         paymentStatus: fullyRefunded ? "REFUNDED" : "PARTIALLY_REFUNDED",
         status: fullyRefunded ? "REFUNDED" : order.status,
       },
+    });
+    if (count === 0) {
+      return NextResponse.json(
+        { error: "This order's refund status just changed — please refresh and try again." },
+        { status: 409 }
+      );
+    }
+
+    const updated = await prisma.order.findUniqueOrThrow({
+      where: { id },
       include: { items: true, user: { select: { id: true, name: true, email: true } } },
     });
 

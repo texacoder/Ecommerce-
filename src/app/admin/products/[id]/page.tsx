@@ -529,9 +529,9 @@ export default function EditProductPage() {
       <section className="mt-10">
         <h2 className="font-semibold mb-1">Linked options</h2>
         <p className="text-xs text-[var(--text-faint)] mb-3">
-          Other, separately-listed products a customer can switch to from this product's page (e.g. a different
+          Other, separately-listed products a customer can switch to from this product&apos;s page (e.g. a different
           design of the same item). Unlike variants, each option keeps its own name, photo and price - selecting
-          one takes the customer to that product's own page.
+          one takes the customer to that product&apos;s own page.
         </p>
         <div className="flex flex-col gap-2 mb-4">
           {product.optionLinks.length === 0 && <p className="text-sm text-[var(--text-faint)]">No linked options yet.</p>}

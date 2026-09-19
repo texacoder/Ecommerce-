@@ -49,28 +49,32 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Payment verification failed" }, { status: 400 });
     }
 
-    const wasAlreadyPaid = order.paymentStatus === "PAID";
-
-    const updated = await prisma.$transaction(async (tx) => {
-      await tx.payment.update({
-        where: { id: payment.id },
-        data: {
-          status: "PAID",
-          providerPaymentId: body.razorpay_payment_id,
-          signature: body.razorpay_signature,
-        },
-      });
-      return tx.order.update({
-        where: { id: order.id },
-        data: { paymentStatus: "PAID", status: order.status === "PENDING" ? "CONFIRMED" : order.status },
-        include: { items: true },
-      });
+    // This client-side callback and the webhook can both arrive for the
+    // same payment (e.g. the webhook wins a race just before the browser
+    // gets back to us). Gate the transition on an atomic updateMany rather
+    // than a plain read-then-write, so only whichever request actually
+    // flips PENDING/FAILED -> PAID gets to sync/email — the loser sees
+    // count === 0 and skips both instead of double-sending.
+    const { count } = await prisma.order.updateMany({
+      where: { id: order.id, paymentStatus: { not: "PAID" } },
+      data: { paymentStatus: "PAID", status: order.status === "PENDING" ? "CONFIRMED" : order.status },
     });
+
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        status: "PAID",
+        providerPaymentId: body.razorpay_payment_id,
+        signature: body.razorpay_signature,
+      },
+    });
+
+    const updated = await prisma.order.findUniqueOrThrow({ where: { id: order.id }, include: { items: true } });
 
     // Awaited (not fire-and-forget) - a serverless function can be torn
     // down right after it returns a response, which would kill a detached
     // background fetch before it completes.
-    if (!wasAlreadyPaid) {
+    if (count > 0) {
       await syncOrderToSheet(updated, user.email);
       await sendOrderConfirmedEmail(updated, user.email);
     }

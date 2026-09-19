@@ -56,14 +56,20 @@ export async function POST(req: NextRequest) {
         data: { status: "PAID", providerPaymentId: paymentEntity.id },
       });
       const order = await tx.order.findUnique({ where: { id: payment.orderId } });
-      if (order && order.paymentStatus !== "PAID") {
-        return tx.order.update({
-          where: { id: order.id },
-          data: { paymentStatus: "PAID", status: order.status === "PENDING" ? "CONFIRMED" : order.status },
-          include: { items: true, user: { select: { email: true } } },
-        });
-      }
-      return null;
+      if (!order) return null;
+      // Atomic guard: the client-side verify-payment callback can win the
+      // same race, so only whichever request actually flips the status
+      // away from PAID gets to sync/email — this avoids a duplicate
+      // confirmation email/sheet row for the same order.
+      const { count } = await tx.order.updateMany({
+        where: { id: order.id, paymentStatus: { not: "PAID" } },
+        data: { paymentStatus: "PAID", status: order.status === "PENDING" ? "CONFIRMED" : order.status },
+      });
+      if (count === 0) return null;
+      return tx.order.findUnique({
+        where: { id: order.id },
+        include: { items: true, user: { select: { email: true } } },
+      });
     });
 
     // Awaited, not fire-and-forget - the function can be torn down right

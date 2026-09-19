@@ -26,7 +26,18 @@ export async function GET(req: NextRequest) {
       orderBy: { position: "asc" },
     });
 
-    return NextResponse.json({ promotions });
+    // A promotion can point at a product/category that's since been
+    // unpublished, hidden, or soft-deleted (the FK uses onDelete: SetNull,
+    // but unpublishing doesn't clear it) — strip those references here so
+    // this public endpoint never exposes a product/category that isn't
+    // supposed to be visible on the storefront.
+    const sanitized = promotions.map((p) => ({
+      ...p,
+      product: p.product && p.product.status === "PUBLISHED" && p.product.visible && !p.product.deletedAt ? p.product : null,
+      category: p.category && p.category.visible ? p.category : null,
+    }));
+
+    return NextResponse.json({ promotions: sanitized });
   } catch (err) {
     return errorResponse(err);
   }

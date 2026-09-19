@@ -72,16 +72,30 @@ export default async function HomePage() {
       prisma.promotion.findMany({ where: { type: "SALE_CAMPAIGN", ...activePromotionWhere(now) }, orderBy: { position: "asc" }, take: 3 }),
       prisma.promotion.findMany({
         where: { type: "DEAL", ...activePromotionWhere(now) },
-        include: { product: { select: { slug: true } } },
+        include: { product: { select: { slug: true, status: true, visible: true, deletedAt: true } } },
         orderBy: { position: "asc" },
         take: 4,
       }),
       prisma.promotion.findMany({
         where: { type: "FEATURED_SECTION", ...activePromotionWhere(now) },
-        include: { product: { select: { slug: true } }, category: { select: { slug: true } } },
+        include: {
+          product: { select: { slug: true, status: true, visible: true, deletedAt: true } },
+          category: { select: { slug: true, visible: true } },
+        },
         orderBy: { position: "asc" },
       }),
     ]);
+
+  // A promo can keep pointing at a product/category after it's been
+  // unpublished, hidden, or soft-deleted (unpublishing doesn't clear the
+  // promo's productId) — drop that reference here so the homepage never
+  // links out to a product page that will 404.
+  const isVisibleProduct = (p: { status: string; visible: boolean; deletedAt: Date | null } | null | undefined) =>
+    !!p && p.status === "PUBLISHED" && p.visible && !p.deletedAt;
+  const validDealPromos = dealPromos.map((d) => ({
+    ...d,
+    product: isVisibleProduct(d.product) ? d.product : null,
+  }));
 
   // FEATURED_SECTION promotions can be scoped to a category (render that
   // category's products) or left as a standalone spotlight banner. A
@@ -89,9 +103,15 @@ export default async function HomePage() {
   // normally assigned to leaf subcategories, not the parent, so a promo
   // scoped to a parent category (e.g. "Electronics") would otherwise match
   // nothing even though it obviously should include "Headphones", etc.
+  const validFeaturedSectionPromos = featuredSectionPromos.map((promo) => ({
+    ...promo,
+    product: isVisibleProduct(promo.product) ? promo.product : null,
+    category: promo.category?.visible ? promo.category : null,
+  }));
+
   const featuredSections = await Promise.all(
-    featuredSectionPromos.map(async (promo) => {
-      if (!promo.categoryId) return { promo, products: [] as ProductCardData[] };
+    validFeaturedSectionPromos.map(async (promo) => {
+      if (!promo.categoryId || !promo.category) return { promo, products: [] as ProductCardData[] };
       const children = await prisma.category.findMany({ where: { parentId: promo.categoryId }, select: { id: true } });
       const categoryIds = [promo.categoryId, ...children.map((c) => c.id)];
       const products = await prisma.product.findMany({
@@ -194,7 +214,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        {(dealPromos.length > 0 || deals.length > 0) && (
+        {(validDealPromos.length > 0 || deals.length > 0) && (
           <section>
             <div className="flex items-baseline justify-between mb-4">
               <h2 className="text-lg font-semibold text-[var(--brand-buy)]">Today&apos;s Deals</h2>
@@ -202,9 +222,9 @@ export default async function HomePage() {
                 See all
               </Link>
             </div>
-            {dealPromos.length > 0 && (
+            {validDealPromos.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                {dealPromos.map((d) => (
+                {validDealPromos.map((d) => (
                   <PromoTile
                     key={d.id}
                     tone="light"
@@ -238,7 +258,7 @@ export default async function HomePage() {
               key={promo.id}
               title={promo.title}
               subtitle={promo.subtitle}
-              viewAllHref={promo.categoryId ? `/category/${promo.category?.slug}` : "/products"}
+              viewAllHref={promo.category ? `/category/${promo.category.slug}` : "/products"}
               products={products}
             />
           ) : promo.productId ? (

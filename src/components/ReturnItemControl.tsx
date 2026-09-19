@@ -23,7 +23,7 @@ export default function ReturnItemControl({ orderId, itemId, returnWindowOpen, e
       return <p className="text-xs text-[var(--text-muted)] mt-1">Return requested — pending review.</p>;
     }
     if (existingRequest.status === "APPROVED") {
-      return <p className="text-xs text-[var(--success)] mt-1">Return approved. We'll follow up with next steps.</p>;
+      return <p className="text-xs text-[var(--success)] mt-1">Return approved. We&apos;ll follow up with next steps.</p>;
     }
     return (
       <p className="text-xs text-[var(--danger)] mt-1">
@@ -31,7 +31,7 @@ export default function ReturnItemControl({ orderId, itemId, returnWindowOpen, e
         <Link href="/customer-service" className="underline">
           Contact customer service
         </Link>{" "}
-        if you'd like to discuss this.
+        if you&apos;d like to discuss this.
       </p>
     );
   }
