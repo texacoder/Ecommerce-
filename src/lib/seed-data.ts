@@ -13,6 +13,19 @@ function placeholder(text: string, bg: string): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
+/** Categories are always displayed as small icons (nav circles, admin
+ * thumbnails) where a full name rendered at `placeholder()`'s font size is
+ * illegible and just looks like an empty blob. Use a large single initial
+ * instead, sized to stay readable even scaled down to ~40px. */
+function categoryPlaceholder(text: string, bg: string): string {
+  const initial = text.trim().charAt(0).toUpperCase() || "?";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600">
+    <rect width="100%" height="100%" fill="${bg}"/>
+    <text x="50%" y="50%" font-size="320" font-family="sans-serif" font-weight="600" fill="white" text-anchor="middle" dominant-baseline="central">${escapeXml(initial)}</text>
+  </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
@@ -93,25 +106,25 @@ export async function seedDatabase(prisma: PrismaClient, adminEmail: string) {
   for (const def of categoryDefs) {
     const parent = await prisma.category.upsert({
       where: { slug: slugify(def.name) },
-      update: { imageUrl: placeholder(def.name, def.color) },
+      update: { imageUrl: categoryPlaceholder(def.name, def.color) },
       create: {
         name: def.name,
         slug: slugify(def.name),
         visible: true,
-        imageUrl: placeholder(def.name, def.color),
+        imageUrl: categoryPlaceholder(def.name, def.color),
       },
     });
     categories[def.name] = parent.id;
     for (const childName of def.children) {
       const child = await prisma.category.upsert({
         where: { slug: slugify(`${def.name}-${childName}`) },
-        update: { imageUrl: placeholder(childName, def.color) },
+        update: { imageUrl: categoryPlaceholder(childName, def.color) },
         create: {
           name: childName,
           slug: slugify(`${def.name}-${childName}`),
           visible: true,
           parentId: parent.id,
-          imageUrl: placeholder(childName, def.color),
+          imageUrl: categoryPlaceholder(childName, def.color),
         },
       });
       categories[childName] = child.id;
