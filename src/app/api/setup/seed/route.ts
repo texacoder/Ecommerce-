@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 // name an arbitrary target email here would turn this into a general
 // "reset anyone's password" tool instead of a bounded recovery lever for
 // the site owner's own first-admin account.
-const BOOTSTRAP_ADMIN_EMAIL = "texacoderzz@gmail.com";
+const BOOTSTRAP_ADMIN_EMAIL = "exorastorebuz@gmail.com";
 const BOOTSTRAP_ADMIN_PASSWORD = "Admin123!";
 
 // One-time bootstrap endpoint for populating a fresh production database.

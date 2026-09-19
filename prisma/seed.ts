@@ -3,7 +3,7 @@ import { seedDatabase } from "../src/lib/seed-data";
 
 const prisma = new PrismaClient();
 
-seedDatabase(prisma, "texacoderzz@gmail.com")
+seedDatabase(prisma, "exorastorebuz@gmail.com")
   .then((log) => log.forEach((line) => console.log(line)))
   .catch((e) => {
     console.error(e);

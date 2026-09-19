@@ -72,7 +72,7 @@ npm run db:seed
 
 This creates:
 
-- An admin account: `texacoderzz@gmail.com` / `Admin123!`
+- An admin account: `exorastorebuz@gmail.com` / `Admin123!`
 - Two customer accounts: `customer@example.com` / `Customer123!` and `rahul@example.com` / `Customer123!`
 - 6 categories (Electronics, Fashion, Home & Kitchen, Beauty, Accessories, Sports) with subcategories
 - 18 realistic products with images, variants, stock levels and reviews
