@@ -21,6 +21,8 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
+  const [wiping, setWiping] = useState(false);
+  const [wipeMessage, setWipeMessage] = useState<string | null>(null);
 
   async function load() {
     const params = new URLSearchParams();
@@ -36,9 +38,42 @@ export default function AdminOrdersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
+  async function wipeTestOrders() {
+    if (
+      !confirm(
+        "Permanently delete EVERY order in the store - not just the ones shown by your current search/filter. This restocks reserved inventory and rolls back coupon usage first. Products, categories, coupons, and customer accounts are left untouched. This cannot be undone."
+      )
+    ) {
+      return;
+    }
+    setWiping(true);
+    setWipeMessage(null);
+    try {
+      const res = await fetch("/api/admin/orders/wipe-test-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: "WIPE" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to clear orders");
+      setWipeMessage(data.log.join(" "));
+      load();
+    } catch (err) {
+      setWipeMessage(err instanceof Error ? err.message : "Failed to clear orders");
+    } finally {
+      setWiping(false);
+    }
+  }
+
   return (
     <div>
-      <h1 className="text-xl font-semibold mb-6">Orders</h1>
+      <div className="flex justify-between items-baseline mb-6">
+        <h1 className="text-xl font-semibold">Orders</h1>
+        <button onClick={wipeTestOrders} disabled={wiping || orders.length === 0} className="text-sm text-[var(--danger)] underline disabled:opacity-50">
+          {wiping ? "Clearing..." : "Clear all orders (testing)"}
+        </button>
+      </div>
+      {wipeMessage && <p className="text-sm text-[var(--text-muted)] mb-4">{wipeMessage}</p>}
 
       <div className="flex flex-wrap gap-2 mb-4">
         <input
