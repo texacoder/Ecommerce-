@@ -21,7 +21,7 @@ export default function PromoTile({ promo, tone = "dark" }: { promo: PromoTileDa
   return (
     <Link
       href={href}
-      className={`block rounded-lg overflow-hidden aspect-[4/3] ${hasImage ? "" : tone === "dark" ? "bg-white/5" : "bg-[var(--surface-muted)]"}`}
+      className={`block rounded-lg overflow-hidden aspect-square ${hasImage ? "" : tone === "dark" ? "bg-white/5" : "bg-[var(--surface-muted)]"}`}
       style={promo.imageUrl ? { backgroundImage: `url(${promo.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
     />
   );

@@ -246,34 +246,28 @@ export default async function HomePage() {
                 See all
               </Link>
             </div>
-            {validDealPromos.length > 0 && (
-              <div className="flex overflow-x-auto gap-3 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-4 sm:overflow-visible mb-4">
-                {validDealPromos.map((d) => (
-                  <div key={d.id} className="w-40 shrink-0 sm:w-auto">
-                    <PromoTile
-                      tone="light"
-                      promo={{
-                        id: d.id,
-                        title: d.title,
-                        subtitle: d.subtitle,
-                        imageUrl: d.imageUrl,
-                        linkUrl: d.linkUrl,
-                        productSlug: d.product?.slug,
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-            {deals.length > 0 && (
-              <div className="flex overflow-x-auto gap-4 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-4 sm:overflow-visible">
-                {deals.map((p) => (
-                  <div key={p.id} className="w-40 shrink-0 sm:w-auto">
-                    <ProductCard product={toCardData(p)} />
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="flex overflow-x-auto gap-4 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-4 sm:overflow-visible">
+              {validDealPromos.map((d) => (
+                <div key={d.id} className="w-40 shrink-0 sm:w-auto">
+                  <PromoTile
+                    tone="light"
+                    promo={{
+                      id: d.id,
+                      title: d.title,
+                      subtitle: d.subtitle,
+                      imageUrl: d.imageUrl,
+                      linkUrl: d.linkUrl,
+                      productSlug: d.product?.slug,
+                    }}
+                  />
+                </div>
+              ))}
+              {deals.map((p) => (
+                <div key={p.id} className="w-40 shrink-0 sm:w-auto">
+                  <ProductCard product={toCardData(p)} />
+                </div>
+              ))}
+            </div>
           </section>
         )}
 
