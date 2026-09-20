@@ -93,10 +93,15 @@ export default async function HomePage() {
   // links out to a product page that will 404.
   const isVisibleProduct = (p: { status: string; visible: boolean; deletedAt: Date | null } | null | undefined) =>
     !!p && p.status === "PUBLISHED" && p.visible && !p.deletedAt;
-  const validDealPromos = dealPromos.map((d) => ({
-    ...d,
-    product: isVisibleProduct(d.product) ? d.product : null,
-  }));
+  // Filtered here (not just inside PromoTile) so an imageless promo's
+  // wrapper element never gets created at all, rather than rendering an
+  // empty box that still takes up a slot in the row/grid.
+  const validDealPromos = dealPromos
+    .filter((d) => d.imageUrl)
+    .map((d) => ({
+      ...d,
+      product: isVisibleProduct(d.product) ? d.product : null,
+    }));
 
   // FEATURED_SECTION promotions can be scoped to a category (render that
   // category's products) or left as a standalone spotlight banner. A
@@ -246,26 +251,56 @@ export default async function HomePage() {
                 See all
               </Link>
             </div>
-            <div className="flex overflow-x-auto gap-4 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-4 sm:overflow-visible">
+            {/* Mobile: promo tiles and real products are different heights
+                (a plain image vs. a full price/rating/button card), so
+                mixing them into one scroll row leaves an odd gap under the
+                shorter tiles - two separate rows keep each one's height
+                consistent. Desktop keeps the original single merged grid
+                (unchanged) since wrapping to multiple items per line there
+                doesn't have this problem. */}
+            {validDealPromos.length > 0 && (
+              <div className="flex sm:hidden overflow-x-auto gap-4 pb-1 -mx-4 px-4 mb-4">
+                {validDealPromos.map((d) => (
+                  <div key={d.id} className="w-40 shrink-0">
+                    <PromoTile
+                      promo={{
+                        id: d.id,
+                        title: d.title,
+                        subtitle: d.subtitle,
+                        imageUrl: d.imageUrl,
+                        linkUrl: d.linkUrl,
+                        productSlug: d.product?.slug,
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+            {deals.length > 0 && (
+              <div className="flex sm:hidden overflow-x-auto gap-4 pb-1 -mx-4 px-4">
+                {deals.map((p) => (
+                  <div key={p.id} className="w-40 shrink-0">
+                    <ProductCard product={toCardData(p)} />
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 gap-4">
               {validDealPromos.map((d) => (
-                <div key={d.id} className="w-40 shrink-0 sm:w-auto">
-                  <PromoTile
-                    tone="light"
-                    promo={{
-                      id: d.id,
-                      title: d.title,
-                      subtitle: d.subtitle,
-                      imageUrl: d.imageUrl,
-                      linkUrl: d.linkUrl,
-                      productSlug: d.product?.slug,
-                    }}
-                  />
-                </div>
+                <PromoTile
+                  key={d.id}
+                  promo={{
+                    id: d.id,
+                    title: d.title,
+                    subtitle: d.subtitle,
+                    imageUrl: d.imageUrl,
+                    linkUrl: d.linkUrl,
+                    productSlug: d.product?.slug,
+                  }}
+                />
               ))}
               {deals.map((p) => (
-                <div key={p.id} className="w-40 shrink-0 sm:w-auto">
-                  <ProductCard product={toCardData(p)} />
-                </div>
+                <ProductCard key={p.id} product={toCardData(p)} />
               ))}
             </div>
           </section>
@@ -298,7 +333,7 @@ export default async function HomePage() {
         {bestSellers.length > 0 && <ProductSection title="Best Sellers" viewAllHref="/products?bestSeller=true" products={bestSellers.map(toCardData)} />}
         {newArrivals.length > 0 && <ProductSection title="New Arrivals" viewAllHref="/products?sort=newest" products={newArrivals.map(toCardData)} />}
 
-        {featured.length === 0 && bestSellers.length === 0 && newArrivals.length === 0 && deals.length === 0 && dealPromos.length === 0 && (
+        {featured.length === 0 && bestSellers.length === 0 && newArrivals.length === 0 && deals.length === 0 && validDealPromos.length === 0 && (
           <div className="text-center py-16 text-[var(--text-muted)]">
             <p className="text-lg font-medium mb-2">No products yet</p>
             <p className="text-sm">Add products from the admin dashboard and they will appear here automatically.</p>

@@ -45,7 +45,6 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
           {dealPromos.map((d) => (
             <PromoTile
               key={d.id}
-              tone="light"
               promo={{
                 id: d.id,
                 title: d.title,
