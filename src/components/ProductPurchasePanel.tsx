@@ -17,9 +17,10 @@ type Props = {
   basePrice: number;
   baseStock: number;
   variants: Variant[];
+  isReturnable: boolean;
 };
 
-export default function ProductPurchasePanel({ productId, slug, name, image, basePrice, baseStock, variants }: Props) {
+export default function ProductPurchasePanel({ productId, slug, name, image, basePrice, baseStock, variants, isReturnable }: Props) {
   const { addItem, setBuyNowItem } = useCart();
   const { notify } = useToast();
   const router = useRouter();
@@ -113,12 +114,14 @@ export default function ProductPurchasePanel({ productId, slug, name, image, bas
             <span className="font-medium">Free delivery</span> on orders over {formatMoney(FREE_SHIPPING_THRESHOLD)}.
           </span>
         </div>
-        <div className="flex gap-2">
-          <span aria-hidden>↩️</span>
-          <span>
-            <span className="font-medium">7-day returns.</span> Change of mind? Return it within 7 days of delivery.
-          </span>
-        </div>
+        {isReturnable && (
+          <div className="flex gap-2">
+            <span aria-hidden>↩️</span>
+            <span>
+              <span className="font-medium">7-day returns.</span> Change of mind? Return it within 7 days of delivery.
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

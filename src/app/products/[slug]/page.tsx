@@ -254,6 +254,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               image={product.images[0]?.url ?? null}
               basePrice={product.price}
               baseStock={product.stock}
+              isReturnable={product.isReturnable}
               variants={product.variants.map((v) => ({
                 id: v.id,
                 name: v.name,
