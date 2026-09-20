@@ -247,27 +247,30 @@ export default async function HomePage() {
               </Link>
             </div>
             {validDealPromos.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              <div className="flex overflow-x-auto gap-3 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-4 sm:overflow-visible mb-4">
                 {validDealPromos.map((d) => (
-                  <PromoTile
-                    key={d.id}
-                    tone="light"
-                    promo={{
-                      id: d.id,
-                      title: d.title,
-                      subtitle: d.subtitle,
-                      imageUrl: d.imageUrl,
-                      linkUrl: d.linkUrl,
-                      productSlug: d.product?.slug,
-                    }}
-                  />
+                  <div key={d.id} className="w-40 shrink-0 sm:w-auto">
+                    <PromoTile
+                      tone="light"
+                      promo={{
+                        id: d.id,
+                        title: d.title,
+                        subtitle: d.subtitle,
+                        imageUrl: d.imageUrl,
+                        linkUrl: d.linkUrl,
+                        productSlug: d.product?.slug,
+                      }}
+                    />
+                  </div>
                 ))}
               </div>
             )}
             {deals.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <div className="flex overflow-x-auto gap-4 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-4 sm:overflow-visible">
                 {deals.map((p) => (
-                  <ProductCard key={p.id} product={toCardData(p)} />
+                  <div key={p.id} className="w-40 shrink-0 sm:w-auto">
+                    <ProductCard product={toCardData(p)} />
+                  </div>
                 ))}
               </div>
             )}
