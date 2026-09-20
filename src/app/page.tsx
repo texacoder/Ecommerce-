@@ -218,12 +218,12 @@ export default async function HomePage() {
         {categories.length > 0 && (
           <section>
             <h2 className="text-lg font-semibold mb-4">Shop by Category</h2>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-8 gap-3">
+            <div className="flex overflow-x-auto gap-3 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-4 md:grid-cols-8 sm:overflow-visible">
               {categories.map((c) => (
                 <Link
                   key={c.id}
                   href={`/category/${c.slug}`}
-                  className="card-surface hover:shadow-md transition-shadow p-3 text-center flex flex-col items-center gap-2"
+                  className="card-surface hover:shadow-md transition-shadow p-3 text-center flex flex-col items-center gap-2 w-20 shrink-0 sm:w-auto"
                 >
                   {c.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -336,9 +336,11 @@ function ProductSection({
           See all
         </Link>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <div className="flex overflow-x-auto gap-4 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-4 sm:overflow-visible">
         {products.map((p) => (
-          <ProductCard key={p.id} product={p} />
+          <div key={p.id} className="w-40 shrink-0 sm:w-auto">
+            <ProductCard product={p} />
+          </div>
         ))}
       </div>
     </section>
