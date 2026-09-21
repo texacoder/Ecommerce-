@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import { formatMoney } from "@/lib/format";
+import { optimizedImageUrl } from "@/lib/image";
 
 export default function CartPage() {
   const { items, setQuantity, removeItem, subtotalEstimate } = useCart();
@@ -35,7 +36,13 @@ export default function CartPage() {
             <Link href={`/products/${item.slug}`} className="w-24 h-24 rounded bg-[var(--surface-muted)] overflow-hidden shrink-0">
               {item.image && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={item.image} alt={item.name} className="w-full h-full object-contain p-2" />
+                <img
+                  src={optimizedImageUrl(item.image, 200)}
+                  alt={item.name}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-contain p-2"
+                />
               )}
             </Link>
             <div className="flex-1">

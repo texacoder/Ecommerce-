@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatMoney } from "@/lib/format";
+import { optimizedImageUrl } from "@/lib/image";
 import AddToCartButton from "@/components/AddToCartButton";
 import StarRating from "@/components/StarRating";
 
@@ -25,7 +26,13 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
       <Link href={`/products/${product.slug}`} className="relative block bg-[var(--surface-muted)] aspect-square overflow-hidden flex items-center justify-center">
         {product.image ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.image} alt={product.name} className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform" />
+          <img
+            src={optimizedImageUrl(product.image, 500)}
+            alt={product.name}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform"
+          />
         ) : (
           <span className="text-xs text-[var(--text-faint)]">No image</span>
         )}

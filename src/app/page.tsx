@@ -4,6 +4,7 @@ import { formatMoney } from "@/lib/format";
 import ProductCard, { type ProductCardData } from "@/components/ProductCard";
 import PromoTile from "@/components/PromoTile";
 import { SITE_NAME, SITE_URL } from "@/lib/seo";
+import { optimizedImageUrl } from "@/lib/image";
 
 type RawProduct = {
   id: string;
@@ -232,7 +233,13 @@ export default async function HomePage() {
                 >
                   {c.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={c.imageUrl} alt={c.name} className="w-12 h-12 rounded-full object-cover" />
+                    <img
+                      src={optimizedImageUrl(c.imageUrl, 96)}
+                      alt={c.name}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
                   ) : (
                     <span className="w-12 h-12 rounded-full bg-[var(--surface-muted)]" />
                   )}

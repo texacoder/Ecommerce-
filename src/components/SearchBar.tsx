@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { optimizedImageUrl } from "@/lib/image";
 
 type Suggestions = {
   products: { id: string; name: string; slug: string; image: string | null }[];
@@ -103,7 +104,13 @@ export default function SearchBar() {
                 >
                   {p.image && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.image} alt="" className="w-8 h-8 rounded object-cover bg-[var(--surface-muted)]" />
+                    <img
+                      src={optimizedImageUrl(p.image, 64)}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="w-8 h-8 rounded object-cover bg-[var(--surface-muted)]"
+                    />
                   )}
                   <span>{p.name}</span>
                 </Link>

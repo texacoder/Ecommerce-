@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { optimizedImageUrl } from "@/lib/image";
 
 export default function ProductGallery({ images, name }: { images: { id: string; url: string }[]; name: string }) {
   const [active, setActive] = useState(0);
@@ -11,7 +12,12 @@ export default function ProductGallery({ images, name }: { images: { id: string;
       <div className="aspect-square rounded-lg overflow-hidden bg-[var(--surface-muted)] border border-[var(--border-subtle)] flex items-center justify-center">
         {current ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={current.url} alt={name} className="w-full h-full object-contain p-6" />
+          <img
+            src={optimizedImageUrl(current.url, 900)}
+            alt={name}
+            decoding="async"
+            className="w-full h-full object-contain p-6"
+          />
         ) : (
           <span className="text-sm text-[var(--text-faint)]">No image available</span>
         )}
@@ -27,7 +33,13 @@ export default function ProductGallery({ images, name }: { images: { id: string;
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img.url} alt="" className="w-full h-full object-contain p-1" />
+              <img
+                src={optimizedImageUrl(img.url, 150)}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-contain p-1"
+              />
             </button>
           ))}
         </div>
