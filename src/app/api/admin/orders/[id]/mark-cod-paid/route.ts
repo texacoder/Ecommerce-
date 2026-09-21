@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { errorResponse } from "@/lib/api";
 import { syncOrderToSheet } from "@/lib/google-sheets";
+import { sendMetaPurchaseEvent } from "@/lib/meta-capi";
 
 // Cash on Delivery orders never go through Razorpay, so nothing ever marks
 // them PAID automatically - this is that step, for once the admin has
@@ -30,6 +31,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     // Same "paid order gets synced" semantics as the Razorpay webhook/verify
     // path - awaited, not fire-and-forget, for the same teardown reason.
     await syncOrderToSheet(updated, order.user.email);
+    await sendMetaPurchaseEvent(updated, order.user.email);
 
     return NextResponse.json({ order: updated });
   } catch (err) {

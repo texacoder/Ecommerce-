@@ -25,12 +25,16 @@ export default function MetaPurchaseTracker({
       // If storage is unavailable, fall through and fire anyway - a rare
       // double-count is better than never reporting the sale at all.
     }
-    trackMetaEvent("Purchase", {
-      content_ids: contentIds,
-      content_type: "product",
-      value: total / 100,
-      currency: "INR",
-    });
+    trackMetaEvent(
+      "Purchase",
+      {
+        content_ids: contentIds,
+        content_type: "product",
+        value: total / 100,
+        currency: "INR",
+      },
+      orderId,
+    );
   }, [orderId, total, contentIds]);
 
   return null;

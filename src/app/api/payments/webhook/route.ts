@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { verifyWebhookSignature } from "@/lib/razorpay";
 import { syncOrderToSheet } from "@/lib/google-sheets";
 import { sendOrderConfirmedEmail } from "@/lib/order-emails";
+import { sendMetaPurchaseEvent } from "@/lib/meta-capi";
 
 type RazorpayWebhookPayload = {
   event: string;
@@ -77,6 +78,7 @@ export async function POST(req: NextRequest) {
     if (paidOrder) {
       await syncOrderToSheet(paidOrder, paidOrder.user.email);
       await sendOrderConfirmedEmail(paidOrder, paidOrder.user.email);
+      await sendMetaPurchaseEvent(paidOrder, paidOrder.user.email);
     }
   } else if (body.event === "payment.failed" && payment.status !== "PAID") {
     await prisma.payment.update({

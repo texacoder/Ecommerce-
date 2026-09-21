@@ -14,8 +14,17 @@ declare global {
 
 /** Fires a Meta Pixel standard event. A no-op if the pixel isn't configured
  * or hasn't loaded yet (e.g. an ad blocker) - callers never need to check
- * first. Amounts must already be in rupees, not paise. */
-export function trackMetaEvent(event: string, params?: Record<string, unknown>) {
+ * first. Amounts must already be in rupees, not paise.
+ *
+ * `eventId`, when passed, must match the `event_id` sent for the same
+ * event via the Conversions API (see `@/lib/meta-capi`) - that's how Meta
+ * deduplicates the browser and server copies of the same event instead of
+ * double-counting it. */
+export function trackMetaEvent(event: string, params?: Record<string, unknown>, eventId?: string) {
   if (typeof window === "undefined" || typeof window.fbq !== "function") return;
-  window.fbq("track", event, params);
+  if (eventId) {
+    window.fbq("track", event, params, { eventID: eventId });
+  } else {
+    window.fbq("track", event, params);
+  }
 }
