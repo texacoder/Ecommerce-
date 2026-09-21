@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
@@ -8,6 +8,7 @@ import { useCart } from "@/lib/cart-context";
 import { useToast } from "@/lib/toast-context";
 import { formatMoney } from "@/lib/format";
 import RazorpayCheckout from "@/components/RazorpayCheckout";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 
 type Address = {
   id: string;
@@ -104,6 +105,10 @@ export default function CheckoutPage() {
       });
   }, [user]);
 
+  // Fires once per checkout visit, on the first successful quote - not on
+  // every recompute a coupon entry triggers.
+  const initiateCheckoutFired = useRef(false);
+
   useEffect(() => {
     if (!user || items.length === 0) return;
     setQuoteLoading(true);
@@ -120,6 +125,16 @@ export default function CheckoutPage() {
       .then((d) => {
         setQuote(d.quote ?? null);
         if (!d.quote?.codAvailable) setPaymentMethod("online");
+        if (d.quote && !initiateCheckoutFired.current) {
+          initiateCheckoutFired.current = true;
+          trackMetaEvent("InitiateCheckout", {
+            content_type: "product",
+            contents: items.map((i) => ({ id: i.variantId ?? i.productId, quantity: i.quantity })),
+            num_items: items.reduce((sum, i) => sum + i.quantity, 0),
+            value: d.quote.total / 100,
+            currency: "INR",
+          });
+        }
       })
       .finally(() => setQuoteLoading(false));
   }, [user, items, couponCode]);

@@ -10,6 +10,7 @@ import ProductGallery from "@/components/ProductGallery";
 import StarRating from "@/components/StarRating";
 import ProductCard, { type ProductCardData } from "@/components/ProductCard";
 import ProductOptionsSelector from "@/components/ProductOptionsSelector";
+import MetaProductViewTracker from "@/components/MetaProductViewTracker";
 import { SITE_URL, isCrawlableImageUrl } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -187,6 +188,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     <div className="container-page py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <MetaProductViewTracker id={product.id} name={product.name} price={product.price} />
       <div className="text-sm text-[var(--text-muted)] mb-4 flex gap-1">
         <Link href="/products" className="hover:underline">
           Products

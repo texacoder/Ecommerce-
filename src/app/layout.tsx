@@ -7,6 +7,7 @@ import { ToastProvider } from "@/lib/toast-context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import MetaPixel from "@/components/MetaPixel";
 import { prisma } from "@/lib/db";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
 
@@ -66,6 +67,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[var(--surface-muted)] text-[var(--text)]">
+        <MetaPixel />
         <ToastProvider>
           <AuthProvider>
             <CartProvider>

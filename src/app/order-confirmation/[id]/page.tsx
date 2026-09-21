@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { formatMoney, statusLabel } from "@/lib/format";
 import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 import OrderPaymentActions from "@/components/OrderPaymentActions";
+import MetaPurchaseTracker from "@/components/MetaPurchaseTracker";
 import type { OrderStatus } from "@/lib/orders";
 
 export default async function OrderConfirmationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -22,6 +23,13 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
 
   return (
     <div className="container-page py-12 max-w-2xl">
+      {order.paymentStatus === "PAID" && (
+        <MetaPurchaseTracker
+          orderId={order.id}
+          total={order.total}
+          contentIds={order.items.map((i) => i.variantId ?? i.productId).filter((id): id is string => id !== null)}
+        />
+      )}
       {isPaid ? (
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-full bg-[var(--success)] text-white flex items-center justify-center text-2xl mx-auto mb-3">✓</div>

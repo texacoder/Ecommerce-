@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 
 export type CartItem = {
   productId: string;
@@ -69,6 +70,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         );
       }
       return [...prev, { ...item, quantity }];
+    });
+    trackMetaEvent("AddToCart", {
+      content_ids: [item.variantId ?? item.productId],
+      content_type: "product",
+      contents: [{ id: item.variantId ?? item.productId, quantity }],
+      value: (item.unitPrice * quantity) / 100,
+      currency: "INR",
     });
   }, []);
 
