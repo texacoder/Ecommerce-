@@ -37,7 +37,7 @@ export default function TermsPage() {
           </p>
           <p className="mt-2">
             Some products are sourced through third-party suppliers and marketplaces. Your order may arrive
-            in packaging bearing the supplier&apos;s branding rather than EXORASTORE&apos;s — this
+            in packaging bearing the supplier&apos;s branding rather than EXORASTORE&apos;s. This
             doesn&apos;t affect the item&apos;s authenticity, your order, or your rights under our{" "}
             <a href="/refund-policy" className="text-[var(--brand-accent)] hover:underline">Refund &amp; Cancellation Policy</a>.
           </p>
@@ -68,7 +68,7 @@ export default function TermsPage() {
 
         <Section title="7. User conduct">
           <p>
-            You agree not to misuse the site — including attempting unauthorized access, submitting false
+            You agree not to misuse the site, including attempting unauthorized access, submitting false
             reviews, or using the platform for any unlawful purpose. Reviews and content you submit must be
             honest and not infringe on anyone else&apos;s rights; we may remove content that violates this.
           </p>

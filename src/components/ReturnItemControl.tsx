@@ -20,7 +20,7 @@ export default function ReturnItemControl({ orderId, itemId, returnWindowOpen, e
 
   if (existingRequest) {
     if (existingRequest.status === "REQUESTED") {
-      return <p className="text-xs text-[var(--text-muted)] mt-1">Return requested — pending review.</p>;
+      return <p className="text-xs text-[var(--text-muted)] mt-1">Return requested. Pending review.</p>;
     }
     if (existingRequest.status === "APPROVED") {
       return <p className="text-xs text-[var(--success)] mt-1">Return approved. We&apos;ll follow up with next steps.</p>;

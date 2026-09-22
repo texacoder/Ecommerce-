@@ -31,7 +31,7 @@ export default function ProductOptionsSelector({ current, options }: Props) {
       >
         {all.map((o) => (
           <option key={o.id} value={o.id}>
-            {o.name} — {formatMoney(o.price)}
+            {o.name} - {formatMoney(o.price)}
           </option>
         ))}
       </select>

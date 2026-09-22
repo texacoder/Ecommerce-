@@ -37,7 +37,7 @@ export default function ProductPurchasePanel({ productId, slug, name, image, bas
     <div className="flex flex-col gap-4">
       <div className="flex items-baseline gap-1">
         <span className={`text-sm font-medium ${stock > 0 ? "text-[var(--success)]" : "text-[var(--danger)]"}`}>
-          {stock > 0 ? `In Stock${stock <= 5 ? ` — only ${stock} left` : ""}` : "Out of Stock"}
+          {stock > 0 ? `In Stock${stock <= 5 ? ` (only ${stock} left)` : ""}` : "Out of Stock"}
         </span>
       </div>
 
@@ -51,7 +51,7 @@ export default function ProductPurchasePanel({ productId, slug, name, image, bas
           >
             {variants.map((v) => (
               <option key={v.id} value={v.id} disabled={v.stock === 0}>
-                {v.name} {v.stock === 0 ? "(out of stock)" : ""} — {formatMoney(v.price)}
+                {v.name} {v.stock === 0 ? "(out of stock)" : ""} - {formatMoney(v.price)}
               </option>
             ))}
           </select>

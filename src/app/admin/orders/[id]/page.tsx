@@ -137,7 +137,7 @@ export default function AdminOrderDetailPage() {
           <h2 className="font-medium mb-2">Delivery address</h2>
           <p className="text-sm">
             {address.fullName}, {address.line1}
-            {address.line2 ? `, ${address.line2}` : ""}, {address.city}, {address.state} {address.postalCode}, {address.country} — {address.phone}
+            {address.line2 ? `, ${address.line2}` : ""}, {address.city}, {address.state} {address.postalCode}, {address.country} · {address.phone}
           </p>
         </div>
       </div>

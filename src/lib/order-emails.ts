@@ -43,7 +43,7 @@ export async function sendOrderConfirmedEmail(order: EmailOrder, email: string):
   await sendEmail({
     to: email,
     replyTo: SUPPORT_EMAIL,
-    subject: `Order confirmed — #${order.orderNumber}`,
+    subject: `Order #${order.orderNumber} confirmed`,
     html: shell(
       "Your order is confirmed!",
       `
@@ -67,7 +67,7 @@ export async function sendOrderShippedEmail(
   await sendEmail({
     to: email,
     replyTo: SUPPORT_EMAIL,
-    subject: `Your order has shipped — #${order.orderNumber}`,
+    subject: `Your order #${order.orderNumber} has shipped`,
     html: shell(
       "Your order is on its way!",
       `
@@ -83,7 +83,7 @@ export async function sendOrderDeliveredEmail(order: EmailOrder, email: string):
   await sendEmail({
     to: email,
     replyTo: SUPPORT_EMAIL,
-    subject: `Delivered — #${order.orderNumber}`,
+    subject: `Order #${order.orderNumber} delivered`,
     html: shell(
       "Your order has been delivered",
       `
@@ -99,7 +99,7 @@ export async function sendOrderCancelledEmail(order: EmailOrder, email: string, 
   await sendEmail({
     to: email,
     replyTo: SUPPORT_EMAIL,
-    subject: `Order cancelled — #${order.orderNumber}`,
+    subject: `Order #${order.orderNumber} cancelled`,
     html: shell(
       "Your order was cancelled",
       `
@@ -119,7 +119,7 @@ export async function sendOrderRefundedEmail(
   await sendEmail({
     to: email,
     replyTo: SUPPORT_EMAIL,
-    subject: `Refund ${fullyRefunded ? "completed" : "processed"} — #${order.orderNumber}`,
+    subject: `Refund ${fullyRefunded ? "completed" : "processed"} for order #${order.orderNumber}`,
     html: shell(
       "Your refund has been processed",
       `

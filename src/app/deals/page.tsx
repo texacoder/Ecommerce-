@@ -9,7 +9,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const page = Number(sp.page ?? "1") || 1;
   return {
     title: "Today's Deals",
-    description: "Discounted electronics, fashion, home & kitchen, beauty, accessories and sports gear at EXORASTORE — deals updated daily.",
+    description: "Discounted electronics, fashion, home & kitchen, beauty, accessories and sports gear at EXORASTORE. Deals updated daily.",
     alternates: { canonical: page > 1 ? `/deals?page=${page}` : "/deals" },
   };
 }
@@ -59,7 +59,7 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
       )}
 
       {products.length === 0 ? (
-        <div className="card-surface p-10 text-center text-[var(--text-muted)]">No active deals right now — check back soon.</div>
+        <div className="card-surface p-10 text-center text-[var(--text-muted)]">No active deals right now. Check back soon.</div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {products.map((p) => (

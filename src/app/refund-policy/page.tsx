@@ -3,7 +3,7 @@ import { whatsappLink } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Refund & Cancellation Policy",
-  description: "EXORASTORE's refund, return, and order cancellation policy — including timelines, eligibility, and how to request one.",
+  description: "EXORASTORE's refund, return, and order cancellation policy, including timelines, eligibility, and how to request one.",
   alternates: { canonical: "/refund-policy" },
 };
 
@@ -19,7 +19,7 @@ export default function RefundPolicyPage() {
             You can cancel an order yourself, free of charge, at any time before it has been paid for. Once
             an order has been paid and confirmed, please contact us at{" "}
             <a href="mailto:exorastorebuz@gmail.com" className="text-[var(--brand-accent)] hover:underline">exorastorebuz@gmail.com</a>{" "}
-            with your order number as soon as possible — we can usually still cancel it if it hasn&apos;t
+            with your order number as soon as possible. We can usually still cancel it if it hasn&apos;t
             shipped yet.
           </p>
         </Section>
@@ -54,7 +54,7 @@ export default function RefundPolicyPage() {
         <Section title="Damaged or wrong items">
           <p>
             If you receive a damaged, defective, or incorrect item, contact us within 48 hours of delivery
-            with photos of the item — we&apos;ll arrange a free replacement or a full refund, including any
+            with photos of the item. We&apos;ll arrange a free replacement or a full refund, including any
             shipping charges, at no cost to you.
           </p>
         </Section>

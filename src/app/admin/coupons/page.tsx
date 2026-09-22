@@ -144,7 +144,7 @@ export default function AdminCouponsPage() {
             <option value="">Apply to: all categories</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
-                Only category: {c.parent ? `${c.parent.name} — ${c.name}` : c.name}
+                Only category: {c.parent ? `${c.parent.name} - ${c.name}` : c.name}
               </option>
             ))}
           </select>

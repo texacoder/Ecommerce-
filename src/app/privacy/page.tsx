@@ -21,7 +21,7 @@ export default function PrivacyPage() {
             <li>Reviews and any other content you choose to submit</li>
           </ul>
           <p className="mt-2">
-            We do <strong>not</strong> collect or store your card, UPI, or bank account details — payments
+            We do <strong>not</strong> collect or store your card, UPI, or bank account details. Payments
             are handled directly by Razorpay, our payment processor.
           </p>
         </Section>
@@ -39,8 +39,8 @@ export default function PrivacyPage() {
         <Section title="3. Who we share it with">
           <p>We share the minimum necessary data with:</p>
           <ul className="list-disc pl-5 mt-2 flex flex-col gap-1">
-            <li><strong>Razorpay</strong> — to process your payment</li>
-            <li><strong>Delivery partners</strong> — your name, address, and phone number, to deliver your order</li>
+            <li><strong>Razorpay</strong>: to process your payment</li>
+            <li><strong>Delivery partners</strong>: your name, address, and phone number, to deliver your order</li>
           </ul>
         </Section>
 
@@ -56,8 +56,8 @@ export default function PrivacyPage() {
             You can view and update your name and email at any time from{" "}
             <a href="/account" className="text-[var(--brand-accent)] hover:underline">My Account</a>. To
             request a copy of your data, or to have your account and personal data deleted, email us at{" "}
-            <a href="mailto:exorastorebuz@gmail.com" className="text-[var(--brand-accent)] hover:underline">exorastorebuz@gmail.com</a>{" "}
-            — we&apos;ll keep only what we&apos;re legally required to retain (e.g. order records for tax
+            <a href="mailto:exorastorebuz@gmail.com" className="text-[var(--brand-accent)] hover:underline">exorastorebuz@gmail.com</a>.
+            We&apos;ll keep only what we&apos;re legally required to retain (e.g. order records for tax
             purposes).
           </p>
         </Section>

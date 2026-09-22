@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { readFile } from "node:fs/promises";
 import { SITE_NAME } from "@/lib/seo";
 
-export const alt = `${SITE_NAME} — Shop everything you need`;
+export const alt = `${SITE_NAME}: Shop Everything You Need`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

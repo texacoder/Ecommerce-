@@ -234,7 +234,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             {product.isReturnable ? "Eligible for 7-day returns" : "This item is not eligible for return"}
           </p>
           <p className="text-xs mt-1 text-[var(--text-muted)]">
-            {product.codAvailable ? "Cash on Delivery available" : "Online payment only — Cash on Delivery not available"}
+            {product.codAvailable ? "Cash on Delivery available" : "Online payment only. Cash on Delivery not available"}
           </p>
 
           {product.description && <p className="mt-4 text-sm leading-relaxed text-[var(--text-muted)]">{product.description}</p>}

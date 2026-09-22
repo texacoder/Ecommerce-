@@ -503,7 +503,7 @@ export async function seedDatabase(prisma: PrismaClient, adminEmail: string) {
       userId: secondCustomer.id,
       rating: 5,
       title: "Perfect fit",
-      body: "Lightweight and breathable — great for my morning runs.",
+      body: "Lightweight and breathable, great for my morning runs.",
     },
     {
       slug: "glowdew-vitamin-c-serum",
@@ -604,7 +604,7 @@ export async function seedDatabase(prisma: PrismaClient, adminEmail: string) {
         id: "seed-banner-2",
         type: "BANNER",
         title: "New: Pulse 5G Smartphone",
-        subtitle: "128GB storage, 5000mAh battery — now available",
+        subtitle: "128GB storage, 5000mAh battery, now available",
         imageUrl: placeholder("Pulse 5G", "#1d4ed8"),
         linkUrl: `/products/pulse-5g-smartphone`,
         productId: phoneId,

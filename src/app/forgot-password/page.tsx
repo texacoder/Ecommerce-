@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
         {message && <p className="text-sm text-[var(--text-muted)] mt-4">{message}</p>}
         {devLink && (
           <div className="mt-3 text-xs bg-[var(--surface-muted)] rounded p-3 break-all">
-            <p className="font-medium mb-1">Dev mode — no email provider configured:</p>
+            <p className="font-medium mb-1">Dev mode: no email provider configured</p>
             <Link href={devLink.replace(process.env.NEXT_PUBLIC_APP_URL ?? "", "")} className="text-[var(--brand-accent)] hover:underline">
               {devLink}
             </Link>

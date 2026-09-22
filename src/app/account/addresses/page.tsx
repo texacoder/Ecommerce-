@@ -96,7 +96,7 @@ export default function AddressesPage() {
             <div className="text-sm">
               {a.isDefault && <span className="text-xs font-semibold text-[var(--success)] block mb-1">Default</span>}
               {a.fullName}, {a.line1}
-              {a.line2 ? `, ${a.line2}` : ""}, {a.city}, {a.state} {a.postalCode}, {a.country} — {a.phone}
+              {a.line2 ? `, ${a.line2}` : ""}, {a.city}, {a.state} {a.postalCode}, {a.country} · {a.phone}
             </div>
             <button onClick={() => deleteAddress(a.id)} className="text-sm text-[var(--danger)] hover:underline shrink-0 ml-4">
               Delete

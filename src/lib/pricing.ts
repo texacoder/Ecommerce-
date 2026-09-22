@@ -241,7 +241,7 @@ export async function recordCouponUsage(
       data: { usedCount: { increment: 1 } },
     });
     if (result.count === 0) {
-      throw new PricingError(`Coupon "${code}" has just reached its usage limit — please remove it and try again`);
+      throw new PricingError(`Coupon "${code}" has just reached its usage limit. Please remove it and try again`);
     }
   } else {
     await tx.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });

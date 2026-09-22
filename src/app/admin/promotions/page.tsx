@@ -144,7 +144,7 @@ export default function AdminPromotionsPage() {
             <option value="">No linked category</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
-                Category: {c.parent ? `${c.parent.name} — ${c.name}` : c.name}
+                Category: {c.parent ? `${c.parent.name} - ${c.name}` : c.name}
               </option>
             ))}
           </select>

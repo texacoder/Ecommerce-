@@ -40,7 +40,7 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
         <div className="text-center mb-8">
           <div className="w-14 h-14 rounded-full bg-[var(--danger)] text-white flex items-center justify-center text-2xl mx-auto mb-3">!</div>
           <h1 className="text-2xl font-semibold mb-1">Payment failed</h1>
-          <p className="text-[var(--text-muted)]">Order #{order.orderNumber} — your items are still reserved.</p>
+          <p className="text-[var(--text-muted)]">Order #{order.orderNumber}. Your items are still reserved.</p>
         </div>
       ) : (
         <div className="text-center mb-8">

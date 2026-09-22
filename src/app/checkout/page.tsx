@@ -240,7 +240,7 @@ export default function CheckoutPage() {
                     <label key={a.id} className="flex gap-2 items-start text-sm border border-[var(--border-subtle)] rounded p-3 cursor-pointer hover:border-[var(--brand-accent)]">
                       <input type="radio" name="address" checked={addressId === a.id} onChange={() => setAddressId(a.id)} className="mt-1" />
                       <span>
-                        <span className="font-medium">{a.fullName}</span> — {a.line1}
+                        <span className="font-medium">{a.fullName}</span> · {a.line1}
                         {a.line2 ? `, ${a.line2}` : ""}, {a.city}, {a.state} {a.postalCode}, {a.country} · {a.phone}
                       </span>
                     </label>
@@ -282,7 +282,7 @@ export default function CheckoutPage() {
               <h2 className="font-semibold mb-4">Review your order</h2>
               {buyNowItem && (
                 <p className="text-xs text-[var(--text-muted)] mb-3">
-                  Buying this item now — your saved cart isn&apos;t affected.
+                  Buying this item now. Your saved cart isn&apos;t affected.
                 </p>
               )}
               <div className="flex flex-col gap-3 mb-5">
@@ -376,7 +376,7 @@ export default function CheckoutPage() {
                       <p className="font-medium mb-1">Payment gateway not configured</p>
                       <p className="text-[var(--text-muted)]">
                         This environment doesn&apos;t have RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET set, so real checkout is
-                        disabled. Your order has been created with payment status &quot;Pending&quot; — configure
+                        disabled. Your order has been created with payment status &quot;Pending&quot;. Configure
                         Razorpay to accept real payments.
                       </p>
                     </div>

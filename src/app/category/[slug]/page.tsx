@@ -33,7 +33,7 @@ export async function generateMetadata({
   const title = `Buy ${category.name}`;
   const description =
     category.description?.slice(0, 160) ??
-    `Shop ${category.name} online at EXORASTORE — great prices, fast delivery, easy returns.`;
+    `Shop ${category.name} online at EXORASTORE: great prices, fast delivery, easy returns.`;
   // Every filter/sort combination canonicalizes to the plain category page
   // (or its own page number) - those are near-duplicate views of the same
   // catalog, and consolidating them keeps ranking signals on one URL

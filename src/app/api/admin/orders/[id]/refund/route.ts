@@ -68,7 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
     if (count === 0) {
       return NextResponse.json(
-        { error: "This order's refund status just changed — please refresh and try again." },
+        { error: "This order's refund status just changed. Please refresh and try again." },
         { status: 409 }
       );
     }
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       gatewayProcessed,
       message: gatewayProcessed
         ? "Refund processed through Razorpay."
-        : "No payment gateway configured (or no matching payment to refund) — the refund was only recorded in the order. Process the actual money return manually.",
+        : "No payment gateway configured (or no matching payment to refund). The refund was only recorded in the order. Process the actual money return manually.",
     });
   } catch (err) {
     return errorResponse(err);

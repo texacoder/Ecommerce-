@@ -318,7 +318,7 @@ export default function EditProductPage() {
               <option value="">None</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.parent ? `${c.parent.name} — ${c.name}` : c.name}
+                  {c.parent ? `${c.parent.name} - ${c.name}` : c.name}
                 </option>
               ))}
             </select>

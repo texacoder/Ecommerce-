@@ -202,7 +202,7 @@ export default async function HomePage() {
               <span className="text-[var(--brand-accent)]">Delivered to Your Door.</span>
             </h1>
             <p className="text-white/80 mb-7 max-w-md">
-              Electronics, fashion, home essentials, beauty and more — all in one place, at prices that make sense.
+              Electronics, fashion, home essentials, beauty and more, all in one place, at prices that make sense.
             </p>
             <div className="flex flex-wrap items-center gap-5 mb-9">
               <Link href="/products" className="btn-primary inline-flex items-center gap-1.5 px-6 py-3 text-sm">

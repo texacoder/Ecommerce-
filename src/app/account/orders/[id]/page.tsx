@@ -92,7 +92,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             {address.line1}
             {address.line2 ? `, ${address.line2}` : ""}
             <br />
-            {address.city}, {address.state} — {address.postalCode}
+            {address.city}, {address.state} {address.postalCode}
             <br />
             {address.country} · {address.phone}
           </p>
