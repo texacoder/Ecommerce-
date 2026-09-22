@@ -6,16 +6,16 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* NEXORA brand palette — a deep-navy header/footer paired with a teal
+  /* NEXORA brand palette — a deep-navy header/footer paired with a blue
      primary accent and a distinct coral "buy now" accent. Intentionally
      different from any existing marketplace's exact colors. */
   --brand-navy: #101a2c;
   --brand-navy-light: #1f3350;
   --brand-navy-dark: #0a1220;
 
-  --brand-accent: #0e7c6b;
-  --brand-accent-dark: #0b5f53;
-  --brand-accent-light: #e6f4f1;
+  --brand-accent: #2563eb;
+  --brand-accent-dark: #1d4ed8;
+  --brand-accent-light: #eff6ff;
 
   --brand-buy: #d64526;
   --brand-buy-dark: #b33a1f;

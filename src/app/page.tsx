@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { formatMoney } from "@/lib/format";
 import ProductCard, { type ProductCardData } from "@/components/ProductCard";
 import PromoTile from "@/components/PromoTile";
+import HeroCarousel, { type HeroSlide } from "@/components/HeroCarousel";
 import { SITE_NAME, SITE_URL } from "@/lib/seo";
 import { optimizedImageUrl } from "@/lib/image";
 
@@ -130,18 +130,28 @@ export default async function HomePage() {
     })
   );
 
-  // No admin banners set up yet - fill that hero space with a couple of
-  // random products instead of a "nothing here" placeholder, so the
-  // homepage never looks empty even before any promotions are configured.
+  // No admin banners set up yet - fill that hero space with a few random
+  // products instead of a "nothing here" placeholder, so the homepage
+  // never looks empty even before any promotions are configured.
   let fallbackHeroProducts: ProductCardData[] = [];
   if (banners.length === 0) {
     const eligibleCount = await prisma.product.count({ where: baseWhere });
     if (eligibleCount > 0) {
-      const skip = eligibleCount > 2 ? randomSkip(eligibleCount - 2) : 0;
-      const randomProducts = await prisma.product.findMany({ where: baseWhere, include, take: 2, skip });
+      const skip = eligibleCount > 3 ? randomSkip(eligibleCount - 3) : 0;
+      const randomProducts = await prisma.product.findMany({ where: baseWhere, include, take: 3, skip });
       fallbackHeroProducts = randomProducts.map(toCardData);
     }
   }
+
+  // The hero carousel shows admin-managed BANNER promotions when any exist,
+  // falling back to a few random products' own photos otherwise - either
+  // way it's just a flat list of {id, imageUrl, linkUrl}.
+  const heroSlides: HeroSlide[] =
+    banners.length > 0
+      ? banners.filter((b) => b.imageUrl).map((b) => ({ id: b.id, imageUrl: b.imageUrl as string, linkUrl: b.linkUrl }))
+      : fallbackHeroProducts
+          .filter((p) => p.image)
+          .map((p) => ({ id: p.id, imageUrl: p.image as string, linkUrl: `/products/${p.slug}` }));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -168,41 +178,43 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <section className="bg-[var(--brand-navy)]">
-        <div className="container-page py-10 sm:py-14 grid md:grid-cols-2 gap-8 items-center">
+      <section className="bg-[var(--brand-navy)] overflow-hidden">
+        <div className="container-page py-10 sm:py-16 grid md:grid-cols-2 gap-10 items-center">
           <div className="text-white">
-            <p className="text-[var(--brand-buy)] font-semibold text-sm uppercase tracking-wide mb-2">Welcome to EXORASTORE</p>
-            <h1 className="text-3xl sm:text-4xl font-bold leading-tight mb-4">
-              Everything you need, delivered to your door.
+            <p className="text-[var(--brand-accent)] font-semibold text-sm uppercase tracking-wide mb-3">EXORASTORE —</p>
+            <h1 className="text-3xl sm:text-5xl font-bold leading-tight mb-4">
+              Everything You Need,
+              <br />
+              <span className="text-[var(--brand-accent)]">Delivered to Your Door.</span>
             </h1>
-            <p className="text-white/70 mb-6 max-w-md">
+            <p className="text-white/70 mb-7 max-w-md">
               Electronics, fashion, home essentials, beauty and more — all in one place, at prices that make sense.
             </p>
-            <Link href="/products" className="btn-buy inline-block px-6 py-3 text-sm">
-              Shop All Products
-            </Link>
+            <div className="flex flex-wrap items-center gap-5 mb-9">
+              <Link href="/products" className="btn-primary inline-flex items-center gap-1.5 px-6 py-3 text-sm">
+                Shop Now <span aria-hidden>→</span>
+              </Link>
+              <Link href="/deals" className="text-[var(--brand-accent)] font-medium text-sm inline-flex items-center gap-1.5 hover:underline">
+                Explore Deals <span aria-hidden>→</span>
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-lg">
+              <TrustBadge icon="truck" label="Free Shipping" sub="Above ₹499" />
+              <TrustBadge icon="shield" label="Secure" sub="Payments" />
+              <TrustBadge icon="package" label="Easy" sub="Returns" />
+              <TrustBadge icon="headset" label="24/7" sub="Support" />
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            {banners.slice(0, 2).map((b) => (
-              <PromoTile
-                key={b.id}
-                promo={{ id: b.id, title: b.title, subtitle: b.subtitle, imageUrl: b.imageUrl, linkUrl: b.linkUrl }}
-              />
-            ))}
-            {banners.length === 0 &&
-              fallbackHeroProducts.map((p) => (
-                <PromoTile
-                  key={p.id}
-                  promo={{
-                    id: p.id,
-                    title: p.name,
-                    subtitle: formatMoney(p.price),
-                    imageUrl: p.image,
-                    linkUrl: null,
-                    productSlug: p.slug,
-                  }}
-                />
-              ))}
+          <div className="relative">
+            <HeroCarousel slides={heroSlides} />
+            {heroSlides.length === 0 && (
+              <div className="aspect-[4/3] rounded-xl bg-white/5 border border-dashed border-white/15 flex items-center justify-center text-white/40 text-sm text-center px-6">
+                Add a homepage banner image in Admin → Promotions
+              </div>
+            )}
+            <p className="hidden lg:block absolute right-1 top-1/2 -translate-y-1/2 text-white/25 italic text-sm tracking-wide rotate-90 whitespace-nowrap">
+              More Than Just a Store
+            </p>
           </div>
         </div>
       </section>
@@ -384,4 +396,62 @@ function ProductSection({
       </div>
     </section>
   );
+}
+
+type TrustIconName = "truck" | "shield" | "package" | "headset";
+
+function TrustBadge({ icon, label, sub }: { icon: TrustIconName; label: string; sub: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center shrink-0 text-white">
+        <TrustIcon name={icon} />
+      </span>
+      <span className="text-xs leading-tight text-white">
+        <span className="block font-medium">{label}</span>
+        <span className="block text-white/60">{sub}</span>
+      </span>
+    </div>
+  );
+}
+
+function TrustIcon({ name }: { name: TrustIconName }) {
+  const common = {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.5,
+    className: "w-5 h-5",
+  };
+  switch (name) {
+    case "truck":
+      return (
+        <svg {...common}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 7h11v8H3zM14 10h4l3 3v2h-7z" />
+          <circle cx="7" cy="18" r="1.5" />
+          <circle cx="17" cy="18" r="1.5" />
+        </svg>
+      );
+    case "shield":
+      return (
+        <svg {...common}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+        </svg>
+      );
+    case "package":
+      return (
+        <svg {...common}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7M12 11v10" />
+        </svg>
+      );
+    case "headset":
+      return (
+        <svg {...common}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 13v-1a8 8 0 0116 0v1" />
+          <rect x="3" y="13" width="4" height="6" rx="1.5" />
+          <rect x="17" y="13" width="4" height="6" rx="1.5" />
+        </svg>
+      );
+  }
 }
