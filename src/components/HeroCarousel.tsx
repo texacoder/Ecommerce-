@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { optimizedImageUrl } from "@/lib/image";
 
 export type HeroSlide = {
@@ -10,10 +9,17 @@ export type HeroSlide = {
   linkUrl: string | null;
 };
 
-/** Auto-rotating hero banner for the homepage. Slides come from admin-managed
- * BANNER promotions (Admin -> Promotions -> Add -> type "Banner") - this
- * component just displays whatever it's given and never renders anything
- * (leaving the caller's own empty-state in its place) when there are none. */
+/** Full-bleed background image carousel for the homepage hero. Renders as
+ * an absolutely-positioned layer that fills whatever size its parent
+ * section ends up being (the section's actual height comes from the text
+ * content overlaid on top of it, in normal flow) - it never renders
+ * anything itself when there are no slides, since the page decides what
+ * its own empty-state background looks like.
+ *
+ * Slides come from admin-managed BANNER promotions (Admin -> Promotions ->
+ * Add -> type "Banner"). Since the image is now a backdrop behind other
+ * links/buttons rather than a tile of its own, it's no longer clickable -
+ * the overlaid "Shop Now" / "Explore Deals" buttons are the real CTAs. */
 export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   const [active, setActive] = useState(0);
 
@@ -27,19 +33,17 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   const current = slides[Math.min(active, slides.length - 1)];
 
   return (
-    <div>
-      <Link href={current.linkUrl ?? "/products"} className="block rounded-xl overflow-hidden aspect-[4/3] bg-white/5">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          key={current.id}
-          src={optimizedImageUrl(current.imageUrl, 900)}
-          alt=""
-          decoding="async"
-          className="w-full h-full object-cover"
-        />
-      </Link>
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        key={current.id}
+        src={optimizedImageUrl(current.imageUrl, 1600)}
+        alt=""
+        decoding="async"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
       {slides.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-4">
+        <div className="absolute bottom-4 inset-x-0 flex justify-center gap-1.5 z-10">
           {slides.map((s, i) => (
             <button
               key={s.id}
@@ -51,6 +55,6 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 }

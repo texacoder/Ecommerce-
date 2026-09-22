@@ -5,8 +5,8 @@ import { formatMoney, statusLabel } from "@/lib/format";
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: "#b5730b",
-  CONFIRMED: "#0e7c6b",
-  PROCESSING: "#0e7c6b",
+  CONFIRMED: "#2563eb",
+  PROCESSING: "#2563eb",
   SHIPPED: "#101a2c",
   OUT_FOR_DELIVERY: "#101a2c",
   DELIVERED: "#12805c",
@@ -25,7 +25,7 @@ export function RevenueChart({ data }: { data: { date: string; revenue: number }
         <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(d) => d.slice(5)} />
         <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => formatMoney(v)} width={70} />
         <Tooltip formatter={(v) => formatMoney(Number(v))} labelFormatter={(l) => `Date: ${l}`} />
-        <Line type="monotone" dataKey="revenue" stroke="#0e7c6b" strokeWidth={2} dot={false} />
+        <Line type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={2} dot={false} />
       </LineChart>
     </ResponsiveContainer>
   );

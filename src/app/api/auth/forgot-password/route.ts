@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
               <h2 style="color: #0f172a;">Reset your password</h2>
               <p>We received a request to reset the password for your EXORASTORE account (${email}).</p>
               <p style="margin: 24px 0;">
-                <a href="${link}" style="background: #0e7c6b; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+                <a href="${link}" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
                   Reset password
                 </a>
               </p>

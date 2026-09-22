@@ -178,16 +178,20 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <section className="bg-[var(--brand-navy)] overflow-hidden">
-        <div className="container-page py-10 sm:py-16 grid md:grid-cols-2 gap-10 items-center">
-          <div className="text-white">
+      <section className="relative bg-[var(--brand-navy)] overflow-hidden">
+        <HeroCarousel slides={heroSlides} />
+        {heroSlides.length > 0 && (
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20" />
+        )}
+        <div className="container-page relative z-10 py-10 sm:py-16">
+          <div className="max-w-xl text-white">
             <p className="text-[var(--brand-accent)] font-semibold text-sm uppercase tracking-wide mb-3">EXORASTORE —</p>
             <h1 className="text-3xl sm:text-5xl font-bold leading-tight mb-4">
               Everything You Need,
               <br />
               <span className="text-[var(--brand-accent)]">Delivered to Your Door.</span>
             </h1>
-            <p className="text-white/70 mb-7 max-w-md">
+            <p className="text-white/80 mb-7 max-w-md">
               Electronics, fashion, home essentials, beauty and more — all in one place, at prices that make sense.
             </p>
             <div className="flex flex-wrap items-center gap-5 mb-9">
@@ -204,19 +208,16 @@ export default async function HomePage() {
               <TrustBadge icon="package" label="Easy" sub="Returns" />
               <TrustBadge icon="headset" label="24/7" sub="Support" />
             </div>
-          </div>
-          <div className="relative">
-            <HeroCarousel slides={heroSlides} />
             {heroSlides.length === 0 && (
-              <div className="aspect-[4/3] rounded-xl bg-white/5 border border-dashed border-white/15 flex items-center justify-center text-white/40 text-sm text-center px-6">
-                Add a homepage banner image in Admin → Promotions
-              </div>
+              <p className="text-white/40 text-xs mt-6">Add a homepage banner image in Admin → Promotions for a background photo here.</p>
             )}
-            <p className="hidden lg:block absolute right-1 top-1/2 -translate-y-1/2 text-white/25 italic text-sm tracking-wide rotate-90 whitespace-nowrap">
-              More Than Just a Store
-            </p>
           </div>
         </div>
+        {heroSlides.length > 0 && (
+          <p className="hidden lg:block absolute right-6 top-1/2 -translate-y-1/2 z-10 text-white/60 italic text-sm tracking-wide rotate-90 whitespace-nowrap">
+            More Than Just a Store
+          </p>
+        )}
       </section>
 
       {saleCampaigns.length > 0 && (
@@ -403,7 +404,7 @@ type TrustIconName = "truck" | "shield" | "package" | "headset";
 function TrustBadge({ icon, label, sub }: { icon: TrustIconName; label: string; sub: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center shrink-0 text-white">
+      <span className="text-blue-400 shrink-0">
         <TrustIcon name={icon} />
       </span>
       <span className="text-xs leading-tight text-white">
