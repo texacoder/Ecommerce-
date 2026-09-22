@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { prisma } from "@/lib/db";
 import ProductCard, { type ProductCardData } from "@/components/ProductCard";
 import PromoTile from "@/components/PromoTile";
@@ -173,19 +172,29 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <section className="relative bg-[var(--brand-navy)] overflow-hidden min-h-[480px] sm:min-h-[560px] flex items-center">
-        <Image
-          src="/hero-banner.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-          style={{ objectPosition: "72% center" }}
-        />
+      <section className="relative bg-[var(--brand-navy)] overflow-hidden aspect-[4/5] sm:aspect-[12/5] flex items-center">
+        {/* Two hand-cropped images, not one image force-cropped by CSS: the
+            mobile (4:5) and desktop (12:5) shapes are different enough that
+            no single crop covers both without either cutting off products or
+            leaving empty bars. <picture>'s media-query source is what makes
+            the browser fetch only the one it actually needs, unlike two
+            <img> tags toggled with CSS (which many browsers still both
+            download). The wrapping div's aspect-ratio matches each image's
+            real shape exactly, so object-cover here never crops anything -
+            it's just filling a box that's already the image's own shape. */}
+        <picture>
+          <source media="(min-width: 640px)" srcSet="/hero-banner-desktop.webp" />
+          <img
+            src="/hero-banner-mobile.webp"
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        </picture>
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20" />
         <div className="container-page relative z-10 py-10 sm:py-16">
-          <div className="max-w-xl text-white">
+          <div className="max-w-xl text-white" style={{ textShadow: "0 2px 10px rgba(0,0,0,0.85)" }}>
             <p className="text-[var(--brand-accent)] font-semibold text-sm uppercase tracking-wide mb-3">EXORASTORE —</p>
             <h1 className="text-3xl sm:text-5xl font-bold leading-tight mb-4">
               Everything You Need,
@@ -199,7 +208,10 @@ export default async function HomePage() {
               <Link href="/products" className="btn-primary inline-flex items-center gap-1.5 px-6 py-3 text-sm">
                 Shop Now <span aria-hidden>→</span>
               </Link>
-              <Link href="/deals" className="text-[var(--brand-accent)] font-medium text-sm inline-flex items-center gap-1.5 hover:underline">
+              <Link
+                href="/deals"
+                className="bg-white/10 hover:bg-white/20 border border-white/40 text-white font-medium text-sm inline-flex items-center gap-1.5 px-5 py-3 rounded-md backdrop-blur-sm"
+              >
                 Explore Deals <span aria-hidden>→</span>
               </Link>
             </div>
