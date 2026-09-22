@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { errorResponse, slugify } from "@/lib/api";
+import { computeDiscountPercent } from "@/lib/pricing";
 
 const createSchema = z.object({
   name: z.string().min(1).max(200),
@@ -10,7 +11,6 @@ const createSchema = z.object({
   specifications: z.string().optional().nullable(),
   price: z.number().int().min(0),
   originalPrice: z.number().int().min(0).optional().nullable(),
-  discountPercent: z.number().int().min(0).max(100).optional().nullable(),
   shippingCost: z.number().int().min(0).optional().default(0),
   sku: z.string().min(1).max(80),
   brand: z.string().max(120).optional().nullable(),
@@ -89,7 +89,11 @@ export async function POST(req: NextRequest) {
         specifications: body.specifications ?? null,
         price: body.price,
         originalPrice: body.originalPrice ?? null,
-        discountPercent: body.discountPercent ?? null,
+        // Always derived from price vs. original price, never trusted from
+        // the client - otherwise a "90% off" badge could be shown with
+        // nothing behind it (no strikethrough price, no real discount at
+        // all) just because that's the number that happened to be typed in.
+        discountPercent: computeDiscountPercent(body.price, body.originalPrice ?? null),
         shippingCost: body.shippingCost,
         sku: body.sku,
         brand: body.brand ?? null,

@@ -129,7 +129,6 @@ export default function EditProductPage() {
       specifications: product.specifications,
       price: product.price,
       originalPrice: product.originalPrice,
-      discountPercent: product.discountPercent,
       shippingCost: product.shippingCost,
       sku: product.sku,
       brand: product.brand,
@@ -329,8 +328,12 @@ export default function EditProductPage() {
           <Field label="Original price (₹)">
             <input type="number" step="0.01" className={inputClass} value={product.originalPrice ? (product.originalPrice / 100).toString() : ""} onChange={(e) => setProduct({ ...product, originalPrice: e.target.value ? Math.round(Number(e.target.value) * 100) : null })} />
           </Field>
-          <Field label="Discount % (display only)">
-            <input type="number" min={0} max={100} className={inputClass} value={product.discountPercent ?? ""} onChange={(e) => setProduct({ ...product, discountPercent: e.target.value ? Number(e.target.value) : null })} />
+          <Field label="Discount % (computed automatically)">
+            <p className="text-sm text-[var(--text-muted)] py-2">
+              {product.originalPrice && product.originalPrice > product.price
+                ? `${Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% off - shown on Save`
+                : "No discount - set an original price higher than the price to show one"}
+            </p>
           </Field>
           <Field label="Stock quantity">
             <input type="number" min={0} className={inputClass} value={product.stock} onChange={(e) => setProduct({ ...product, stock: Number(e.target.value) })} />

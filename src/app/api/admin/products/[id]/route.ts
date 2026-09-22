@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { errorResponse } from "@/lib/api";
+import { computeDiscountPercent } from "@/lib/pricing";
 
 const updateSchema = z.object({
   name: z.string().min(1).max(200).optional(),
@@ -10,7 +11,6 @@ const updateSchema = z.object({
   specifications: z.string().nullable().optional(),
   price: z.number().int().min(0).optional(),
   originalPrice: z.number().int().min(0).nullable().optional(),
-  discountPercent: z.number().int().min(0).max(100).nullable().optional(),
   shippingCost: z.number().int().min(0).optional(),
   sku: z.string().min(1).max(80).optional(),
   brand: z.string().max(120).nullable().optional(),
@@ -64,6 +64,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     // Reviving a soft-deleted product happens explicitly via republish.
     const data: Record<string, unknown> = { ...body };
     if (body.status === "PUBLISHED") data.deletedAt = null;
+
+    // Same rule as creation: discountPercent is never taken from the
+    // request, even though the field exists in the schema below (some
+    // callers still send whatever they last displayed) - it's recomputed
+    // from the *resulting* price/originalPrice so the "X% off" badge can
+    // never claim a discount larger than what the prices actually show.
+    const finalPrice = body.price ?? existing.price;
+    const finalOriginalPrice = body.originalPrice !== undefined ? body.originalPrice : existing.originalPrice;
+    data.discountPercent = computeDiscountPercent(finalPrice, finalOriginalPrice);
 
     const product = await prisma.product.update({
       where: { id },

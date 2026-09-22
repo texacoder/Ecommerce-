@@ -10,6 +10,15 @@ import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 export const TAX_RATE = 0;
 export { FREE_SHIPPING_THRESHOLD };
 
+/** The "X% off" badge shown across the storefront must always be backed by
+ * a real strikethrough price - never a number typed in independently of
+ * what the product actually costs. Both admin product routes derive
+ * discountPercent from this instead of trusting it from the request. */
+export function computeDiscountPercent(price: number, originalPrice: number | null): number | null {
+  if (!originalPrice || originalPrice <= price) return null;
+  return Math.round(((originalPrice - price) / originalPrice) * 100);
+}
+
 export type QuoteItemInput = { productId: string; variantId?: string | null; quantity: number };
 
 export type QuoteLineItem = {
