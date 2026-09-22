@@ -113,8 +113,9 @@ export default function AdminOrderDetailPage() {
     load();
   }
 
-  const canCancel = !["CANCELLED", "DELIVERED", "REFUNDED"].includes(order.status);
-  const canRefund = (order.paymentStatus === "PAID" || order.paymentStatus === "PARTIALLY_REFUNDED") && order.refundedAmount < order.total;
+  const isPaidOrPartiallyRefunded = order.paymentStatus === "PAID" || order.paymentStatus === "PARTIALLY_REFUNDED";
+  const canCancel = !["CANCELLED", "DELIVERED", "REFUNDED"].includes(order.status) && !isPaidOrPartiallyRefunded;
+  const canRefund = isPaidOrPartiallyRefunded && order.refundedAmount < order.total;
   const isCod = order.paymentProvider === "cod";
 
   return (
@@ -181,6 +182,11 @@ export default function AdminOrderDetailPage() {
             </button>
           )}
         </div>
+        {!canCancel && isPaidOrPartiallyRefunded && !["CANCELLED", "DELIVERED", "REFUNDED"].includes(order.status) && (
+          <p className="text-sm text-[var(--text-muted)] mt-2">
+            This order has already been paid, so it can&apos;t be cancelled directly. Refund it first if it needs to be called off.
+          </p>
+        )}
         {order.cancelReason && <p className="text-sm text-[var(--text-muted)] mt-2">Cancel reason: {order.cancelReason}</p>}
         <p className="text-sm mt-2">
           Payment method: {isCod ? "Cash on Delivery" : "Online (Razorpay)"}

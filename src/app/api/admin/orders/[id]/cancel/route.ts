@@ -22,6 +22,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         { status: 400 }
       );
     }
+    // Cancelling only restocks the item - it never touches money. Blocking
+    // it once payment has actually been collected forces the admin through
+    // the Refund action instead, which is the one that actually accounts
+    // for the customer's money. Otherwise a click here would silently
+    // restock a paid order and leave the customer's payment uncollected
+    // with no record that a refund is still owed.
+    if (order.paymentStatus === "PAID" || order.paymentStatus === "PARTIALLY_REFUNDED") {
+      return NextResponse.json(
+        { error: "This order has already been paid. Refund it first, then cancel it." },
+        { status: 400 }
+      );
+    }
 
     const updated = await prisma.$transaction(async (tx) => {
       if (order.stockReserved) {

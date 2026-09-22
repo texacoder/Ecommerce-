@@ -33,8 +33,19 @@ export async function getAnalyticsData() {
 
   const customerCount = await prisma.user.count({ where: { role: "CUSTOMER" } });
 
+  // A COD order is a committed sale from the moment it's placed (cash is
+  // collected later, at delivery), but an online order isn't - one whose
+  // payment failed or was simply abandoned stays PENDING forever rather
+  // than being auto-cancelled (see payment-failed/route.ts, which leaves it
+  // that way on purpose so the customer can retry). Counting those against
+  // "Products Sold"/"Best Sellers" would credit sales that never happened.
   const soldItems = await prisma.orderItem.findMany({
-    where: { order: { status: { not: "CANCELLED" } } },
+    where: {
+      order: {
+        status: { not: "CANCELLED" },
+        OR: [{ paymentProvider: "cod" }, { paymentStatus: { in: PAID_STATUSES } }],
+      },
+    },
     select: { productId: true, nameSnapshot: true, quantity: true },
   });
   const productsSold = soldItems.reduce((s, i) => s + i.quantity, 0);
