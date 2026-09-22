@@ -23,7 +23,15 @@ export default function CategoryInfoButton({ description }: { description: strin
       {open && (
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} aria-hidden="true" />
-          <div className="absolute left-0 top-7 z-40 w-72 max-w-[80vw] bg-[var(--surface)] border border-[var(--border-subtle)] rounded-md shadow-lg p-3 text-sm font-normal text-[var(--text-muted)] leading-relaxed">
+          {/* The box's own position is relative to the button, but the
+              button can sit anywhere horizontally depending on how long the
+              category name is - a fixed-width box anchored to it easily runs
+              off the right edge of a phone screen. Below sm:, it's "fixed"
+              with both edges pinned to the viewport (inset-x-4) instead, so
+              it can never overflow regardless of the button's position or
+              the screen width; sm: and up reverts to the anchored tooltip,
+              which already has enough room. */}
+          <div className="fixed inset-x-4 top-32 sm:absolute sm:inset-x-auto sm:left-0 sm:top-7 sm:w-72 sm:max-w-[80vw] z-40 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-md shadow-lg p-3 text-sm font-normal text-[var(--text-muted)] leading-relaxed">
             {description}
           </div>
         </>
