@@ -228,7 +228,7 @@ export default async function HomePage() {
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-lg">
-              <TrustBadge icon="truck" label="Free Shipping" sub="Above ₹499" />
+              <TrustBadge icon="truck" label="Free Shipping" sub="Above ₹999" />
               <TrustBadge icon="shield" label="Secure" sub="Payments" />
               <TrustBadge icon="package" label="Easy" sub="Returns" />
               <TrustBadge icon="headset" label="24/7" sub="Support" />
