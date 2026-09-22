@@ -74,7 +74,27 @@ export default async function HomePage() {
       prisma.promotion.findMany({ where: { type: "SALE_CAMPAIGN", ...activePromotionWhere(now) }, orderBy: { position: "asc" }, take: 3 }),
       prisma.promotion.findMany({
         where: { type: "DEAL", ...activePromotionWhere(now) },
-        include: { product: { select: { slug: true, status: true, visible: true, deletedAt: true } } },
+        include: {
+          product: {
+            select: {
+              id: true,
+              slug: true,
+              name: true,
+              price: true,
+              originalPrice: true,
+              discountPercent: true,
+              stock: true,
+              isNewArrival: true,
+              isBestSeller: true,
+              status: true,
+              visible: true,
+              deletedAt: true,
+              images: { orderBy: { position: "asc" }, take: 1 },
+              _count: { select: { variants: true } },
+              reviews: { where: { status: "PUBLISHED" }, select: { rating: true } },
+            },
+          },
+        },
         orderBy: { position: "asc" },
         take: 4,
       }),
@@ -94,15 +114,20 @@ export default async function HomePage() {
   // links out to a product page that will 404.
   const isVisibleProduct = (p: { status: string; visible: boolean; deletedAt: Date | null } | null | undefined) =>
     !!p && p.status === "PUBLISHED" && p.visible && !p.deletedAt;
-  // Filtered here (not just inside PromoTile) so an imageless promo's
-  // wrapper element never gets created at all, rather than rendering an
-  // empty box that still takes up a slot in the row/grid.
-  const validDealPromos = dealPromos
-    .filter((d) => d.imageUrl)
-    .map((d) => ({
-      ...d,
-      product: isVisibleProduct(d.product) ? d.product : null,
-    }));
+  // A DEAL promo tied to a real, visible product renders as a full product
+  // card (photo, price, rating, Add to Cart) instead of just a clickable
+  // promo image - consistent with every other product listing on the site.
+  // Only a promo with no product at all (a pure promotional graphic) still
+  // falls back to the plain image tile, and only if it has an image to show.
+  const dealProductCards: ProductCardData[] = dealPromos
+    .filter((d) => isVisibleProduct(d.product))
+    .map((d) => toCardData(d.product as RawProduct));
+  const dealImageOnlyPromos = dealPromos.filter((d) => !d.productId && d.imageUrl);
+  // A product promoted via a DEAL promo can also independently qualify for
+  // the plain discount-based query below - drop it from that second list so
+  // it never renders as two identical cards in the same section.
+  const dealPromoProductIds = new Set(dealProductCards.map((p) => p.id));
+  const additionalDeals = deals.filter((p) => !dealPromoProductIds.has(p.id));
 
   // FEATURED_SECTION promotions can be scoped to a category (render that
   // category's products) or left as a standalone spotlight banner. A
@@ -213,11 +238,6 @@ export default async function HomePage() {
             )}
           </div>
         </div>
-        {heroSlides.length > 0 && (
-          <p className="hidden lg:block absolute right-6 top-1/2 -translate-y-1/2 z-10 text-white/60 italic text-sm tracking-wide rotate-90 whitespace-nowrap">
-            More Than Just a Store
-          </p>
-        )}
       </section>
 
       {saleCampaigns.length > 0 && (
@@ -263,7 +283,7 @@ export default async function HomePage() {
           </section>
         )}
 
-        {(validDealPromos.length > 0 || deals.length > 0) && (
+        {(dealImageOnlyPromos.length > 0 || dealProductCards.length > 0 || additionalDeals.length > 0) && (
           <section>
             <div className="flex items-baseline justify-between mb-4">
               <h2 className="text-lg font-semibold text-[var(--brand-buy)]">Today&apos;s Deals</h2>
@@ -271,16 +291,16 @@ export default async function HomePage() {
                 See all
               </Link>
             </div>
-            {/* Mobile: promo tiles and real products are different heights
-                (a plain image vs. a full price/rating/button card), so
-                mixing them into one scroll row leaves an odd gap under the
-                shorter tiles - two separate rows keep each one's height
-                consistent. Desktop keeps the original single merged grid
-                (unchanged) since wrapping to multiple items per line there
-                doesn't have this problem. */}
-            {validDealPromos.length > 0 && (
+            {/* Mobile: a pure promotional image tile (no linked product) is a
+                different height from a full price/rating/button product
+                card, so mixing them into one scroll row leaves an odd gap
+                under the shorter tiles - two separate rows keep each one's
+                height consistent. Desktop keeps a single merged grid since
+                wrapping to multiple items per line there doesn't have this
+                problem. */}
+            {dealImageOnlyPromos.length > 0 && (
               <div className="flex sm:hidden overflow-x-auto gap-4 pb-1 -mx-4 px-4 mb-4">
-                {validDealPromos.map((d) => (
+                {dealImageOnlyPromos.map((d) => (
                   <div key={d.id} className="w-40 shrink-0">
                     <PromoTile
                       promo={{
@@ -289,16 +309,20 @@ export default async function HomePage() {
                         subtitle: d.subtitle,
                         imageUrl: d.imageUrl,
                         linkUrl: d.linkUrl,
-                        productSlug: d.product?.slug,
                       }}
                     />
                   </div>
                 ))}
               </div>
             )}
-            {deals.length > 0 && (
+            {(dealProductCards.length > 0 || additionalDeals.length > 0) && (
               <div className="flex sm:hidden overflow-x-auto gap-4 pb-1 -mx-4 px-4">
-                {deals.map((p) => (
+                {dealProductCards.map((p) => (
+                  <div key={p.id} className="w-40 shrink-0">
+                    <ProductCard product={p} />
+                  </div>
+                ))}
+                {additionalDeals.map((p) => (
                   <div key={p.id} className="w-40 shrink-0">
                     <ProductCard product={toCardData(p)} />
                   </div>
@@ -306,7 +330,7 @@ export default async function HomePage() {
               </div>
             )}
             <div className="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {validDealPromos.map((d) => (
+              {dealImageOnlyPromos.map((d) => (
                 <PromoTile
                   key={d.id}
                   promo={{
@@ -315,11 +339,13 @@ export default async function HomePage() {
                     subtitle: d.subtitle,
                     imageUrl: d.imageUrl,
                     linkUrl: d.linkUrl,
-                    productSlug: d.product?.slug,
                   }}
                 />
               ))}
-              {deals.map((p) => (
+              {dealProductCards.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+              {additionalDeals.map((p) => (
                 <ProductCard key={p.id} product={toCardData(p)} />
               ))}
             </div>
@@ -353,7 +379,12 @@ export default async function HomePage() {
         {bestSellers.length > 0 && <ProductSection title="Best Sellers" viewAllHref="/products?bestSeller=true" products={bestSellers.map(toCardData)} />}
         {newArrivals.length > 0 && <ProductSection title="New Arrivals" viewAllHref="/products?sort=newest" products={newArrivals.map(toCardData)} />}
 
-        {featured.length === 0 && bestSellers.length === 0 && newArrivals.length === 0 && deals.length === 0 && validDealPromos.length === 0 && (
+        {featured.length === 0 &&
+          bestSellers.length === 0 &&
+          newArrivals.length === 0 &&
+          additionalDeals.length === 0 &&
+          dealProductCards.length === 0 &&
+          dealImageOnlyPromos.length === 0 && (
           <div className="text-center py-16 text-[var(--text-muted)]">
             <p className="text-lg font-medium mb-2">No products yet</p>
             <p className="text-sm">Add products from the admin dashboard and they will appear here automatically.</p>
