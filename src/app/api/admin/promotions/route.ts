@@ -35,6 +35,15 @@ export async function POST(req: NextRequest) {
   try {
     await requireAdmin();
     const body = schema.parse(await req.json());
+
+    // An end date on or before the start date makes the "is this promotion
+    // currently active" window (start <= now <= end) impossible for any
+    // value of now - the promotion would silently never appear anywhere,
+    // with nothing telling the admin why.
+    if (body.startsAt && body.endsAt && new Date(body.endsAt) <= new Date(body.startsAt)) {
+      return NextResponse.json({ error: "End date must be after the start date" }, { status: 400 });
+    }
+
     const promotion = await prisma.promotion.create({
       data: {
         ...body,

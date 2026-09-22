@@ -23,6 +23,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     await requireAdmin();
     const { id } = await params;
     const body = schema.parse(await req.json());
+
+    const existing = await prisma.promotion.findUnique({ where: { id } });
+    if (!existing) return NextResponse.json({ error: "Promotion not found" }, { status: 404 });
+
+    // Same "impossible active window" check as creation, but against the
+    // *resulting* dates - a PATCH that only sends one of the two fields
+    // still has to be checked against whichever one isn't changing.
+    const finalStartsAt = body.startsAt !== undefined ? body.startsAt : existing.startsAt?.toISOString() ?? null;
+    const finalEndsAt = body.endsAt !== undefined ? body.endsAt : existing.endsAt?.toISOString() ?? null;
+    if (finalStartsAt && finalEndsAt && new Date(finalEndsAt) <= new Date(finalStartsAt)) {
+      return NextResponse.json({ error: "End date must be after the start date" }, { status: 400 });
+    }
+
     const data: Record<string, unknown> = { ...body };
     if (body.startsAt !== undefined) data.startsAt = body.startsAt ? new Date(body.startsAt) : null;
     if (body.endsAt !== undefined) data.endsAt = body.endsAt ? new Date(body.endsAt) : null;
