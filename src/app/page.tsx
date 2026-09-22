@@ -195,7 +195,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20" />
         <div className="container-page relative z-10 py-10 sm:py-16">
           <div className="max-w-xl text-white" style={{ textShadow: "0 2px 10px rgba(0,0,0,0.85)" }}>
-            <p className="text-[var(--brand-accent)] font-semibold text-sm uppercase tracking-wide mb-3">EXORASTORE —</p>
+            <p className="text-[var(--brand-accent)] font-semibold text-sm uppercase tracking-wide mb-3">EXORASTORE</p>
             <h1 className="text-3xl sm:text-5xl font-bold leading-tight mb-4">
               Everything You Need,
               <br />
@@ -276,45 +276,7 @@ export default async function HomePage() {
                 See all
               </Link>
             </div>
-            {/* Mobile: a pure promotional image tile (no linked product) is a
-                different height from a full price/rating/button product
-                card, so mixing them into one scroll row leaves an odd gap
-                under the shorter tiles - two separate rows keep each one's
-                height consistent. Desktop keeps a single merged grid since
-                wrapping to multiple items per line there doesn't have this
-                problem. */}
-            {dealImageOnlyPromos.length > 0 && (
-              <div className="flex sm:hidden overflow-x-auto gap-4 pb-1 -mx-4 px-4 mb-4">
-                {dealImageOnlyPromos.map((d) => (
-                  <div key={d.id} className="w-40 shrink-0">
-                    <PromoTile
-                      promo={{
-                        id: d.id,
-                        title: d.title,
-                        subtitle: d.subtitle,
-                        imageUrl: d.imageUrl,
-                        linkUrl: d.linkUrl,
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-            {(dealProductCards.length > 0 || additionalDeals.length > 0) && (
-              <div className="flex sm:hidden overflow-x-auto gap-4 pb-1 -mx-4 px-4">
-                {dealProductCards.map((p) => (
-                  <div key={p.id} className="w-40 shrink-0">
-                    <ProductCard product={p} />
-                  </div>
-                ))}
-                {additionalDeals.map((p) => (
-                  <div key={p.id} className="w-40 shrink-0">
-                    <ProductCard product={toCardData(p)} />
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
               {dealImageOnlyPromos.map((d) => (
                 <PromoTile
                   key={d.id}
@@ -404,11 +366,9 @@ function ProductSection({
           See all
         </Link>
       </div>
-      <div className="flex overflow-x-auto gap-4 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-4 sm:overflow-visible">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
         {products.map((p) => (
-          <div key={p.id} className="w-40 shrink-0 sm:w-auto">
-            <ProductCard product={p} />
-          </div>
+          <ProductCard key={p.id} product={p} />
         ))}
       </div>
     </section>

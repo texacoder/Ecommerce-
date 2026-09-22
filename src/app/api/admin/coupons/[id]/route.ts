@@ -26,6 +26,26 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const existing = await prisma.coupon.findUnique({ where: { id } });
     if (!existing) return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
 
+    // A partial update only sends the fields being changed, so these rules
+    // (enforced on creation) have to be re-checked against the *resulting*
+    // record, not just the fields in this request - otherwise e.g. PATCHing
+    // only `type: "PERCENT"` onto a coupon whose value is still 500 (valid
+    // as a FIXED amount, meaningless as a percent) would silently produce a
+    // 500%-off coupon with no validation catching it at all.
+    const finalType = body.type ?? existing.type;
+    const finalValue = body.value ?? existing.value;
+    if (finalType === "PERCENT" && finalValue > 100) {
+      return NextResponse.json({ error: "Percentage discount cannot exceed 100" }, { status: 400 });
+    }
+    const finalProductId = body.productId !== undefined ? body.productId : existing.productId;
+    const finalCategoryId = body.categoryId !== undefined ? body.categoryId : existing.categoryId;
+    if (finalProductId && finalCategoryId) {
+      return NextResponse.json(
+        { error: "A coupon can be scoped to a product or a category, not both" },
+        { status: 400 }
+      );
+    }
+
     const data: Record<string, unknown> = { ...body };
     if (body.code) {
       const code = body.code.trim().toUpperCase();

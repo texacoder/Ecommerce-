@@ -30,6 +30,22 @@ export async function POST(req: NextRequest) {
     await requireAdmin();
     const body = createSchema.parse(await req.json());
 
+    // The rest of the app (breadcrumbs, homepage featured sections, category
+    // pages) only ever looks one level deep - a category's own children, not
+    // grandchildren. Nesting a subcategory under another subcategory would
+    // create a level nothing displays or aggregates, so products placed
+    // there would just silently never show up anywhere they're expected to.
+    if (body.parentId) {
+      const targetParent = await prisma.category.findUnique({ where: { id: body.parentId } });
+      if (!targetParent) return NextResponse.json({ error: "Parent category not found" }, { status: 404 });
+      if (targetParent.parentId) {
+        return NextResponse.json(
+          { error: "A subcategory cannot itself be used as a parent category" },
+          { status: 400 }
+        );
+      }
+    }
+
     let slug = slugify(body.name);
     let suffix = 0;
     while (await prisma.category.findUnique({ where: { slug: suffix ? `${slug}-${suffix}` : slug } })) {

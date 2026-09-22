@@ -24,6 +24,28 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (body.parentId === id) {
       return NextResponse.json({ error: "A category cannot be its own parent" }, { status: 400 });
     }
+    // Same 2-level-only constraint as creation: the target parent can't
+    // itself be a subcategory (that's the direct cycle case too - a real
+    // subcategory always has a parentId, so this rejects it before a cycle
+    // can even form), and this category can't already have subcategories
+    // of its own, or they'd become invisible grandchildren nothing displays.
+    if (body.parentId) {
+      const targetParent = await prisma.category.findUnique({ where: { id: body.parentId } });
+      if (!targetParent) return NextResponse.json({ error: "Parent category not found" }, { status: 404 });
+      if (targetParent.parentId) {
+        return NextResponse.json(
+          { error: "A subcategory cannot itself be used as a parent category" },
+          { status: 400 }
+        );
+      }
+      const childCount = await prisma.category.count({ where: { parentId: id } });
+      if (childCount > 0) {
+        return NextResponse.json(
+          { error: "This category has its own subcategories - move or remove them first before making it a subcategory itself" },
+          { status: 400 }
+        );
+      }
+    }
 
     const data: Record<string, unknown> = { ...body };
     if (body.name && body.name !== existing.name) {
