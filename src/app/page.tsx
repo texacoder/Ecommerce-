@@ -1,8 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/db";
 import ProductCard, { type ProductCardData } from "@/components/ProductCard";
 import PromoTile from "@/components/PromoTile";
-import HeroCarousel, { type HeroSlide } from "@/components/HeroCarousel";
 import { SITE_NAME, SITE_URL } from "@/lib/seo";
 import { optimizedImageUrl } from "@/lib/image";
 
@@ -48,12 +48,6 @@ const activePromotionWhere = (now: Date) => ({
   ],
 });
 
-// Plain helper (not inline in the component body) so the randomness doesn't
-// trip React's rule against impure calls inside a component's render.
-function randomSkip(exclusiveMax: number): number {
-  return Math.floor(Math.random() * exclusiveMax);
-}
-
 export default async function HomePage() {
   const now = new Date();
   const baseWhere = { deletedAt: null, status: "PUBLISHED" as const, visible: true };
@@ -63,9 +57,8 @@ export default async function HomePage() {
     reviews: { where: { status: "PUBLISHED" as const }, select: { rating: true } },
   };
 
-  const [banners, featured, newArrivals, bestSellers, deals, categories, saleCampaigns, dealPromos, featuredSectionPromos] =
+  const [featured, newArrivals, bestSellers, deals, categories, saleCampaigns, dealPromos, featuredSectionPromos] =
     await Promise.all([
-      prisma.promotion.findMany({ where: { type: "BANNER", ...activePromotionWhere(now) }, orderBy: { position: "asc" }, take: 3 }),
       prisma.product.findMany({ where: { ...baseWhere, isFeatured: true }, include, take: 8, orderBy: { updatedAt: "desc" } }),
       prisma.product.findMany({ where: { ...baseWhere, isNewArrival: true }, include, take: 8, orderBy: { createdAt: "desc" } }),
       prisma.product.findMany({ where: { ...baseWhere, isBestSeller: true }, include, take: 8, orderBy: { updatedAt: "desc" } }),
@@ -155,29 +148,6 @@ export default async function HomePage() {
     })
   );
 
-  // No admin banners set up yet - fill that hero space with a few random
-  // products instead of a "nothing here" placeholder, so the homepage
-  // never looks empty even before any promotions are configured.
-  let fallbackHeroProducts: ProductCardData[] = [];
-  if (banners.length === 0) {
-    const eligibleCount = await prisma.product.count({ where: baseWhere });
-    if (eligibleCount > 0) {
-      const skip = eligibleCount > 3 ? randomSkip(eligibleCount - 3) : 0;
-      const randomProducts = await prisma.product.findMany({ where: baseWhere, include, take: 3, skip });
-      fallbackHeroProducts = randomProducts.map(toCardData);
-    }
-  }
-
-  // The hero carousel shows admin-managed BANNER promotions when any exist,
-  // falling back to a few random products' own photos otherwise - either
-  // way it's just a flat list of {id, imageUrl, linkUrl}.
-  const heroSlides: HeroSlide[] =
-    banners.length > 0
-      ? banners.filter((b) => b.imageUrl).map((b) => ({ id: b.id, imageUrl: b.imageUrl as string, linkUrl: b.linkUrl }))
-      : fallbackHeroProducts
-          .filter((p) => p.image)
-          .map((p) => ({ id: p.id, imageUrl: p.image as string, linkUrl: `/products/${p.slug}` }));
-
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -203,11 +173,17 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <section className="relative bg-[var(--brand-navy)] overflow-hidden">
-        <HeroCarousel slides={heroSlides} />
-        {heroSlides.length > 0 && (
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20" />
-        )}
+      <section className="relative bg-[var(--brand-navy)] overflow-hidden min-h-[480px] sm:min-h-[560px] flex items-center">
+        <Image
+          src="/hero-banner.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+          style={{ objectPosition: "72% center" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20" />
         <div className="container-page relative z-10 py-10 sm:py-16">
           <div className="max-w-xl text-white">
             <p className="text-[var(--brand-accent)] font-semibold text-sm uppercase tracking-wide mb-3">EXORASTORE —</p>
@@ -233,9 +209,6 @@ export default async function HomePage() {
               <TrustBadge icon="package" label="Easy" sub="Returns" />
               <TrustBadge icon="headset" label="24/7" sub="Support" />
             </div>
-            {heroSlides.length === 0 && (
-              <p className="text-white/40 text-xs mt-6">Add a homepage banner image in Admin → Promotions for a background photo here.</p>
-            )}
           </div>
         </div>
       </section>
