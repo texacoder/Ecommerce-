@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { CartProvider } from "@/lib/cart-context";
 import { ToastProvider } from "@/lib/toast-context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import MetaPixel from "@/components/MetaPixel";
 import { prisma } from "@/lib/db";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
@@ -18,6 +17,15 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+// Used only for the "EXORASTORE" wordmark in the header - a plain, rounded
+// sans that reads as a clean brand name rather than a heavy, all-caps block
+// of the body font at extrabold weight.
+const poppins = Poppins({
+  variable: "--font-poppins",
+  weight: ["600"],
   subsets: ["latin"],
 });
 
@@ -64,7 +72,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[var(--surface-muted)] text-[var(--text)]">
         <MetaPixel />
@@ -74,7 +82,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <Header categories={categories} />
               <main className="flex-1">{children}</main>
               <Footer />
-              <WhatsAppButton />
             </CartProvider>
           </AuthProvider>
         </ToastProvider>

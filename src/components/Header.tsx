@@ -39,7 +39,9 @@ export default function Header({ categories }: { categories: NavCategory[] }) {
 
           <Link href="/" className="shrink-0 flex items-center gap-2">
             <Image src="/logo-mark-96.png" alt="" width={32} height={32} className="rounded-full" priority />
-            <span className="text-xl font-extrabold tracking-tight">EXORASTORE</span>
+            <span className="text-xl font-semibold" style={{ fontFamily: "var(--font-poppins)" }}>
+              EXORASTORE
+            </span>
           </Link>
 
           <div className="hidden md:block">

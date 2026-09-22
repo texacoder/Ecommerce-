@@ -190,6 +190,7 @@ export default async function HomePage() {
             fetchPriority="high"
             decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
+            style={{ filter: "saturate(0.8) brightness(0.94)" }}
           />
         </picture>
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20" />

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 import ProductFilters from "@/components/ProductFilters";
+import CategoryInfoButton from "@/components/CategoryInfoButton";
 import { getProductListing } from "@/lib/product-listing";
 import { SITE_URL } from "@/lib/seo";
 
@@ -93,8 +94,10 @@ export default async function CategoryPage({
   return (
     <div className="container-page py-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <h1 className="text-2xl font-semibold mb-2">{category.name}</h1>
-      {category.description && <p className="text-[var(--text-muted)] mb-4">{category.description}</p>}
+      <h1 className="text-2xl font-semibold mb-4 flex items-center">
+        {category.name}
+        {category.description && <CategoryInfoButton description={category.description} />}
+      </h1>
 
       {category.children.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-6">
