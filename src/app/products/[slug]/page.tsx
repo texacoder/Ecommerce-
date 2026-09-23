@@ -11,7 +11,7 @@ import StarRating from "@/components/StarRating";
 import ProductCard, { type ProductCardData } from "@/components/ProductCard";
 import ProductOptionsSelector from "@/components/ProductOptionsSelector";
 import MetaProductViewTracker from "@/components/MetaProductViewTracker";
-import { SITE_URL, isCrawlableImageUrl } from "@/lib/seo";
+import { SITE_URL, isCrawlableImageUrl, structuredDataName } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -133,32 +133,36 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   }));
 
   const crawlableImages = product.images.map((i) => i.url).filter(isCrawlableImageUrl);
+  const structuredProductName = structuredDataName(product.name);
+  const structuredBrandName = structuredDataName(product.brand, 100);
 
-  const productJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    description: product.description ?? undefined,
-    image: crawlableImages.length > 0 ? crawlableImages : undefined,
-    sku: product.sku,
-    brand: product.brand ? { "@type": "Brand", name: product.brand } : undefined,
-    offers: {
-      "@type": "Offer",
-      url: `${SITE_URL}/products/${slug}`,
-      priceCurrency: "INR",
-      price: (product.price / 100).toFixed(2),
-      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-    },
-    ...(product.reviews.length > 0
-      ? {
-          aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: avgRating?.toFixed(1),
-            reviewCount: product.reviews.length,
-          },
-        }
-      : {}),
-  };
+  const productJsonLd = structuredProductName
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: structuredProductName,
+        description: product.description ?? undefined,
+        image: crawlableImages.length > 0 ? crawlableImages : undefined,
+        sku: product.sku,
+        brand: structuredBrandName ? { "@type": "Brand", name: structuredBrandName } : undefined,
+        offers: {
+          "@type": "Offer",
+          url: `${SITE_URL}/products/${slug}`,
+          priceCurrency: "INR",
+          price: (product.price / 100).toFixed(2),
+          availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        },
+        ...(product.reviews.length > 0
+          ? {
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: avgRating?.toFixed(1),
+                reviewCount: product.reviews.length,
+              },
+            }
+          : {}),
+      }
+    : null;
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -178,7 +182,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       {
         "@type": "ListItem",
         position: product.category ? 3 : 2,
-        name: product.name,
+        name: structuredProductName ?? product.name,
         item: `${SITE_URL}/products/${slug}`,
       },
     ],
@@ -186,7 +190,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="container-page py-8">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      {productJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <MetaProductViewTracker id={product.id} name={product.name} price={product.price} />
       <div className="text-sm text-[var(--text-muted)] mb-4 flex gap-1">

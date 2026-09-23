@@ -16,3 +16,14 @@ export const SITE_DESCRIPTION =
 export function isCrawlableImageUrl(url: string | null | undefined): url is string {
   return typeof url === "string" && /^https?:\/\//.test(url);
 }
+
+// Google's Merchant listing structured data check flags a "name" field with
+// "Invalid string length" when it's empty or unreasonably long. The admin
+// form enforces a sane length on write, but a row created before that check
+// existed (or edited directly) isn't guaranteed to respect it, so structured
+// data trims/caps names at render time rather than trusting the database.
+export function structuredDataName(value: string | null | undefined, maxLength = 150): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  return trimmed.length > maxLength ? trimmed.slice(0, maxLength).trim() : trimmed;
+}
