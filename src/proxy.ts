@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { SESSION_COOKIE } from "@/lib/auth";
+import { SITE_URL } from "@/lib/seo";
+
+// Vercel keeps a project's own <project>.vercel.app domain live and
+// serving the same deployment even after a custom domain is attached -
+// visiting it shows the exact same site under a second, uglier URL, which
+// both confuses customers and splits SEO signal across two domains for
+// identical content. Permanently redirecting it to the real domain (path
+// and query preserved) means exorastore.com is the only address the site
+// is ever actually reachable at.
+const CANONICAL_HOST = (() => {
+  try {
+    return new URL(SITE_URL).hostname;
+  } catch {
+    return "";
+  }
+})();
 
 // Edge-safe JWT check. This is a first line of defense that keeps customers
 // out of /admin pages entirely; every actual admin mutation additionally
@@ -82,7 +98,15 @@ function maintenanceResponse(): NextResponse {
 }
 
 export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
+
+  // `request.nextUrl.hostname` reflects the server's own bind address, not
+  // the domain the visitor actually typed - the incoming Host header is
+  // the only reliable source for which domain this request came in on.
+  const requestHost = request.headers.get("host") ?? "";
+  if (CANONICAL_HOST && requestHost !== CANONICAL_HOST && requestHost.endsWith(".vercel.app")) {
+    return NextResponse.redirect(new URL(`${pathname}${search}`, SITE_URL), 308);
+  }
 
   if (process.env.MAINTENANCE_MODE === "true" && !isAllowedDuringMaintenance(pathname)) {
     return maintenanceResponse();
