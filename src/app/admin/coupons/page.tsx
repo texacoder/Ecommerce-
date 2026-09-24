@@ -70,7 +70,14 @@ export default function AdminCouponsPage() {
         type: form.type,
         value: form.type === "PERCENT" ? Number(form.value) : Math.round(Number(form.value) * 100),
         minOrderValue: form.minOrderValue ? Math.round(Number(form.minOrderValue) * 100) : null,
-        expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
+        // The <input type="date"> value is just "YYYY-MM-DD" - handing that
+        // straight to `new Date()` parses it as UTC midnight, which is
+        // already hours in the past for an IST admin by the time they pick
+        // "today" expecting the coupon to last through the end of it.
+        // Appending a local time (no "Z") makes the browser interpret it in
+        // the admin's own timezone, matching what "expires on this date"
+        // actually means to a human.
+        expiresAt: form.expiresAt ? new Date(`${form.expiresAt}T23:59:59`).toISOString() : null,
         usageLimit: form.usageLimit ? Number(form.usageLimit) : null,
         perCustomerLimit: form.perCustomerLimit ? Number(form.perCustomerLimit) : null,
         productId: form.productId || null,
