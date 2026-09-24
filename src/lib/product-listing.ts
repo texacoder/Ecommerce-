@@ -21,9 +21,27 @@ export type ListingParams = {
 const PAGE_SIZE = 24;
 
 export async function getProductListing(params: ListingParams) {
+  // Every product lives in a leaf subcategory, never directly in a
+  // top-level one (Electronics itself has zero products - they're all
+  // under Electronics > Mobiles, > Laptops, etc.). Filtering by a bare
+  // category slug/id without also pulling in its children means picking
+  // "Electronics" from the filter dropdown would silently return nothing,
+  // ever - resolve it to the full [parent, ...children] id list up front
+  // so both the product query and the brand-filter list below share one
+  // correct definition of "in this category" instead of two ad hoc ones.
+  let categoryIds = params.categoryIds;
+  if (!categoryIds?.length && params.category) {
+    const category = await prisma.category.findFirst({
+      where: { slug: params.category },
+      select: { id: true, children: { select: { id: true } } },
+    });
+    // An unresolvable slug should match nothing, same as before - not
+    // silently fall through to "no category filter" and show everything.
+    categoryIds = category ? [category.id, ...category.children.map((c) => c.id)] : ["__no_such_category__"];
+  }
+
   const where: Prisma.ProductWhereInput = { deletedAt: null, status: "PUBLISHED", visible: true };
-  if (params.categoryIds?.length) where.categoryId = { in: params.categoryIds };
-  else if (params.category) where.category = { slug: params.category };
+  if (categoryIds?.length) where.categoryId = { in: categoryIds };
   if (params.brand) where.brand = params.brand;
   if (params.inStockOnly) where.stock = { gt: 0 };
   if (params.minDiscount) where.discountPercent = { gte: params.minDiscount };
@@ -56,6 +74,21 @@ export async function getProductListing(params: ListingParams) {
 
   const page = Math.max(1, params.page ?? 1);
 
+  // The brand filter's own option list must stay scoped to the same
+  // category as the listing - otherwise every category page ends up
+  // offering every brand in the entire catalog (e.g. an electronics brand
+  // showing up as a filter on the Fashion page), even though picking it
+  // there would just return zero results. It intentionally ignores price/
+  // rating/search though, so narrowing by those doesn't prematurely hide
+  // a brand that's still relevant to the category being browsed.
+  const brandsWhere: Prisma.ProductWhereInput = {
+    deletedAt: null,
+    status: "PUBLISHED",
+    visible: true,
+    brand: { not: null },
+  };
+  if (categoryIds?.length) brandsWhere.categoryId = { in: categoryIds };
+
   const [products, total, brands] = await Promise.all([
     prisma.product.findMany({
       where,
@@ -70,7 +103,7 @@ export async function getProductListing(params: ListingParams) {
     }),
     prisma.product.count({ where }),
     prisma.product.findMany({
-      where: { deletedAt: null, status: "PUBLISHED", visible: true, brand: { not: null } },
+      where: brandsWhere,
       select: { brand: true },
       distinct: ["brand"],
       take: 30,

@@ -189,8 +189,17 @@ export async function validateAndPriceCoupon(
     eligibleSubtotal = eligibleItems.reduce((s, i) => s + i.lineTotal, 0);
   } else if (coupon.categoryId) {
     const productIds = items.map((i) => i.productId);
+    // Every product lives in a leaf subcategory, never directly in a
+    // top-level one (Electronics has zero products of its own - they're
+    // all under Electronics > Mobiles, > Laptops, etc.). A coupon scoped
+    // to a parent category needs its children's ids too, or it silently
+    // matches nothing at all, ever - the same expansion promotions already
+    // do for the same reason (see the featured-promotion query on the
+    // homepage).
+    const children = await prisma.category.findMany({ where: { parentId: coupon.categoryId }, select: { id: true } });
+    const categoryIds = [coupon.categoryId, ...children.map((c) => c.id)];
     const productsInCategory = await prisma.product.findMany({
-      where: { id: { in: productIds }, categoryId: coupon.categoryId },
+      where: { id: { in: productIds }, categoryId: { in: categoryIds } },
       select: { id: true },
     });
     const idSet = new Set(productsInCategory.map((p) => p.id));
