@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
@@ -28,6 +28,10 @@ const poppins = Poppins({
   weight: ["600"],
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  themeColor: "#101a2c",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
