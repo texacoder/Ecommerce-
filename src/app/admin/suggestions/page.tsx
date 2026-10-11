@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatDateTime } from "@/lib/format";
 
-type Suggestion = { id: string; message: string; createdAt: string };
+type Suggestion = { id: string; message: string; source: string; createdAt: string };
 
 export default function AdminSuggestionsPage() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -28,7 +28,7 @@ export default function AdminSuggestionsPage() {
     <div>
       <h1 className="text-xl font-semibold mb-2">Suggestions</h1>
       <p className="text-sm text-[var(--text-muted)] mb-6">
-        Anonymous feedback submitted from the maintenance page.
+        Anonymous feedback submitted from the site or the maintenance page.
       </p>
 
       {suggestions.length === 0 ? (
@@ -38,6 +38,9 @@ export default function AdminSuggestionsPage() {
           {suggestions.map((s) => (
             <div key={s.id} className="card-surface p-4 flex justify-between items-start gap-4">
               <div>
+                <span className="inline-block text-xs font-medium px-2 py-0.5 rounded bg-[var(--surface-muted)] text-[var(--text-muted)] mb-2">
+                  {s.source === "maintenance" ? "During maintenance" : "From the site"}
+                </span>
                 <p className="text-sm whitespace-pre-wrap">{s.message}</p>
                 <p className="text-xs text-[var(--text-muted)] mt-2">{formatDateTime(s.createdAt)}</p>
               </div>

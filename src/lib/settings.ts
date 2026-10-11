@@ -28,3 +28,33 @@ export async function setMaintenanceMode(enabled: boolean): Promise<void> {
   });
   cached = { value: enabled, expiresAt: Date.now() + CACHE_TTL_MS };
 }
+
+const ANNOUNCEMENT_ENABLED_KEY = "announcementEnabled";
+const ANNOUNCEMENT_MESSAGE_KEY = "announcementMessage";
+
+// The root layout reads this on every request anyway (it's already a
+// force-dynamic page fetching the category list fresh each time), so
+// there's no need for the same kind of cache maintenance mode uses here -
+// this one's always current.
+export async function getAnnouncement(): Promise<{ enabled: boolean; message: string }> {
+  const [enabledRow, messageRow] = await Promise.all([
+    prisma.setting.findUnique({ where: { key: ANNOUNCEMENT_ENABLED_KEY } }),
+    prisma.setting.findUnique({ where: { key: ANNOUNCEMENT_MESSAGE_KEY } }),
+  ]);
+  return { enabled: enabledRow?.value === "true", message: messageRow?.value ?? "" };
+}
+
+export async function setAnnouncement(enabled: boolean, message: string): Promise<void> {
+  await Promise.all([
+    prisma.setting.upsert({
+      where: { key: ANNOUNCEMENT_ENABLED_KEY },
+      update: { value: String(enabled) },
+      create: { key: ANNOUNCEMENT_ENABLED_KEY, value: String(enabled) },
+    }),
+    prisma.setting.upsert({
+      where: { key: ANNOUNCEMENT_MESSAGE_KEY },
+      update: { value: message },
+      create: { key: ANNOUNCEMENT_MESSAGE_KEY, value: message },
+    }),
+  ]);
+}

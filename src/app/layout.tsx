@@ -7,7 +7,9 @@ import { ToastProvider } from "@/lib/toast-context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MetaPixel from "@/components/MetaPixel";
+import AnnouncementBanner from "@/components/AnnouncementBanner";
 import { prisma } from "@/lib/db";
+import { getAnnouncement } from "@/lib/settings";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
 
 const geistSans = Geist({
@@ -66,12 +68,15 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const categories = await prisma.category.findMany({
-    where: { visible: true, parentId: null },
-    select: { id: true, name: true, slug: true },
-    orderBy: { name: "asc" },
-    take: 10,
-  });
+  const [categories, announcement] = await Promise.all([
+    prisma.category.findMany({
+      where: { visible: true, parentId: null },
+      select: { id: true, name: true, slug: true },
+      orderBy: { name: "asc" },
+      take: 10,
+    }),
+    getAnnouncement(),
+  ]);
 
   return (
     <html
@@ -83,6 +88,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <ToastProvider>
           <AuthProvider>
             <CartProvider>
+              {announcement.enabled && announcement.message && (
+                <AnnouncementBanner message={announcement.message} />
+              )}
               <Header categories={categories} />
               <main className="flex-1">{children}</main>
               <Footer />

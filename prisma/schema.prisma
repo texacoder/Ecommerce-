@@ -398,11 +398,24 @@ model Setting {
   updatedAt DateTime @updatedAt
 }
 
-// Free-text feedback submitted anonymously from the maintenance page - no
-// account or name required, so there's nothing identifying to store beyond
-// the message itself.
+// Free-text feedback submitted anonymously - no account or name required,
+// so there's nothing identifying to store beyond the message itself.
+// `source` just distinguishes where it came from (the maintenance page vs
+// the always-there "Report a problem" link in the footer) for context
+// when reading them later, not for anything functional.
 model Suggestion {
   id        String   @id @default(cuid())
   message   String
+  source    String   @default("site")
   createdAt DateTime @default(now())
+}
+
+// A search term that returned zero products, deduplicated and counted
+// rather than logged once per occurrence - sorted by count, this is
+// directly "what customers keep looking for that we don't carry."
+model MissedSearch {
+  id             String   @id @default(cuid())
+  query          String   @unique
+  count          Int      @default(1)
+  lastSearchedAt DateTime @default(now())
 }

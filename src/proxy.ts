@@ -130,7 +130,7 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
         fetch('/api/suggestions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: message }),
+          body: JSON.stringify({ message: message, source: 'maintenance' }),
         })
           .then(function (res) {
             if (!res.ok) throw new Error();

@@ -50,6 +50,22 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     prisma.category.findMany({ where: { visible: true }, orderBy: { name: "asc" } }),
   ]);
 
+  // "What are people searching for that we don't carry" - deduplicated by
+  // normalized query rather than logged per-occurrence, so this stays a
+  // short, sorted-by-demand list instead of a raw event log. Only counts a
+  // real text search (not a bare filter combination) that came back empty,
+  // and must never break the search page itself if it fails.
+  if (sp.q?.trim() && total === 0) {
+    const query = sp.q.trim().toLowerCase().slice(0, 200);
+    await prisma.missedSearch
+      .upsert({
+        where: { query },
+        update: { count: { increment: 1 }, lastSearchedAt: new Date() },
+        create: { query },
+      })
+      .catch(() => {});
+  }
+
   return (
     <div className="container-page py-8 grid md:grid-cols-[240px_1fr] gap-6">
       <aside>
