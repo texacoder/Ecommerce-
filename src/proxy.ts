@@ -41,7 +41,15 @@ async function readRole(request: NextRequest): Promise<{ role?: string; status?:
 // Razorpay's webhook is allowed through too since it's a server-to-server
 // call, not a customer visiting the site, and blocking it could strand the
 // payment confirmation for an order placed right before maintenance began.
-const MAINTENANCE_ALLOWED_PREFIXES = ["/admin", "/login", "/api/admin", "/api/auth", "/api/payments/webhook"];
+const MAINTENANCE_ALLOWED_PREFIXES = [
+  "/admin",
+  "/login",
+  "/api/admin",
+  "/api/auth",
+  "/api/payments/webhook",
+  // The maintenance page's own feedback box submits here.
+  "/api/suggestions",
+];
 
 function isAllowedDuringMaintenance(pathname: string): boolean {
   if (MAINTENANCE_ALLOWED_PREFIXES.some((p) => pathname.startsWith(p))) return true;
@@ -73,11 +81,26 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
     padding: 24px;
     text-align: center;
   }
-  .card { max-width: 440px; animation: fade-in 0.6s ease-out; }
+  .card { max-width: 440px; width: 100%; animation: fade-in 0.6s ease-out; }
   img { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 24px; }
   .divider { width: 32px; height: 3px; background: #2563eb; border-radius: 2px; margin: 18px auto 20px; }
   h1 { font-size: 24px; font-weight: 700; margin: 0; }
   p { color: #93a3bd; font-size: 15px; line-height: 1.6; margin: 0; }
+  .suggestion-box { margin-top: 40px; padding-top: 28px; border-top: 1px solid #1f3350; text-align: left; }
+  .suggestion-box p.label { color: #ffffff; font-size: 14px; font-weight: 600; margin: 0 0 10px; text-align: center; }
+  textarea {
+    width: 100%; min-height: 72px; resize: vertical; background: #16213a; color: #ffffff;
+    border: 1px solid #2a3b57; border-radius: 8px; padding: 10px 12px; font-size: 14px;
+    font-family: inherit; margin-bottom: 10px;
+  }
+  textarea:focus { outline: none; border-color: #2563eb; }
+  textarea::placeholder { color: #5c6c87; }
+  #suggestion-submit {
+    background: #2563eb; color: #ffffff; border: none; border-radius: 8px; padding: 10px 16px;
+    font-size: 14px; font-weight: 600; cursor: pointer; width: 100%;
+  }
+  #suggestion-submit:disabled { opacity: 0.6; cursor: default; }
+  #suggestion-status { font-size: 13px; margin-top: 10px; text-align: center; min-height: 18px; }
 </style>
 </head>
 <body>
@@ -86,7 +109,45 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
     <h1>Back shortly</h1>
     <div class="divider"></div>
     <p>The best stores are the ones that keep getting better. That's what we're doing right now.</p>
+
+    <div class="suggestion-box">
+      <p class="label">Got a suggestion for us? We'd love to hear it.</p>
+      <textarea id="suggestion-text" maxlength="1000" placeholder="Tell us what you think..."></textarea>
+      <button id="suggestion-submit">Send</button>
+      <p id="suggestion-status"></p>
+    </div>
   </div>
+  <script>
+    (function () {
+      var textarea = document.getElementById('suggestion-text');
+      var button = document.getElementById('suggestion-submit');
+      var status = document.getElementById('suggestion-status');
+      button.addEventListener('click', function () {
+        var message = textarea.value.trim();
+        if (!message) return;
+        button.disabled = true;
+        status.textContent = '';
+        fetch('/api/suggestions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: message }),
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error();
+            textarea.value = '';
+            status.style.color = '#4ade80';
+            status.textContent = 'Thanks for letting us know!';
+          })
+          .catch(function () {
+            status.style.color = '#f87171';
+            status.textContent = 'Something went wrong. Please try again.';
+          })
+          .finally(function () {
+            button.disabled = false;
+          });
+      });
+    })();
+  </script>
 </body>
 </html>`;
 

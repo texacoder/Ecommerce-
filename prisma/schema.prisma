@@ -397,3 +397,12 @@ model Setting {
   value     String
   updatedAt DateTime @updatedAt
 }
+
+// Free-text feedback submitted anonymously from the maintenance page - no
+// account or name required, so there's nothing identifying to store beyond
+// the message itself.
+model Suggestion {
+  id        String   @id @default(cuid())
+  message   String
+  createdAt DateTime @default(now())
+}
