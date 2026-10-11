@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { getAnalyticsData } from "@/lib/analytics";
+import { getMaintenanceMode } from "@/lib/settings";
 import { formatMoney } from "@/lib/format";
 import { RevenueChart, OrderStatusChart } from "@/components/admin/AdminCharts";
+import MaintenanceToggle from "@/components/admin/MaintenanceToggle";
 
 export default async function AdminDashboardPage() {
-  const data = await getAnalyticsData();
+  const [data, maintenanceEnabled] = await Promise.all([getAnalyticsData(), getMaintenanceMode()]);
 
   return (
     <div>
       <h1 className="text-xl font-semibold mb-6">Dashboard</h1>
+
+      <MaintenanceToggle initialEnabled={maintenanceEnabled} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <Stat label="Total revenue" value={formatMoney(data.totalRevenue)} />

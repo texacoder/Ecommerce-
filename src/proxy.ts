@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { SITE_URL } from "@/lib/seo";
+import { getMaintenanceMode } from "@/lib/settings";
 
 // Vercel keeps a project's own <project>.vercel.app domain live and
 // serving the same deployment even after a custom domain is attached -
@@ -108,7 +109,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(`${pathname}${search}`, SITE_URL), 308);
   }
 
-  if (process.env.MAINTENANCE_MODE === "true" && !isAllowedDuringMaintenance(pathname)) {
+  if (!isAllowedDuringMaintenance(pathname) && (await getMaintenanceMode())) {
     return maintenanceResponse();
   }
 

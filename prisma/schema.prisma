@@ -387,3 +387,13 @@ model RateLimitAttempt {
 
   @@index([key, createdAt])
 }
+
+// Generic key/value store for site-wide toggles an admin flips at runtime
+// (starting with "maintenanceMode") - deliberately not a one-off boolean
+// column on some other model, so the next on/off switch the store needs
+// doesn't require its own migration.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
