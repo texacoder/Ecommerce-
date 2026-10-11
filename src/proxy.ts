@@ -76,6 +76,8 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
   img { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 24px; }
   h1 { font-size: 24px; font-weight: 700; margin: 0 0 12px; }
   p { color: #93a3bd; font-size: 15px; line-height: 1.6; margin: 0; }
+  .admin-link { color: #4a5a78; font-size: 12px; text-decoration: none; display: inline-block; margin-top: 40px; }
+  .admin-link:hover { color: #93a3bd; }
 </style>
 </head>
 <body>
@@ -83,6 +85,7 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
     <img src="/icon.png" alt="EXORASTORE" />
     <h1>We'll be back soon</h1>
     <p>EXORASTORE is currently undergoing scheduled maintenance. Thanks for your patience &mdash; please check back shortly.</p>
+    <a class="admin-link" href="/admin">Admin login</a>
   </div>
 </body>
 </html>`;
