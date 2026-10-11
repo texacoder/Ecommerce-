@@ -57,9 +57,10 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex" />
-<title>EXORASTORE is down for maintenance</title>
+<title>EXORASTORE: Back shortly</title>
 <style>
   * { box-sizing: border-box; }
+  @keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   body {
     margin: 0;
     min-height: 100vh;
@@ -72,9 +73,10 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
     padding: 24px;
     text-align: center;
   }
-  .card { max-width: 440px; }
+  .card { max-width: 440px; animation: fade-in 0.6s ease-out; }
   img { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 24px; }
-  h1 { font-size: 24px; font-weight: 700; margin: 0 0 12px; }
+  .divider { width: 32px; height: 3px; background: #2563eb; border-radius: 2px; margin: 18px auto 20px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0; }
   p { color: #93a3bd; font-size: 15px; line-height: 1.6; margin: 0; }
   .admin-link { color: #4a5a78; font-size: 12px; text-decoration: none; display: inline-block; margin-top: 40px; }
   .admin-link:hover { color: #93a3bd; }
@@ -83,8 +85,9 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
 <body>
   <div class="card">
     <img src="/icon.png" alt="EXORASTORE" />
-    <h1>We'll be back soon</h1>
-    <p>EXORASTORE is currently undergoing scheduled maintenance. Thanks for your patience &mdash; please check back shortly.</p>
+    <h1>Back shortly</h1>
+    <div class="divider"></div>
+    <p>The best stores are the ones that keep getting better. That's what we're doing right now.</p>
     <a class="admin-link" href="/admin">Admin login</a>
   </div>
 </body>
