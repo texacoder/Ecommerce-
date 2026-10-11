@@ -78,8 +78,6 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
   .divider { width: 32px; height: 3px; background: #2563eb; border-radius: 2px; margin: 18px auto 20px; }
   h1 { font-size: 24px; font-weight: 700; margin: 0; }
   p { color: #93a3bd; font-size: 15px; line-height: 1.6; margin: 0; }
-  .admin-link { color: #4a5a78; font-size: 12px; text-decoration: none; display: inline-block; margin-top: 40px; }
-  .admin-link:hover { color: #93a3bd; }
 </style>
 </head>
 <body>
@@ -88,7 +86,6 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
     <h1>Back shortly</h1>
     <div class="divider"></div>
     <p>The best stores are the ones that keep getting better. That's what we're doing right now.</p>
-    <a class="admin-link" href="/admin">Admin login</a>
   </div>
 </body>
 </html>`;
